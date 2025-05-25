@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/database_service.dart';
+import '../services/api_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
 import 'questions_list_screen.dart';
@@ -16,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final DatabaseService _databaseService = DatabaseService();
+  final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
   
   List<Question> _popularQuestions = [];
@@ -33,9 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
     try {
-      final popularQuestions = await _databaseService.getPopularQuestions(limit: 3);
-      final frequentQuestions = await _databaseService.getFrequentlyAskedQuestions(limit: 3);
-      final officialQuestions = await _databaseService.getOfficialQuestions(limit: 3);
+      final popularQuestions = await _apiService.getPopularQuestions(limit: 3);
+      final frequentQuestions = await _apiService.getFrequentlyAskedQuestions(limit: 3);
+      final officialQuestions = await _apiService.getOfficialQuestions(limit: 3);
       
       setState(() {
         _popularQuestions = popularQuestions;

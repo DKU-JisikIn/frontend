@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
 
 void main() {
@@ -12,17 +10,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AppProvider(),
-      child: MaterialApp(
-        title: '단국대 도우미',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.dark,
-        ),
-        home: const HomeScreen(),
+    return MaterialApp(
+      title: '단국대 도우미',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF19C37D)),
+        useMaterial3: true,
       ),
+      home: const HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

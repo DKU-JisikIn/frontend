@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+import '../services/api_service.dart';
 import '../models/question.dart';
-import '../services/database_service.dart';
 import '../widgets/category_selector.dart';
 
 class NewQuestionScreen extends StatefulWidget {
@@ -12,7 +11,8 @@ class NewQuestionScreen extends StatefulWidget {
 }
 
 class _NewQuestionScreenState extends State<NewQuestionScreen> {
-  final DatabaseService _databaseService = DatabaseService();
+  final ApiService _apiService = ApiService();
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
@@ -20,45 +20,6 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
   String _selectedCategory = '학사';
   List<String> _tags = [];
   bool _isSubmitting = false;
-
-  Future<void> _submitQuestion() async {
-    if (_titleController.text.trim().isEmpty || _contentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('제목과 내용을 모두 입력해주세요.')),
-      );
-      return;
-    }
-
-    setState(() => _isSubmitting = true);
-
-    final question = Question(
-      id: const Uuid().v4(),
-      title: _titleController.text.trim(),
-      content: _contentController.text.trim(),
-      userId: 'user_001', // 실제 앱에서는 로그인 시스템으로 대체
-      userName: '익명',
-      createdAt: DateTime.now(),
-      category: _selectedCategory,
-      tags: _tags,
-    );
-
-    try {
-      await _databaseService.insertQuestion(question);
-      if (mounted) {
-        Navigator.pop(context, true); // 성공 시 true 반환
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('질문이 등록되었습니다!')),
-        );
-      }
-    } catch (e) {
-      setState(() => _isSubmitting = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('질문 등록 중 오류가 발생했습니다: $e')),
-        );
-      }
-    }
-  }
 
   void _addTag() {
     final tag = _tagController.text.trim();
@@ -74,6 +35,41 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
     setState(() {
       _tags.remove(tag);
     });
+  }
+
+  Future<void> _submitQuestion() async {
+    if (!_formKey.currentState!.validate() || _isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final question = Question(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _titleController.text.trim(),
+        content: _contentController.text.trim(),
+        userId: 'user_001', // TODO: 실제 사용자 ID로 대체
+        userName: '익명',
+        createdAt: DateTime.now(),
+        category: _selectedCategory,
+        tags: _tags,
+      );
+
+      await _apiService.createQuestion(question);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('질문이 성공적으로 등록되었습니다!')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('질문 등록 중 오류가 발생했습니다: $e')),
+        );
+      }
+    }
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
-import '../services/chat_service.dart';
+import '../services/api_service.dart';
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input.dart';
 import 'question_detail_screen.dart';
@@ -16,7 +16,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final ChatService _chatService = ChatService();
+  final ApiService _apiService = ApiService();
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
@@ -55,8 +55,8 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      // 채팅 서비스로 메시지 처리
-      final newMessages = await _chatService.processUserMessage(text.trim());
+      // API 서비스로 메시지 처리
+      final newMessages = await _apiService.processChatMessage(text.trim());
       
       setState(() {
         _messages.addAll(newMessages);
@@ -94,11 +94,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final suggestedTitle = metadata['suggestedTitle'] as String? ?? '';
     final suggestedContent = metadata['suggestedContent'] as String? ?? '';
-    final category = _chatService.detectCategory(suggestedContent);
+    final category = _apiService.detectCategory(suggestedContent);
 
     try {
       // 자동으로 질문 생성
-      final question = await _chatService.createQuestionFromChat(
+      final question = await _apiService.createQuestionFromChat(
         suggestedTitle,
         suggestedContent,
         category,

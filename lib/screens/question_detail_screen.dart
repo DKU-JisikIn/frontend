@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
+import '../services/api_service.dart';
 import '../models/question.dart';
 import '../models/answer.dart';
-import '../services/database_service.dart';
 import '../widgets/chat_input.dart';
 
 class QuestionDetailScreen extends StatefulWidget {
@@ -19,12 +18,13 @@ class QuestionDetailScreen extends StatefulWidget {
 }
 
 class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
-  final DatabaseService _databaseService = DatabaseService();
+  final ApiService _apiService = ApiService();
   final TextEditingController _answerController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
   List<Answer> _answers = [];
   bool _isLoading = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -35,7 +35,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   Future<void> _loadAnswers() async {
     setState(() => _isLoading = true);
     try {
-      final answers = await _databaseService.getAnswersByQuestionId(widget.question.id);
+      final answers = await _apiService.getAnswersByQuestionId(widget.question.id);
       setState(() {
         _answers = answers;
         _isLoading = false;
@@ -51,34 +51,39 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   }
 
   Future<void> _submitAnswer(String content) async {
-    if (content.trim().isEmpty) return;
+    if (content.trim().isEmpty || _isSubmitting) return;
 
-    final answer = Answer(
-      id: const Uuid().v4(),
-      questionId: widget.question.id,
-      content: content.trim(),
-      userId: 'user_001', // 실제 앱에서는 로그인 시스템으로 대체
-      userName: '익명',
-      createdAt: DateTime.now(),
-    );
+    setState(() => _isSubmitting = true);
 
     try {
-      await _databaseService.insertAnswer(answer);
-      _answerController.clear();
-      _loadAnswers();
+      final answer = Answer(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        questionId: widget.question.id,
+        content: content.trim(),
+        userId: 'user_001', // TODO: 실제 사용자 ID로 대체
+        userName: '익명',
+        createdAt: DateTime.now(),
+      );
+
+      await _apiService.createAnswer(answer);
       
-      // 스크롤을 맨 아래로
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
+      setState(() {
+        _answers.add(answer);
+        _isSubmitting = false;
+      });
+
+      _answerController.clear();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('답변이 등록되었습니다!')),
         );
       }
     } catch (e) {
+      setState(() => _isSubmitting = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('답변 작성 중 오류가 발생했습니다: $e')),
+          SnackBar(content: Text('답변 등록 중 오류가 발생했습니다: $e')),
         );
       }
     }
