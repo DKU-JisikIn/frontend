@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/database_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
 import 'questions_list_screen.dart';
 import 'question_detail_screen.dart';
 import 'new_question_screen.dart';
+import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,13 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _performSearch() {
     final query = _searchController.text.trim();
     if (query.isNotEmpty) {
-      // 질문 목록 화면으로 이동하면서 검색 쿼리 전달
+      // 채팅 화면으로 이동하면서 검색어 전달
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const QuestionsListScreen(),
+          builder: (context) => ChatScreen(initialQuery: query),
         ),
       );
+      _searchController.clear();
     }
   }
 
@@ -263,6 +266,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.home,
                   title: '홈',
                   onTap: () => Navigator.pop(context),
+                ),
+                _buildDrawerItem(
+                  icon: Icons.chat,
+                  title: 'AI 채팅 도우미',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChatScreen(),
+                      ),
+                    );
+                  },
                 ),
                 _buildDrawerItem(
                   icon: Icons.list,
