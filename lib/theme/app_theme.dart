@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class AppTheme {
   // 기본 색상 정의
@@ -63,18 +64,19 @@ class AppTheme {
       scaffoldBackgroundColor: backgroundColor,
       
       // iOS 스타일 AppBar
-      appBarTheme: const AppBarTheme(
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+      appBarTheme: AppBarTheme(
+        backgroundColor: backgroundColor,
+        foregroundColor: primaryTextColor,
         elevation: 0,
         titleTextStyle: TextStyle(
           fontFamily: '.SF Pro Display',
-          color: Colors.white,
+          color: primaryTextColor,
           fontSize: 17, // iOS 표준 타이틀 크기
           fontWeight: FontWeight.w600,
           letterSpacing: -0.4, // iOS 스타일 letter spacing
         ),
-        iconTheme: IconThemeData(color: Colors.white, size: 22),
+        iconTheme: IconThemeData(color: primaryTextColor, size: 22),
+        systemOverlayStyle: SystemUiOverlayStyle.dark, // 상태바 아이콘을 어둡게
       ),
       
       // iOS 스타일 버튼
@@ -242,6 +244,10 @@ class AppTheme {
   // 검색바 컨테이너 데코레이션
   static BoxDecoration get searchBarContainerDecoration => const BoxDecoration(
     color: backgroundColor,
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
+    ),
     border: Border(
       top: BorderSide(color: borderColor, width: 0.5),
     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 
 class ChatInput extends StatelessWidget {
@@ -6,6 +7,7 @@ class ChatInput extends StatelessWidget {
   final Function(String) onSubmitted;
   final Function(String)? onChanged;
   final bool enabled;
+  final String? hintText;
 
   const ChatInput({
     super.key,
@@ -13,6 +15,7 @@ class ChatInput extends StatelessWidget {
     required this.onSubmitted,
     this.onChanged,
     this.enabled = true,
+    this.hintText,
   });
 
   @override
@@ -45,7 +48,7 @@ class ChatInput extends StatelessWidget {
                   color: enabled ? AppTheme.primaryTextColor : AppTheme.secondaryTextColor,
                 ),
                 decoration: InputDecoration(
-                  hintText: enabled ? '질문을 입력하세요...' : '처리 중입니다...',
+                  hintText: enabled ? (hintText ?? '질문을 입력하세요...') : '처리 중입니다...',
                   hintStyle: AppTheme.hintStyle,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -64,7 +67,7 @@ class ChatInput extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(
-                Icons.send, 
+                CupertinoIcons.arrow_up, 
                 color: Colors.white, 
                 size: 20,
               ),

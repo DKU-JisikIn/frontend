@@ -5,9 +5,7 @@ import '../services/api_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/category_selector.dart';
-import '../widgets/chat_input.dart';
 import 'question_detail_screen.dart';
-import 'new_question_screen.dart';
 
 class QuestionsListScreen extends StatefulWidget {
   const QuestionsListScreen({super.key});
@@ -19,9 +17,9 @@ class QuestionsListScreen extends StatefulWidget {
 class _QuestionsListScreenState extends State<QuestionsListScreen> {
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
   
-  List<Question> _questions = [];
+  List<Question> _allQuestions = [];
+  List<Question> _filteredQuestions = [];
   String _selectedCategory = '전체';
   bool _isLoading = false;
 
@@ -34,11 +32,10 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
   Future<void> _loadQuestions() async {
     setState(() => _isLoading = true);
     try {
-      final questions = await _apiService.getQuestions(
-        category: _selectedCategory == '전체' ? null : _selectedCategory,
-      );
+      final questions = await _apiService.getQuestions();
       setState(() {
-        _questions = questions;
+        _allQuestions = questions;
+        _filterQuestions();
         _isLoading = false;
       });
     } catch (e) {
@@ -51,34 +48,21 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
     }
   }
 
-  Future<void> _searchQuestions(String query) async {
-    if (query.trim().isEmpty) {
-      _loadQuestions();
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      final questions = await _apiService.searchQuestions(query.trim());
-      setState(() {
-        _questions = questions;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('검색 중 오류가 발생했습니다: $e')),
-        );
-      }
+  void _filterQuestions() {
+    if (_selectedCategory == '전체') {
+      _filteredQuestions = _allQuestions;
+    } else {
+      _filteredQuestions = _allQuestions
+          .where((question) => question.category == _selectedCategory)
+          .toList();
     }
   }
 
   void _onCategoryChanged(String category) {
     setState(() {
       _selectedCategory = category;
+      _filterQuestions();
     });
-    _loadQuestions();
   }
 
   void _onQuestionTap(Question question) {
@@ -95,112 +79,77 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        title: const Text(
+        backgroundColor: AppTheme.backgroundColor,
+        title: Text(
           '질문 목록',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryTextColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(CupertinoIcons.back, color: Colors.white),
+          icon: Icon(CupertinoIcons.back, color: AppTheme.primaryTextColor),
           onPressed: () {
-            // 키보드 숨기기 및 포커스 해제
-            FocusScope.of(context).unfocus();
             Navigator.pop(context);
           },
         ),
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.refresh, color: Colors.white),
-            onPressed: () {
-              _loadQuestions();
-            },
+      ),
+      body: Column(
+        children: [
+          // 카테고리 선택기
+          CategorySelector(
+            selectedCategory: _selectedCategory,
+            onCategoryChanged: _onCategoryChanged,
+          ),
+          
+          // 메시지 리스트
+          Expanded(
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                    ),
+                  )
+                : _filteredQuestions.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              CupertinoIcons.chat_bubble,
+                              size: 64,
+                              color: AppTheme.lightTextColor,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _selectedCategory == '전체' 
+                                  ? '등록된 질문이 없습니다'
+                                  : '${_selectedCategory} 카테고리에\n등록된 질문이 없습니다',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: AppTheme.secondaryTextColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: _filteredQuestions.length,
+                        itemBuilder: (context, index) {
+                          final question = _filteredQuestions[index];
+                          return MessageBubble(
+                            question: question,
+                            onTap: () => _onQuestionTap(question),
+                          );
+                        },
+                      ),
           ),
         ],
-      ),
-      body: GestureDetector(
-        // 화면 터치 시 키보드 숨기기
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Column(
-          children: [
-            // 카테고리 선택기
-            CategorySelector(
-              selectedCategory: _selectedCategory,
-              onCategoryChanged: _onCategoryChanged,
-            ),
-            
-            // 메시지 리스트
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-                      ),
-                    )
-                  : _questions.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                CupertinoIcons.chat_bubble,
-                                size: 64,
-                                color: AppTheme.lightTextColor,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                '질문을 검색하거나\n새로운 질문을 작성해보세요',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: AppTheme.secondaryTextColor,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          itemCount: _questions.length,
-                          itemBuilder: (context, index) {
-                            final question = _questions[index];
-                            return MessageBubble(
-                              question: question,
-                              onTap: () => _onQuestionTap(question),
-                            );
-                          },
-                        ),
-            ),
-            
-            // 입력 영역
-            ChatInput(
-              controller: _searchController,
-              onSubmitted: _searchQuestions,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NewQuestionScreen(),
-            ),
-          );
-          
-          // 새 질문이 작성된 경우 목록 새로고침
-          if (result == true) {
-            _loadQuestions();
-          }
-        },
-        backgroundColor: AppTheme.primaryColor,
-        child: const Icon(CupertinoIcons.plus, color: Colors.white),
       ),
     );
   }
@@ -208,7 +157,6 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 } 

@@ -12,7 +12,7 @@ class CategorySelector extends StatelessWidget {
   });
 
   static const List<Map<String, String>> categories = [
-    {'id': 'all', 'name': '전체'},
+    {'id': '전체', 'name': '전체'},
     {'id': '학사', 'name': '학사'},
     {'id': '장학금', 'name': '장학금'},
     {'id': '교내프로그램', 'name': '교내프로그램'},
@@ -60,7 +60,9 @@ class CategorySelector extends StatelessWidget {
                 width: 1,
               ),
               showCheckmark: false,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
             ),
           );
         },

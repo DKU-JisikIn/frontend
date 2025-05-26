@@ -79,35 +79,35 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        title: const Text(
+        backgroundColor: AppTheme.backgroundColor,
+        title: Text(
           '새 질문 작성',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryTextColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(CupertinoIcons.xmark, color: Colors.white),
+          icon: Icon(CupertinoIcons.xmark, color: AppTheme.primaryTextColor),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           TextButton(
             onPressed: _isSubmitting ? null : _submitQuestion,
             child: _isSubmitting
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                     ),
                   )
-                : const Text(
+                : Text(
                     '등록',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

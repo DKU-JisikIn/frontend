@@ -142,17 +142,17 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        title: const Text(
-          '단국대 도우미 채팅',
+        backgroundColor: AppTheme.backgroundColor,
+        title: Text(
+          '검색 결과',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryTextColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(CupertinoIcons.back, color: Colors.white),
+          icon: Icon(CupertinoIcons.back, color: AppTheme.primaryTextColor),
           onPressed: () async {
             // 텍스트 필드 포커스 완전히 해제
             _textController.clear();
@@ -166,16 +166,6 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.refresh, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                _messages.clear();
-              });
-            },
-          ),
-        ],
         elevation: 0,
       ),
       body: GestureDetector(

@@ -88,17 +88,17 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: AppTheme.backgroundColor,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(CupertinoIcons.line_horizontal_3, color: Colors.white),
+            icon: Icon(CupertinoIcons.line_horizontal_3, color: AppTheme.primaryTextColor),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text(
+        title: Text(
           '단국대 도우미',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryTextColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(CupertinoIcons.person_circle, color: Colors.white),
+            icon: Icon(CupertinoIcons.person_circle, color: AppTheme.primaryTextColor),
             onPressed: () {
               // 사용자 정보 화면으로 이동 (추후 구현)
               ScaffoldMessenger.of(context).showSnackBar(
@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (_frequentQuestions.isNotEmpty) ...[
                         _buildSectionHeader(
                           '❓ 자주 받은 질문',
-                          '답변이 많은 질문들',
+                          '비슷한 유형의 질문들',
                           () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -366,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       decoration: AppTheme.searchBarContainerDecoration,
       child: Row(
         children: [
@@ -399,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(CupertinoIcons.arrow_right, color: Colors.white, size: 20),
+              icon: const Icon(CupertinoIcons.arrow_up, color: Colors.white, size: 20),
               onPressed: _performSearch,
             ),
           ),

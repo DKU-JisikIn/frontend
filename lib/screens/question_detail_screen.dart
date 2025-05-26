@@ -96,17 +96,17 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        title: const Text(
+        backgroundColor: AppTheme.backgroundColor,
+        title: Text(
           '질문 상세',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryTextColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(CupertinoIcons.back, color: Colors.white),
+          icon: Icon(CupertinoIcons.back, color: AppTheme.primaryTextColor),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
@@ -200,6 +200,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           ChatInput(
             controller: _answerController,
             onSubmitted: _submitAnswer,
+            hintText: '답변을 입력하세요...',
           ),
         ],
       ),
