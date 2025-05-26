@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
 import 'questions_list_screen.dart';
 import 'question_detail_screen.dart';
 import 'new_question_screen.dart';
 import 'chat_screen.dart';
+import 'login_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,8 +19,9 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
+  final AuthService _authService = AuthService();
   final TextEditingController _searchController = TextEditingController();
   
   List<Question> _popularQuestions = [];
@@ -25,10 +29,58 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Question> _officialQuestions = [];
   bool _isLoading = false;
 
+  // 애니메이션 컨트롤러들
+  late AnimationController _animationController;
+  late List<Animation<double>> _fadeAnimations;
+  late List<Animation<Offset>> _slideAnimations;
+
   @override
   void initState() {
     super.initState();
+    
+    // 애니메이션 컨트롤러 초기화
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    // 4개 요소에 대한 애니메이션 생성 (환영메시지, 공식정보, 인기질문, 자주받은질문)
+    _fadeAnimations = List.generate(4, (index) {
+      return Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          index * 0.15, // 각 요소마다 0.15초씩 지연
+          (index * 0.15) + 0.4, // 0.4초 동안 애니메이션
+          curve: Curves.easeOutCubic,
+        ),
+      ));
+    });
+
+    _slideAnimations = List.generate(4, (index) {
+      return Tween<Offset>(
+        begin: const Offset(0, 0.3),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          index * 0.15,
+          (index * 0.15) + 0.4,
+          curve: Curves.easeOutCubic,
+        ),
+      ));
+    });
+
     _loadDashboardData();
+    
+    // AuthService 상태 변경 감지
+    _authService.authStateStream.listen((isLoggedIn) {
+      if (mounted) {
+        setState(() {}); // UI 업데이트
+      }
+    });
     
     // 다른 화면에서 돌아왔을 때 키보드가 나타나지 않도록 포커스 해제
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,6 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _officialQuestions = officialQuestions;
         _isLoading = false;
       });
+
+      // 데이터 로딩 완료 후 애니메이션 시작
+      if (!_isLoading) {
+        _animationController.forward();
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -108,10 +165,23 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(CupertinoIcons.person_circle, color: AppTheme.primaryTextColor),
             onPressed: () {
-              // 사용자 정보 화면으로 이동 (추후 구현)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('사용자 정보 기능은 추후 구현 예정입니다.')),
-              );
+              if (_authService.isLoggedIn) {
+                // 로그인된 상태: 프로필 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              } else {
+                // 로그인되지 않은 상태: 로그인 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -138,83 +208,119 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 환영 메시지
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: AppTheme.welcomeContainerDecoration,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              '안녕하세요! 👋',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      SlideTransition(
+                        position: _slideAnimations[0],
+                        child: FadeTransition(
+                          opacity: _fadeAnimations[0],
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: AppTheme.welcomeContainerDecoration,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  '안녕하세요! 👋',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 16,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 16,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
 
                       // 공식 정보
                       if (_officialQuestions.isNotEmpty) ...[
-                        _buildSectionHeader(
-                          '📋 공식 정보',
-                          '단국대학교 공식 자료',
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QuestionsListScreen(),
+                        SlideTransition(
+                          position: _slideAnimations[1],
+                          child: FadeTransition(
+                            opacity: _fadeAnimations[1],
+                            child: Column(
+                              children: [
+                                _buildSectionHeader(
+                                  '📋 공식 정보',
+                                  '단국대학교 공식 자료',
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const QuestionsListScreen(),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildQuestionsList(_officialQuestions),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        _buildQuestionsList(_officialQuestions),
                         const SizedBox(height: 32),
                       ],
 
                       // 인기 질문
                       if (_popularQuestions.isNotEmpty) ...[
-                        _buildSectionHeader(
-                          '🔥 인기 질문',
-                          '조회수가 많은 질문들',
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QuestionsListScreen(),
+                        SlideTransition(
+                          position: _slideAnimations[2],
+                          child: FadeTransition(
+                            opacity: _fadeAnimations[2],
+                            child: Column(
+                              children: [
+                                _buildSectionHeader(
+                                  '🔥 인기 질문',
+                                  '조회수가 많은 질문들',
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const QuestionsListScreen(),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildQuestionsList(_popularQuestions),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        _buildQuestionsList(_popularQuestions),
                         const SizedBox(height: 32),
                       ],
 
                       // 자주 받은 질문
                       if (_frequentQuestions.isNotEmpty) ...[
-                        _buildSectionHeader(
-                          '❓ 자주 받은 질문',
-                          '비슷한 유형의 질문들',
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QuestionsListScreen(),
+                        SlideTransition(
+                          position: _slideAnimations[3],
+                          child: FadeTransition(
+                            opacity: _fadeAnimations[3],
+                            child: Column(
+                              children: [
+                                _buildSectionHeader(
+                                  '❓ 자주 받은 질문',
+                                  '비슷한 유형의 질문들',
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const QuestionsListScreen(),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildQuestionsList(_frequentQuestions),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        _buildQuestionsList(_frequentQuestions),
                         const SizedBox(height: 120), // 하단 검색창을 위한 여백
                       ],
                     ],
@@ -411,6 +517,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 } 

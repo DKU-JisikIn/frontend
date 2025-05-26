@@ -1,0 +1,340 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final AuthService _authService = AuthService();
+
+  Future<void> _handleLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.backgroundColor,
+        title: Text(
+          '로그아웃',
+          style: TextStyle(color: AppTheme.primaryTextColor),
+        ),
+        content: Text(
+          '정말 로그아웃하시겠습니까?',
+          style: TextStyle(color: AppTheme.secondaryTextColor),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              '취소',
+              style: TextStyle(color: AppTheme.secondaryTextColor),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              '로그아웃',
+              style: TextStyle(color: AppTheme.primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true) {
+      await _authService.logout();
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('로그아웃되었습니다.'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: AppTheme.backgroundColor,
+        leading: IconButton(
+          icon: Icon(CupertinoIcons.back, color: AppTheme.primaryTextColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          '내 정보',
+          style: TextStyle(
+            color: AppTheme.primaryTextColor,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 20),
+            
+            // 프로필 카드
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: AppTheme.welcomeContainerDecoration,
+              child: Column(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.person_fill,
+                      size: 40,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _authService.currentUserName ?? '사용자',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _authService.currentUserEmail ?? '',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // 메뉴 항목들
+            _buildMenuSection('계정 관리', [
+              _buildMenuItem(
+                icon: CupertinoIcons.person_circle,
+                title: '프로필 수정',
+                subtitle: '이름, 프로필 사진 변경',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('프로필 수정 기능은 추후 구현 예정입니다.')),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                icon: CupertinoIcons.lock,
+                title: '비밀번호 변경',
+                subtitle: '계정 보안을 위해 정기적으로 변경하세요',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('비밀번호 변경 기능은 추후 구현 예정입니다.')),
+                  );
+                },
+              ),
+            ]),
+            
+            const SizedBox(height: 24),
+            
+            _buildMenuSection('앱 설정', [
+              _buildMenuItem(
+                icon: CupertinoIcons.bell,
+                title: '알림 설정',
+                subtitle: '푸시 알림, 이메일 알림 설정',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('알림 설정 기능은 추후 구현 예정입니다.')),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                icon: CupertinoIcons.question_circle,
+                title: '도움말',
+                subtitle: '자주 묻는 질문, 사용법 안내',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('도움말 기능은 추후 구현 예정입니다.')),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                icon: CupertinoIcons.info_circle,
+                title: '앱 정보',
+                subtitle: '버전 정보, 개발자 정보',
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: AppTheme.backgroundColor,
+                      title: Text(
+                        '앱 정보',
+                        style: TextStyle(color: AppTheme.primaryTextColor),
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '단국대 도우미',
+                            style: TextStyle(
+                              color: AppTheme.primaryTextColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '버전: 1.0.0',
+                            style: TextStyle(color: AppTheme.secondaryTextColor),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '단국대학교 학생들을 위한\n정보 공유 플랫폼',
+                            style: TextStyle(color: AppTheme.secondaryTextColor),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            '확인',
+                            style: TextStyle(color: AppTheme.primaryColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ]),
+            
+            const SizedBox(height: 40),
+            
+            // 로그아웃 버튼
+            SizedBox(
+              height: 56,
+              child: OutlinedButton(
+                onPressed: _handleLogout,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '로그아웃',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuSection(String title, List<Widget> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTheme.headingStyle.copyWith(fontSize: 16),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(children: items),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: AppTheme.primaryColor,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: AppTheme.primaryTextColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: AppTheme.secondaryTextColor,
+          fontSize: 12,
+        ),
+      ),
+      trailing: Icon(
+        CupertinoIcons.chevron_right,
+        color: AppTheme.hintTextColor,
+        size: 16,
+      ),
+      onTap: onTap,
+    );
+  }
+} 
