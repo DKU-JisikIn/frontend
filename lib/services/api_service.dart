@@ -12,17 +12,70 @@ class ApiService {
   Future<List<Question>> getQuestions({String? category, String? search}) async {
     // TODO: 실제 API 호출로 대체
     // 현재는 목업 데이터 반환
-    return _getMockQuestions();
+    final allQuestions = _getMockQuestions();
+    
+    // 카테고리 필터링
+    if (category != null && category != '전체') {
+      if (category == '공식') {
+        // 공식 카테고리는 isOfficial이 true인 질문들을 반환
+        return allQuestions.where((q) => q.isOfficial).toList();
+      } else {
+        // 다른 카테고리는 기존 로직 유지
+        return allQuestions.where((q) => q.category == category).toList();
+      }
+    }
+    
+    return allQuestions;
   }
 
-  Future<List<Question>> getPopularQuestions({int limit = 10}) async {
-    // TODO: 실제 API 호출로 대체
-    return _getMockQuestions().take(limit).toList();
+  // 인기 질문 목록 조회 (조회수 기준)
+  Future<List<Question>> getPopularQuestions({int limit = 10, String period = '전체기간'}) async {
+    // TODO: 백엔드 API 호출
+    // final response = await http.get('/api/questions/popular?limit=$limit&period=$period');
+    
+    await Future.delayed(const Duration(milliseconds: 500)); // API 호출 시뮬레이션
+    
+    final allQuestions = _getMockQuestions();
+    
+    // 기간 필터 적용
+    List<Question> filteredQuestions;
+    if (period == '일주일') {
+      final oneWeekAgo = DateTime.now().subtract(const Duration(days: 7));
+      filteredQuestions = allQuestions
+          .where((q) => q.createdAt.isAfter(oneWeekAgo))
+          .toList();
+    } else {
+      filteredQuestions = allQuestions;
+    }
+    
+    // 조회수 기준으로 정렬하고 제한
+    filteredQuestions.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+    return filteredQuestions.take(limit).toList();
   }
 
-  Future<List<Question>> getFrequentlyAskedQuestions({int limit = 10}) async {
-    // TODO: 실제 API 호출로 대체
-    return _getMockQuestions().take(limit).toList();
+  // 자주 받은 질문 목록 조회 (답변 수 기준)
+  Future<List<Question>> getFrequentlyAskedQuestions({int limit = 10, String period = '전체기간'}) async {
+    // TODO: 백엔드 API 호출
+    // final response = await http.get('/api/questions/frequent?limit=$limit&period=$period');
+    
+    await Future.delayed(const Duration(milliseconds: 500)); // API 호출 시뮬레이션
+    
+    final allQuestions = _getMockQuestions();
+    
+    // 기간 필터 적용
+    List<Question> filteredQuestions;
+    if (period == '일주일') {
+      final oneWeekAgo = DateTime.now().subtract(const Duration(days: 7));
+      filteredQuestions = allQuestions
+          .where((q) => q.createdAt.isAfter(oneWeekAgo))
+          .toList();
+    } else {
+      filteredQuestions = allQuestions;
+    }
+    
+    // 답변 수 기준으로 정렬하고 제한
+    filteredQuestions.sort((a, b) => b.answerCount.compareTo(a.answerCount));
+    return filteredQuestions.take(limit).toList();
   }
 
   Future<List<Question>> getOfficialQuestions({int limit = 10}) async {

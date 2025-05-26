@@ -6,6 +6,8 @@ import '../services/auth_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
 import 'questions_list_screen.dart';
+import 'popular_questions_screen.dart';
+import 'frequent_questions_screen.dart';
 import 'question_detail_screen.dart';
 import 'new_question_screen.dart';
 import 'chat_screen.dart';
@@ -219,9 +221,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  '안녕하세요! 👋',
-                                  style: TextStyle(
+                                Text(
+                                  _authService.isLoggedIn 
+                                    ? '${_authService.currentUserName ?? '사용자'}님, 반가워요! 👋'
+                                    : '안녕하세요! 👋',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
@@ -257,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const QuestionsListScreen(),
+                                      builder: (context) => const QuestionsListScreen(initialCategory: '공식'),
                                     ),
                                   ),
                                 ),
@@ -284,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const QuestionsListScreen(),
+                                      builder: (context) => const PopularQuestionsScreen(),
                                     ),
                                   ),
                                 ),
@@ -311,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const QuestionsListScreen(),
+                                      builder: (context) => const FrequentQuestionsScreen(),
                                     ),
                                   ),
                                 ),

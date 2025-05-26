@@ -8,7 +8,9 @@ import '../widgets/category_selector.dart';
 import 'question_detail_screen.dart';
 
 class QuestionsListScreen extends StatefulWidget {
-  const QuestionsListScreen({super.key});
+  final String? initialCategory; // 초기 카테고리 설정
+  
+  const QuestionsListScreen({super.key, this.initialCategory});
 
   @override
   State<QuestionsListScreen> createState() => _QuestionsListScreenState();
@@ -18,24 +20,23 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
   
-  List<Question> _allQuestions = [];
-  List<Question> _filteredQuestions = [];
+  List<Question> _questions = [];
   String _selectedCategory = '전체';
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _selectedCategory = widget.initialCategory ?? '전체';
     _loadQuestions();
   }
 
   Future<void> _loadQuestions() async {
     setState(() => _isLoading = true);
     try {
-      final questions = await _apiService.getQuestions();
+      final questions = await _apiService.getQuestions(category: _selectedCategory);
       setState(() {
-        _allQuestions = questions;
-        _filterQuestions();
+        _questions = questions;
         _isLoading = false;
       });
     } catch (e) {
@@ -48,21 +49,11 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
     }
   }
 
-  void _filterQuestions() {
-    if (_selectedCategory == '전체') {
-      _filteredQuestions = _allQuestions;
-    } else {
-      _filteredQuestions = _allQuestions
-          .where((question) => question.category == _selectedCategory)
-          .toList();
-    }
-  }
-
   void _onCategoryChanged(String category) {
     setState(() {
       _selectedCategory = category;
-      _filterQuestions();
     });
+    _loadQuestions();
   }
 
   void _onQuestionTap(Question question) {
@@ -116,7 +107,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),
                     )
-                  : _filteredQuestions.isEmpty
+                  : _questions.isEmpty
                       ? SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           child: SizedBox(
@@ -150,9 +141,9 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
                           controller: _scrollController,
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          itemCount: _filteredQuestions.length,
+                          itemCount: _questions.length,
                           itemBuilder: (context, index) {
-                            final question = _filteredQuestions[index];
+                            final question = _questions[index];
                             return MessageBubble(
                               question: question,
                               onTap: () => _onQuestionTap(question),

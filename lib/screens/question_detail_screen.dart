@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../models/question.dart';
 import '../models/answer.dart';
 import '../widgets/chat_input.dart';
+import '../widgets/message_bubble.dart';
 
 class QuestionDetailScreen extends StatefulWidget {
   final Question question;
@@ -208,113 +209,10 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   }
 
   Widget _buildQuestionCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: widget.question.isOfficial ? AppTheme.primaryColor : AppTheme.borderColor,
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 상단 정보
-          Row(
-            children: [
-              if (widget.question.isOfficial)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    '공식',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              if (widget.question.isOfficial) const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.secondaryColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  widget.question.category,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Icon(
-                CupertinoIcons.eye,
-                size: 16,
-                color: AppTheme.lightTextColor,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                widget.question.viewCount.toString(),
-                style: TextStyle(
-                  color: AppTheme.lightTextColor,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // 제목
-          Text(
-            widget.question.title,
-            style: AppTheme.headingStyle.copyWith(fontSize: 20),
-          ),
-          const SizedBox(height: 16),
-          
-          // 하단 정보 (날짜)
-          Row(
-            children: [
-              const Spacer(),
-              Text(
-                DateFormat('yyyy/MM/dd HH:mm').format(widget.question.createdAt),
-                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // 태그
-          if (widget.question.tags.isNotEmpty) ...[
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.question.tags.map((tag) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppTheme.backgroundColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.borderColor),
-                  ),
-                  child: Text(
-                    '#$tag',
-                    style: AppTheme.bodyStyle.copyWith(fontSize: 12),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ],
-      ),
+    return MessageBubble(
+      question: widget.question,
+      onTap: () {}, // 상세 페이지에서는 탭 기능 불필요
+      showDate: true, // 날짜를 우측 상단에 표시
     );
   }
 

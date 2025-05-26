@@ -13,6 +13,7 @@ class CategorySelector extends StatelessWidget {
 
   static const List<Map<String, String>> categories = [
     {'id': '전체', 'name': '전체'},
+    {'id': '공식', 'name': '공식'},
     {'id': '학사', 'name': '학사'},
     {'id': '장학금', 'name': '장학금'},
     {'id': '교내프로그램', 'name': '교내프로그램'},
