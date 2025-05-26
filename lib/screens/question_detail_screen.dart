@@ -339,36 +339,17 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        border: answer.isAccepted 
-            ? Border.all(color: AppTheme.primaryColor, width: 1.5)
-            : Border.all(color: AppTheme.borderColor),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 답변자 정보와 상태
-          Row(
-            children: [
-              if (answer.isAccepted)
+          // AI 태그만 표시 (상단 좌측)
+          if (answer.isAIGenerated) ...[
+            Row(
+              children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    '채택',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              if (answer.isAIGenerated)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  margin: EdgeInsets.only(left: answer.isAccepted ? 8 : 0),
                   decoration: BoxDecoration(
                     color: AppTheme.secondaryColor,
                     borderRadius: BorderRadius.circular(12),
@@ -382,19 +363,10 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     ),
                   ),
                 ),
-              const Spacer(),
-              Text(
-                answer.userName,
-                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                DateFormat('MM/dd HH:mm').format(answer.createdAt),
-                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           
           // 답변 내용
           Text(
@@ -402,11 +374,13 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
             style: AppTheme.bodyStyle.copyWith(height: 1.4),
           ),
           
-          // 좋아요 버튼
-          if (answer.likeCount > 0) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
+          const SizedBox(height: 12),
+          
+          // 하단 영역 (좋아요와 날짜)
+          Row(
+            children: [
+              // 좋아요 버튼 (좌측)
+              if (answer.likeCount > 0) ...[
                 Icon(
                   Icons.thumb_up,
                   size: 16,
@@ -418,8 +392,16 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                   style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
                 ),
               ],
-            ),
-          ],
+              
+              const Spacer(),
+              
+              // 날짜 (우측)
+              Text(
+                DateFormat('MM/dd HH:mm').format(answer.createdAt),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
+              ),
+            ],
+          ),
         ],
       ),
     );
