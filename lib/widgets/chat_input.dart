@@ -21,9 +21,13 @@ class ChatInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       decoration: const BoxDecoration(
         color: AppTheme.backgroundColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
         border: Border(
           top: BorderSide(color: AppTheme.borderColor, width: 1),
         ),

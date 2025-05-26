@@ -106,48 +106,60 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
           
           // 메시지 리스트
           Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-                    ),
-                  )
-                : _filteredQuestions.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              CupertinoIcons.chat_bubble,
-                              size: 64,
-                              color: AppTheme.lightTextColor,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _selectedCategory == '전체' 
-                                  ? '등록된 질문이 없습니다'
-                                  : '${_selectedCategory} 카테고리에\n등록된 질문이 없습니다',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AppTheme.secondaryTextColor,
-                                fontSize: 16,
+            child: RefreshIndicator(
+              onRefresh: _loadQuestions,
+              color: AppTheme.primaryColor,
+              backgroundColor: AppTheme.backgroundColor,
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                      ),
+                    )
+                  : _filteredQuestions.isEmpty
+                      ? SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.chat_bubble,
+                                    size: 64,
+                                    color: AppTheme.lightTextColor,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _selectedCategory == '전체' 
+                                        ? '등록된 질문이 없습니다'
+                                        : '${_selectedCategory} 카테고리에\n등록된 질문이 없습니다',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: AppTheme.secondaryTextColor,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: _scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          itemCount: _filteredQuestions.length,
+                          itemBuilder: (context, index) {
+                            final question = _filteredQuestions[index];
+                            return MessageBubble(
+                              question: question,
+                              onTap: () => _onQuestionTap(question),
+                            );
+                          },
                         ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        itemCount: _filteredQuestions.length,
-                        itemBuilder: (context, index) {
-                          final question = _filteredQuestions[index];
-                          return MessageBubble(
-                            question: question,
-                            onTap: () => _onQuestionTap(question),
-                          );
-                        },
-                      ),
+            ),
           ),
         ],
       ),

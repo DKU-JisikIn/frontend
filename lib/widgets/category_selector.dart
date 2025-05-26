@@ -23,7 +23,7 @@ class CategorySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
+      height: 56,
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: AppTheme.backgroundColor,
@@ -60,9 +60,9 @@ class CategorySelector extends StatelessWidget {
                 width: 1,
               ),
               showCheckmark: false,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
+              visualDensity: VisualDensity.standard,
             ),
           );
         },
