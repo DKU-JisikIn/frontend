@@ -49,7 +49,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     _textController.clear();
-    _scrollToBottom();
+    
+    // 사용자 메시지 추가 후 즉시 스크롤
+    await _scrollToBottomSmooth();
 
     try {
       // API 서비스로 메시지 처리 (AI 답변만)
@@ -60,7 +62,8 @@ class _ChatScreenState extends State<ChatScreen> {
         _isProcessing = false;
       });
 
-      _scrollToBottom();
+      // AI 답변 추가 후 스크롤
+      await _scrollToBottomSmooth();
     } catch (e) {
       setState(() {
         _messages.add(ChatMessage.assistant(
@@ -69,6 +72,21 @@ class _ChatScreenState extends State<ChatScreen> {
         ));
         _isProcessing = false;
       });
+      
+      await _scrollToBottomSmooth();
+    }
+  }
+
+  Future<void> _scrollToBottomSmooth() async {
+    // 약간의 지연을 두어 UI 업데이트가 완료된 후 스크롤
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    if (_scrollController.hasClients) {
+      await _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 500), // 더 부드러운 애니메이션
+        curve: Curves.easeOutCubic,
+      );
     }
   }
 
@@ -111,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ));
       });
 
-      _scrollToBottom();
+      await _scrollToBottomSmooth();
     } catch (e) {
       // 오류 메시지 추가
       setState(() {
@@ -120,6 +138,8 @@ class _ChatScreenState extends State<ChatScreen> {
           metadata: {'type': 'error'},
         ));
       });
+      
+      await _scrollToBottomSmooth();
     }
   }
 
@@ -177,7 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.only(top: 8, bottom: 24),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
@@ -193,7 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
             // 처리 중 표시
             if (_isProcessing)
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     const SizedBox(

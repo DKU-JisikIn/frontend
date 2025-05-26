@@ -19,7 +19,12 @@ class ChatMessageWidget extends StatelessWidget {
     final isUser = message.type == MessageType.user;
     
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      margin: EdgeInsets.only(
+        top: isUser ? 16 : 8,
+        bottom: isUser ? 8 : 20,
+        left: 16,
+        right: 16,
+      ),
       child: Row(
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +37,7 @@ class ChatMessageWidget extends StatelessWidget {
                 children: [
                   _buildMessageBubble(context, isUser),
                   if (_hasActions()) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     _buildActionButtons(context),
                   ],
                 ],
