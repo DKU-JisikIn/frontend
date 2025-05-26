@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../widgets/chat_message_widget.dart';
@@ -26,7 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _addWelcomeMessage();
+    // 초기 인삿말 제거
     
     // 초기 검색어가 있으면 자동으로 처리
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
@@ -36,34 +37,28 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _addWelcomeMessage() {
-    final welcomeMessage = ChatMessage.assistant(
-      '안녕하세요! 단국대 도우미입니다. 🎓\n\n궁금한 점이 있으시면 언제든지 질문해주세요!\n\n예시:\n• "올해 수강신청은 언제부터야?"\n• "장학금 신청 방법 알려줘"\n• "도서관 이용시간이 어떻게 돼?"',
-      metadata: {'type': 'welcome'},
-    );
-    
-    setState(() {
-      _messages.add(welcomeMessage);
-    });
-  }
-
   Future<void> _sendMessage(String text) async {
     if (text.trim().isEmpty || _isProcessing) return;
 
+    // 사용자 메시지를 먼저 화면에 표시
+    final userMessage = ChatMessage.user(text.trim());
     setState(() {
+      _messages.add(userMessage);
       _isProcessing = true;
     });
 
+    _textController.clear();
+    _scrollToBottom();
+
     try {
-      // API 서비스로 메시지 처리
-      final newMessages = await _apiService.processChatMessage(text.trim());
+      // API 서비스로 메시지 처리 (AI 답변만)
+      final aiMessages = await _apiService.processChatMessage(text.trim());
       
       setState(() {
-        _messages.addAll(newMessages);
+        _messages.addAll(aiMessages);
         _isProcessing = false;
       });
 
-      _textController.clear();
       _scrollToBottom();
     } catch (e) {
       setState(() {
@@ -144,9 +139,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF343541),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF343541),
+        backgroundColor: AppTheme.primaryColor,
         title: const Text(
           '단국대 도우미 채팅',
           style: TextStyle(
@@ -157,7 +152,18 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () async {
+            // 텍스트 필드 포커스 완전히 해제
+            _textController.clear();
+            FocusManager.instance.primaryFocus?.unfocus();
+            
+            // 키보드가 완전히 숨겨질 때까지 대기
+            await Future.delayed(const Duration(milliseconds: 200));
+            
+            if (mounted) {
+              Navigator.pop(context);
+            }
+          },
         ),
         actions: [
           IconButton(
@@ -166,91 +172,74 @@ class _ChatScreenState extends State<ChatScreen> {
               setState(() {
                 _messages.clear();
               });
-              _addWelcomeMessage();
             },
           ),
         ],
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          // 채팅 메시지 리스트
-          Expanded(
-            child: _messages.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 64,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '대화를 시작해보세요!',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      final message = _messages[index];
-                      return ChatMessageWidget(
-                        message: message,
-                        onQuestionCreate: () => _handleQuestionCreate(message),
-                        onViewQuestion: () => _handleViewQuestion(message),
-                      );
-                    },
-                  ),
-          ),
-
-          // 처리 중 표시
-          if (_isProcessing)
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF19C37D)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '답변을 찾고 있습니다...',
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+      body: GestureDetector(
+        // 화면 터치 시 키보드 숨기기
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            // 채팅 메시지 리스트
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  return ChatMessageWidget(
+                    message: message,
+                    onQuestionCreate: () => _handleQuestionCreate(message),
+                    onViewQuestion: () => _handleViewQuestion(message),
+                  );
+                },
               ),
             ),
 
-          // 입력 영역
-          ChatInput(
-            controller: _textController,
-            onSubmitted: _sendMessage,
-            enabled: !_isProcessing,
-          ),
-        ],
+            // 처리 중 표시
+            if (_isProcessing)
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '답변을 찾고 있습니다...',
+                      style: TextStyle(
+                        color: AppTheme.secondaryTextColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // 입력 영역
+            ChatInput(
+              controller: _textController,
+              onSubmitted: _sendMessage,
+              enabled: !_isProcessing,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
+    // dispose 시에는 context 접근하지 않음 (위젯이 이미 비활성화됨)
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();

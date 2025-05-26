@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
@@ -27,6 +28,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadDashboardData();
+    
+    // 다른 화면에서 돌아왔을 때 키보드가 나타나지 않도록 포커스 해제
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      _searchController.clear();
+    });
   }
 
   Future<void> _loadDashboardData() async {
@@ -78,9 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF343541),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF343541),
+        backgroundColor: AppTheme.primaryColor,
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
@@ -110,112 +117,109 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
       ),
       drawer: _buildDrawer(),
-      body: RefreshIndicator(
-        onRefresh: _loadDashboardData,
-        color: const Color(0xFF19C37D),
-        backgroundColor: const Color(0xFF40414F),
-        child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 환영 메시지
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF19C37D), Color(0xFF16A085)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+      body: GestureDetector(
+        // 화면 터치 시 키보드 숨기기
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: RefreshIndicator(
+          onRefresh: _loadDashboardData,
+          color: AppTheme.primaryColor,
+          backgroundColor: AppTheme.backgroundColor,
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                  ),
+                )
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 환영 메시지
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: AppTheme.welcomeContainerDecoration,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              '안녕하세요! 👋',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 16,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '안녕하세요! 👋',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                      const SizedBox(height: 24),
+
+                      // 공식 정보
+                      if (_officialQuestions.isNotEmpty) ...[
+                        _buildSectionHeader(
+                          '📋 공식 정보',
+                          '단국대학교 공식 자료',
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const QuestionsListScreen(),
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 16,
-                              height: 1.4,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildQuestionsList(_officialQuestions),
+                        const SizedBox(height: 32),
+                      ],
+
+                      // 인기 질문
+                      if (_popularQuestions.isNotEmpty) ...[
+                        _buildSectionHeader(
+                          '🔥 인기 질문',
+                          '조회수가 많은 질문들',
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const QuestionsListScreen(),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildQuestionsList(_popularQuestions),
+                        const SizedBox(height: 32),
+                      ],
 
-                    // 공식 정보
-                    if (_officialQuestions.isNotEmpty) ...[
-                      _buildSectionHeader(
-                        '📋 공식 정보',
-                        '단국대학교 공식 자료',
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const QuestionsListScreen(),
+                      // 자주 받은 질문
+                      if (_frequentQuestions.isNotEmpty) ...[
+                        _buildSectionHeader(
+                          '❓ 자주 받은 질문',
+                          '답변이 많은 질문들',
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const QuestionsListScreen(),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildQuestionsList(_officialQuestions),
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 16),
+                        _buildQuestionsList(_frequentQuestions),
+                        const SizedBox(height: 120), // 하단 검색창을 위한 여백
+                      ],
                     ],
-
-                    // 인기 질문
-                    if (_popularQuestions.isNotEmpty) ...[
-                      _buildSectionHeader(
-                        '🔥 인기 질문',
-                        '조회수가 많은 질문들',
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const QuestionsListScreen(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildQuestionsList(_popularQuestions),
-                      const SizedBox(height: 32),
-                    ],
-
-                    // 자주 받은 질문
-                    if (_frequentQuestions.isNotEmpty) ...[
-                      _buildSectionHeader(
-                        '❓ 자주 받은 질문',
-                        '답변이 많은 질문들',
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const QuestionsListScreen(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildQuestionsList(_frequentQuestions),
-                      const SizedBox(height: 120), // 하단 검색창을 위한 여백
-                    ],
-                  ],
+                  ),
                 ),
-              ),
+        ),
       ),
       bottomSheet: _buildSearchBar(),
     );
@@ -223,132 +227,102 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDrawer() {
     return Drawer(
-      backgroundColor: const Color(0xFF40414F),
-      child: Column(
+      backgroundColor: AppTheme.backgroundColor,
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF19C37D), Color(0xFF16A085)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  '단국대 도우미',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '교내 정보를 쉽게 찾아보세요',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+          // 상단 여백 (상태바 높이만큼)
+          SizedBox(height: MediaQuery.of(context).padding.top + 20),
+          
+          // 메뉴 아이템들
+          _buildDrawerItem(
+            icon: Icons.person,
+            title: '내정보',
+            onTap: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('내정보 기능은 추후 구현 예정입니다.')),
+              );
+            },
           ),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _buildDrawerItem(
-                  icon: Icons.home,
-                  title: '홈',
-                  onTap: () => Navigator.pop(context),
-                ),
-                _buildDrawerItem(
-                  icon: Icons.chat,
-                  title: 'AI 채팅 도우미',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChatScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.list,
-                  title: '질문 목록',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const QuestionsListScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.add_circle,
-                  title: '새 질문 작성',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NewQuestionScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(color: Color(0xFF565869)),
-                _buildDrawerItem(
-                  icon: Icons.school,
-                  title: '학사 정보',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 학사 카테고리로 필터링된 질문 목록으로 이동
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.attach_money,
-                  title: '장학금 정보',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 장학금 카테고리로 필터링된 질문 목록으로 이동
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.event,
-                  title: '교내 프로그램',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 교내프로그램 카테고리로 필터링된 질문 목록으로 이동
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.work,
-                  title: '취업 정보',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 취업 카테고리로 필터링된 질문 목록으로 이동
-                  },
-                ),
-              ],
-            ),
+          _buildDrawerItem(
+            icon: Icons.settings,
+            title: '설정',
+            onTap: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('설정 기능은 추후 구현 예정입니다.')),
+              );
+            },
           ),
+          _buildDrawerItem(
+            icon: Icons.question_answer,
+            title: '내가 올린 질문',
+            onTap: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('내가 올린 질문 기능은 추후 구현 예정입니다.')),
+              );
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.list,
+            title: '질문목록',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const QuestionsListScreen(),
+                ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 20),
+          const Divider(),
+          
+          // 추가 메뉴
+          _buildDrawerItem(
+            icon: Icons.chat,
+            title: 'AI 채팅 도우미',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChatScreen(),
+                ),
+              );
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.add_circle,
+            title: '새 질문 작성',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NewQuestionScreen(),
+                ),
+              );
+            },
+          ),
+          
+          // 하단 여백
+          const SizedBox(height: 40),
+          
+          // 버전 정보
           Container(
             padding: const EdgeInsets.all(16),
             child: Text(
               'v1.0.0',
               style: TextStyle(
-                color: Colors.grey[400],
+                color: AppTheme.lightTextColor,
                 fontSize: 12,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -362,10 +336,10 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: Colors.white),
+      leading: Icon(icon, color: AppTheme.secondaryTextColor),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: AppTheme.primaryTextColor),
       ),
       onTap: onTap,
     );
@@ -380,19 +354,12 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTheme.headingStyle,
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 12,
-              ),
+              style: AppTheme.subheadingStyle,
             ),
           ],
         ),
@@ -427,39 +394,35 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF40414F),
-        border: Border(
-          top: BorderSide(color: Color(0xFF565869), width: 1),
-        ),
-      ),
+      decoration: AppTheme.searchBarContainerDecoration,
       child: Row(
         children: [
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF40414F),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF565869)),
-              ),
+              decoration: AppTheme.inputContainerDecoration,
               child: TextField(
                 controller: _searchController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: AppTheme.bodyStyle,
+                autofocus: false,
+                enableInteractiveSelection: true,
+                decoration: InputDecoration(
                   hintText: '궁금한 점을 검색해보세요...',
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintStyle: AppTheme.hintStyle,
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  prefixIcon: Icon(Icons.search, color: AppTheme.hintTextColor),
                 ),
                 onSubmitted: (_) => _performSearch(),
+                onTap: () {
+                  // 검색바를 탭했을 때만 포커스 받도록
+                },
               ),
             ),
           ),
           const SizedBox(width: 8),
           Container(
             decoration: const BoxDecoration(
-              color: Color(0xFF19C37D),
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
             ),
             child: IconButton(

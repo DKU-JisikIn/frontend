@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
@@ -91,9 +92,9 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF343541),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF343541),
+        backgroundColor: AppTheme.primaryColor,
         title: const Text(
           '질문 목록',
           style: TextStyle(
@@ -104,7 +105,11 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // 키보드 숨기기 및 포커스 해제
+            FocusScope.of(context).unfocus();
+            Navigator.pop(context);
+          },
         ),
         elevation: 0,
         actions: [
@@ -116,64 +121,68 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // 카테고리 선택기
-          CategorySelector(
-            selectedCategory: _selectedCategory,
-            onCategoryChanged: _onCategoryChanged,
-          ),
-          
-          // 메시지 리스트
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : _questions.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              size: 64,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '질문을 검색하거나\n새로운 질문을 작성해보세요',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        itemCount: _questions.length,
-                        itemBuilder: (context, index) {
-                          final question = _questions[index];
-                          return MessageBubble(
-                            question: question,
-                            onTap: () => _onQuestionTap(question),
-                          );
-                        },
+      body: GestureDetector(
+        // 화면 터치 시 키보드 숨기기
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            // 카테고리 선택기
+            CategorySelector(
+              selectedCategory: _selectedCategory,
+              onCategoryChanged: _onCategoryChanged,
+            ),
+            
+            // 메시지 리스트
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),
-          ),
-          
-          // 입력 영역
-          ChatInput(
-            controller: _searchController,
-            onSubmitted: _searchQuestions,
-          ),
-        ],
+                    )
+                  : _questions.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.chat_bubble_outline,
+                                size: 64,
+                                color: AppTheme.lightTextColor,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                '질문을 검색하거나\n새로운 질문을 작성해보세요',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppTheme.secondaryTextColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          itemCount: _questions.length,
+                          itemBuilder: (context, index) {
+                            final question = _questions[index];
+                            return MessageBubble(
+                              question: question,
+                              onTap: () => _onQuestionTap(question),
+                            );
+                          },
+                        ),
+            ),
+            
+            // 입력 영역
+            ChatInput(
+              controller: _searchController,
+              onSubmitted: _searchQuestions,
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -189,7 +198,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
             _loadQuestions();
           }
         },
-        backgroundColor: const Color(0xFF19C37D),
+        backgroundColor: AppTheme.primaryColor,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

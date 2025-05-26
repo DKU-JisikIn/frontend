@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class ChatInput extends StatelessWidget {
   final TextEditingController controller;
@@ -19,23 +20,21 @@ class ChatInput extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF40414F),
+        color: AppTheme.backgroundColor,
         border: Border(
-          top: BorderSide(color: Color(0xFF565869), width: 1),
+          top: BorderSide(color: AppTheme.borderColor, width: 1),
         ),
       ),
       child: Row(
         children: [
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF40414F),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF565869)),
-              ),
+              decoration: AppTheme.inputContainerDecoration,
               child: TextField(
                 controller: controller,
                 enabled: enabled,
+                autofocus: false,
+                enableInteractiveSelection: true,
                 onChanged: onChanged,
                 onSubmitted: enabled ? (value) {
                   if (value.trim().isNotEmpty) {
@@ -43,13 +42,11 @@ class ChatInput extends StatelessWidget {
                   }
                 } : null,
                 style: TextStyle(
-                  color: enabled ? Colors.white : Colors.grey[600],
+                  color: enabled ? AppTheme.primaryTextColor : AppTheme.secondaryTextColor,
                 ),
                 decoration: InputDecoration(
                   hintText: enabled ? '질문을 입력하세요...' : '처리 중입니다...',
-                  hintStyle: TextStyle(
-                    color: enabled ? Colors.grey : Colors.grey[700],
-                  ),
+                  hintStyle: AppTheme.hintStyle,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
@@ -62,13 +59,13 @@ class ChatInput extends StatelessWidget {
           const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
-              color: enabled ? const Color(0xFF19C37D) : Colors.grey[700],
+              color: enabled ? AppTheme.primaryColor : AppTheme.lightTextColor,
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.send, 
-                color: enabled ? Colors.white : Colors.grey[500], 
+                color: Colors.white, 
                 size: 20,
               ),
               onPressed: enabled ? () {

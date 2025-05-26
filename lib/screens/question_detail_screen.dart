@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
 import '../models/answer.dart';
@@ -92,9 +93,9 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF343541),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF343541),
+        backgroundColor: AppTheme.primaryColor,
         title: const Text(
           '질문 상세',
           style: TextStyle(
@@ -125,19 +126,15 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                   // 답변 섹션 헤더
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         '답변',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTheme.headingStyle,
                       ),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF565869),
+                          color: AppTheme.primaryColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -157,15 +154,16 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                   if (_isLoading)
                     const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),
                     )
                   else if (_answers.isEmpty)
                     Container(
                       padding: const EdgeInsets.all(32),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF444654),
+                        color: AppTheme.surfaceColor,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.borderColor),
                       ),
                       child: Center(
                         child: Column(
@@ -173,14 +171,14 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppTheme.lightTextColor,
                             ),
                             const SizedBox(height: 16),
                             Text(
                               '아직 답변이 없습니다.\n첫 번째 답변을 작성해보세요!',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: Colors.grey[400],
+                                color: AppTheme.secondaryTextColor,
                                 fontSize: 16,
                               ),
                             ),
@@ -211,10 +209,10 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF444654),
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: widget.question.isOfficial ? const Color(0xFF19C37D) : Colors.transparent,
+          color: widget.question.isOfficial ? AppTheme.primaryColor : AppTheme.borderColor,
           width: 1.5,
         ),
       ),
@@ -228,7 +226,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF19C37D),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -244,7 +242,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF565869),
+                  color: AppTheme.secondaryColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -259,13 +257,13 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               Icon(
                 Icons.remove_red_eye,
                 size: 16,
-                color: Colors.grey[400],
+                color: AppTheme.lightTextColor,
               ),
               const SizedBox(width: 4),
               Text(
                 widget.question.viewCount.toString(),
                 style: TextStyle(
-                  color: Colors.grey[400],
+                  color: AppTheme.lightTextColor,
                   fontSize: 12,
                 ),
               ),
@@ -276,22 +274,14 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           // 제목
           Text(
             widget.question.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTheme.headingStyle.copyWith(fontSize: 20),
           ),
           const SizedBox(height: 16),
           
           // 내용
           Text(
             widget.question.content,
-            style: TextStyle(
-              color: Colors.grey[300],
-              fontSize: 16,
-              height: 1.5,
-            ),
+            style: AppTheme.bodyStyle.copyWith(fontSize: 16, height: 1.5),
           ),
           const SizedBox(height: 16),
           
@@ -300,26 +290,17 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
             children: [
               Text(
                 widget.question.userName,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 14),
               ),
               const SizedBox(width: 8),
               Text(
                 '•',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 14),
               ),
               const SizedBox(width: 8),
               Text(
                 DateFormat('yyyy.MM.dd HH:mm').format(widget.question.createdAt),
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 14),
               ),
             ],
           ),
@@ -334,15 +315,13 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2A2B38),
+                    color: AppTheme.backgroundColor,
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.borderColor),
                   ),
                   child: Text(
                     '#$tag',
-                    style: TextStyle(
-                      color: Colors.grey[300],
-                      fontSize: 12,
-                    ),
+                    style: AppTheme.bodyStyle.copyWith(fontSize: 12),
                   ),
                 );
               }).toList(),
@@ -358,11 +337,11 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF40414F),
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(12),
         border: answer.isAccepted 
-            ? Border.all(color: const Color(0xFF19C37D), width: 1.5)
-            : null,
+            ? Border.all(color: AppTheme.primaryColor, width: 1.5)
+            : Border.all(color: AppTheme.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,7 +353,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF19C37D),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -391,7 +370,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   margin: EdgeInsets.only(left: answer.isAccepted ? 8 : 0),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9333EA),
+                    color: AppTheme.secondaryColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -406,18 +385,12 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               const Spacer(),
               Text(
                 answer.userName,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 12,
-                ),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
               ),
               const SizedBox(width: 8),
               Text(
                 DateFormat('MM/dd HH:mm').format(answer.createdAt),
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 12,
-                ),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
               ),
             ],
           ),
@@ -426,11 +399,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           // 답변 내용
           Text(
             answer.content,
-            style: TextStyle(
-              color: Colors.grey[300],
-              fontSize: 14,
-              height: 1.4,
-            ),
+            style: AppTheme.bodyStyle.copyWith(height: 1.4),
           ),
           
           // 좋아요 버튼
@@ -441,15 +410,12 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                 Icon(
                   Icons.thumb_up,
                   size: 16,
-                  color: Colors.grey[400],
+                  color: AppTheme.lightTextColor,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   answer.likeCount.toString(),
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 12,
-                  ),
+                  style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
                 ),
               ],
             ),

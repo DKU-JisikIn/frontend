@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
 import '../widgets/category_selector.dart';
@@ -75,9 +76,9 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF343541),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF343541),
+        backgroundColor: AppTheme.primaryColor,
         title: const Text(
           '새 질문 작성',
           style: TextStyle(
@@ -105,7 +106,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                 : const Text(
                     '등록',
                     style: TextStyle(
-                      color: Color(0xFF19C37D),
+                      color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -120,20 +121,16 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 카테고리 선택
-            const Text(
+            Text(
               '카테고리',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTheme.headingStyle.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF40414F),
+                color: AppTheme.surfaceColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF565869)),
+                border: Border.all(color: AppTheme.borderColor),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -149,12 +146,12 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                             value: category['id'],
                             child: Text(
                               category['name']!,
-                              style: const TextStyle(color: Colors.white),
+                              style: AppTheme.bodyStyle,
                             ),
                           ))
                       .toList(),
-                  dropdownColor: const Color(0xFF40414F),
-                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+                  dropdownColor: AppTheme.surfaceColor,
+                  icon: Icon(Icons.keyboard_arrow_down, color: AppTheme.primaryTextColor),
                   isExpanded: true,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 ),
@@ -163,34 +160,30 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
             const SizedBox(height: 24),
             
             // 제목 입력
-            const Text(
+            Text(
               '제목',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTheme.headingStyle.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _titleController,
-              style: const TextStyle(color: Colors.white),
+              style: AppTheme.bodyStyle,
               decoration: InputDecoration(
                 hintText: '질문의 제목을 입력하세요',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: AppTheme.hintStyle,
                 filled: true,
-                fillColor: const Color(0xFF40414F),
+                fillColor: AppTheme.surfaceColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF565869)),
+                  borderSide: BorderSide(color: AppTheme.borderColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF565869)),
+                  borderSide: BorderSide(color: AppTheme.borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF19C37D)),
+                  borderSide: BorderSide(color: AppTheme.primaryColor),
                 ),
               ),
               maxLines: 1,
@@ -198,34 +191,30 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
             const SizedBox(height: 24),
             
             // 내용 입력
-            const Text(
+            Text(
               '내용',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTheme.headingStyle.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _contentController,
-              style: const TextStyle(color: Colors.white),
+              style: AppTheme.bodyStyle,
               decoration: InputDecoration(
                 hintText: '질문의 상세 내용을 입력하세요',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: AppTheme.hintStyle,
                 filled: true,
-                fillColor: const Color(0xFF40414F),
+                fillColor: AppTheme.surfaceColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF565869)),
+                  borderSide: BorderSide(color: AppTheme.borderColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF565869)),
+                  borderSide: BorderSide(color: AppTheme.borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF19C37D)),
+                  borderSide: BorderSide(color: AppTheme.primaryColor),
                 ),
                 alignLabelWithHint: true,
               ),
@@ -235,13 +224,9 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
             const SizedBox(height: 24),
             
             // 태그 입력
-            const Text(
+            Text(
               '태그 (선택사항)',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTheme.headingStyle.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 12),
             Row(
@@ -249,23 +234,23 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                 Expanded(
                   child: TextField(
                     controller: _tagController,
-                    style: const TextStyle(color: Colors.white),
+                    style: AppTheme.bodyStyle,
                     decoration: InputDecoration(
                       hintText: '태그를 입력하고 추가 버튼을 누르세요',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      hintStyle: AppTheme.hintStyle,
                       filled: true,
-                      fillColor: const Color(0xFF40414F),
+                      fillColor: AppTheme.surfaceColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF565869)),
+                        borderSide: BorderSide(color: AppTheme.borderColor),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF565869)),
+                        borderSide: BorderSide(color: AppTheme.borderColor),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF19C37D)),
+                        borderSide: BorderSide(color: AppTheme.primaryColor),
                       ),
                     ),
                     maxLines: 1,
@@ -276,7 +261,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                 ElevatedButton(
                   onPressed: _addTag,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF19C37D),
+                    backgroundColor: AppTheme.primaryColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
@@ -295,7 +280,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF19C37D),
+                      color: AppTheme.primaryColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -325,10 +310,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
               const SizedBox(height: 8),
               Text(
                 '태그는 최대 5개까지 추가할 수 있습니다 (${_tags.length}/5)',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 12,
-                ),
+                style: AppTheme.subheadingStyle,
               ),
             ],
             
@@ -338,19 +320,16 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF444654),
+                color: AppTheme.surfaceColor,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.borderColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     '질문 작성 가이드',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTheme.headingStyle.copyWith(fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -358,11 +337,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                     '• 상황을 자세히 설명해주시면 더 정확한 답변을 받을 수 있습니다\n'
                     '• 관련 태그를 추가하면 비슷한 질문을 찾기 쉬워집니다\n'
                     '• 개인정보는 포함하지 마세요',
-                    style: TextStyle(
-                      color: Colors.grey[300],
-                      fontSize: 12,
-                      height: 1.4,
-                    ),
+                    style: AppTheme.bodyStyle.copyWith(fontSize: 12, height: 1.4),
                   ),
                 ],
               ),

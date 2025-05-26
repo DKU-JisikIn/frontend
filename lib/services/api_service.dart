@@ -68,8 +68,8 @@ class ApiService {
     // 현재는 간단한 목업 응답
     await Future.delayed(const Duration(seconds: 1)); // 네트워크 지연 시뮬레이션
     
+    // 사용자 메시지는 제외하고 AI 답변만 반환
     return [
-      ChatMessage.user(message),
       ChatMessage.assistant(
         '죄송합니다. 현재 백엔드 연동 대기 중입니다.\n백엔드 개발자가 API를 구현하면 정상적으로 작동할 예정입니다.',
         metadata: {'type': 'mock_response'},
