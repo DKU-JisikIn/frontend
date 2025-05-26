@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
@@ -88,7 +89,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(CupertinoIcons.xmark, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -151,7 +152,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                           ))
                       .toList(),
                   dropdownColor: AppTheme.surfaceColor,
-                  icon: Icon(Icons.keyboard_arrow_down, color: AppTheme.primaryTextColor),
+                  icon: Icon(CupertinoIcons.chevron_down, color: AppTheme.primaryTextColor),
                   isExpanded: true,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 ),
@@ -297,7 +298,7 @@ class _NewQuestionScreenState extends State<NewQuestionScreen> {
                         GestureDetector(
                           onTap: () => _removeTag(tag),
                           child: const Icon(
-                            Icons.close,
+                            CupertinoIcons.xmark,
                             size: 16,
                             color: Colors.white,
                           ),

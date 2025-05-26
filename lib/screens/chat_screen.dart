@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
@@ -151,7 +152,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(CupertinoIcons.back, color: Colors.white),
           onPressed: () async {
             // 텍스트 필드 포커스 완전히 해제
             _textController.clear();
@@ -167,7 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(CupertinoIcons.refresh, color: Colors.white),
             onPressed: () {
               setState(() {
                 _messages.clear();

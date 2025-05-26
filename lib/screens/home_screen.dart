@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
@@ -90,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppTheme.primaryColor,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
+            icon: const Icon(CupertinoIcons.line_horizontal_3, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -105,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.white),
+            icon: const Icon(CupertinoIcons.person_circle, color: Colors.white),
             onPressed: () {
               // 사용자 정보 화면으로 이동 (추후 구현)
               ScaffoldMessenger.of(context).showSnackBar(
@@ -236,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
           
           // 메뉴 아이템들
           _buildDrawerItem(
-            icon: Icons.person,
+            icon: CupertinoIcons.person,
             title: '내정보',
             onTap: () {
               Navigator.pop(context);
@@ -246,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           _buildDrawerItem(
-            icon: Icons.settings,
+            icon: CupertinoIcons.settings,
             title: '설정',
             onTap: () {
               Navigator.pop(context);
@@ -256,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           _buildDrawerItem(
-            icon: Icons.question_answer,
+            icon: CupertinoIcons.chat_bubble_text,
             title: '내가 올린 질문',
             onTap: () {
               Navigator.pop(context);
@@ -266,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           _buildDrawerItem(
-            icon: Icons.list,
+            icon: CupertinoIcons.list_bullet,
             title: '질문목록',
             onTap: () {
               Navigator.pop(context);
@@ -281,34 +282,6 @@ class _HomeScreenState extends State<HomeScreen> {
           
           const SizedBox(height: 20),
           const Divider(),
-          
-          // 추가 메뉴
-          _buildDrawerItem(
-            icon: Icons.chat,
-            title: 'AI 채팅 도우미',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ChatScreen(),
-                ),
-              );
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.add_circle,
-            title: '새 질문 작성',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NewQuestionScreen(),
-                ),
-              );
-            },
-          ),
           
           // 하단 여백
           const SizedBox(height: 40),
@@ -410,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   hintStyle: AppTheme.hintStyle,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  prefixIcon: Icon(Icons.search, color: AppTheme.hintTextColor),
+                  prefixIcon: Icon(CupertinoIcons.search, color: AppTheme.hintTextColor),
                 ),
                 onSubmitted: (_) => _performSearch(),
                 onTap: () {
@@ -426,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white, size: 20),
+              icon: const Icon(CupertinoIcons.arrow_right, color: Colors.white, size: 20),
               onPressed: _performSearch,
             ),
           ),

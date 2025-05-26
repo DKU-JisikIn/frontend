@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
@@ -105,7 +106,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(CupertinoIcons.back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
@@ -169,7 +170,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                         child: Column(
                           children: [
                             Icon(
-                              Icons.chat_bubble_outline,
+                              CupertinoIcons.chat_bubble,
                               size: 48,
                               color: AppTheme.lightTextColor,
                             ),
@@ -255,7 +256,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               ),
               const Spacer(),
               Icon(
-                Icons.remove_red_eye,
+                CupertinoIcons.eye,
                 size: 16,
                 color: AppTheme.lightTextColor,
               ),
@@ -278,36 +279,20 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           ),
           const SizedBox(height: 16),
           
-          // 내용
-          Text(
-            widget.question.content,
-            style: AppTheme.bodyStyle.copyWith(fontSize: 16, height: 1.5),
-          ),
-          const SizedBox(height: 16),
-          
-          // 작성자 정보
+          // 하단 정보 (날짜)
           Row(
             children: [
+              const Spacer(),
               Text(
-                widget.question.userName,
-                style: AppTheme.subheadingStyle.copyWith(fontSize: 14),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '•',
-                style: AppTheme.subheadingStyle.copyWith(fontSize: 14),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                DateFormat('yyyy.MM.dd HH:mm').format(widget.question.createdAt),
-                style: AppTheme.subheadingStyle.copyWith(fontSize: 14),
+                DateFormat('yyyy/MM/dd HH:mm').format(widget.question.createdAt),
+                style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
               ),
             ],
           ),
+          const SizedBox(height: 16),
           
           // 태그
           if (widget.question.tags.isNotEmpty) ...[
-            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -382,7 +367,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               // 좋아요 버튼 (좌측)
               if (answer.likeCount > 0) ...[
                 Icon(
-                  Icons.thumb_up,
+                  CupertinoIcons.heart,
                   size: 16,
                   color: AppTheme.lightTextColor,
                 ),
@@ -397,7 +382,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               
               // 날짜 (우측)
               Text(
-                DateFormat('MM/dd HH:mm').format(answer.createdAt),
+                DateFormat('yyyy/MM/dd HH:mm').format(answer.createdAt),
                 style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
               ),
             ],

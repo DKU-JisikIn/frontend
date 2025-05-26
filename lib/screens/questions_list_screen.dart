@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/question.dart';
@@ -104,7 +105,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(CupertinoIcons.back, color: Colors.white),
           onPressed: () {
             // 키보드 숨기기 및 포커스 해제
             FocusScope.of(context).unfocus();
@@ -114,7 +115,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(CupertinoIcons.refresh, color: Colors.white),
             onPressed: () {
               _loadQuestions();
             },
@@ -146,7 +147,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.chat_bubble_outline,
+                                CupertinoIcons.chat_bubble,
                                 size: 64,
                                 color: AppTheme.lightTextColor,
                               ),
@@ -199,7 +200,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
           }
         },
         backgroundColor: AppTheme.primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(CupertinoIcons.plus, color: Colors.white),
       ),
     );
   }

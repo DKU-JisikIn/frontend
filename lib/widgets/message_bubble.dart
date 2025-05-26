@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../models/question.dart';
 
@@ -69,7 +69,7 @@ class MessageBubble extends StatelessWidget {
                   ),
                   const Spacer(),
                   Icon(
-                    Icons.remove_red_eye,
+                    CupertinoIcons.eye,
                     size: 16,
                     color: AppTheme.lightTextColor,
                   ),
@@ -89,41 +89,18 @@ class MessageBubble extends StatelessWidget {
               Text(
                 question.title,
                 style: AppTheme.headingStyle.copyWith(fontSize: 16),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              
-              // 내용 미리보기
-              Text(
-                question.content,
-                style: AppTheme.bodyStyle.copyWith(height: 1.4),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
               
-              // 하단 정보
+              // 하단 정보 (답변 수만)
               Row(
                 children: [
-                  Text(
-                    question.userName,
-                    style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '•',
-                    style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatDate(question.createdAt),
-                    style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-                  ),
                   const Spacer(),
                   if (question.answerCount > 0) ...[
                     Icon(
-                      Icons.chat_bubble_outline,
+                      CupertinoIcons.chat_bubble,
                       size: 16,
                       color: AppTheme.lightTextColor,
                     ),
@@ -163,22 +140,5 @@ class MessageBubble extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 7) {
-      return DateFormat('MM/dd').format(dateTime);
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}분 전';
-    } else {
-      return '방금 전';
-    }
   }
 } 
