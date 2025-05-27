@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final AuthService _authService = AuthService();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _bannerScrollController = ScrollController();
   
   List<Question> _popularQuestions = [];
   List<Question> _frequentQuestions = [];
@@ -209,37 +210,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 환영 메시지
+                      // 배너 리스트 (좌우 스크롤 가능)
                       SlideTransition(
                         position: _slideAnimations[0],
                         child: FadeTransition(
                           opacity: _fadeAnimations[0],
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(20),
-                            decoration: AppTheme.welcomeContainerDecoration,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          child: SizedBox(
+                            height: 200, // 정사각형에 가까운 높이로 조정
+                            child: ListView(
+                              controller: _bannerScrollController,
+                              scrollDirection: Axis.horizontal,
                               children: [
-                                Text(
-                                  _authService.isLoggedIn 
-                                    ? '${_authService.currentUserName ?? '사용자'}님, 반가워요! 👋'
-                                    : '안녕하세요! 👋',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontSize: 16,
-                                    height: 1.4,
-                                  ),
-                                ),
+                                // 1. 인삿말 배너
+                                _buildWelcomeBanner(),
+                                // 2. 공식 정보 배너
+                                _buildOfficialBanner(),
+                                // 3. 인기 질문 배너
+                                _buildPopularBanner(),
+                                // 4. 자주 받은 질문 배너
+                                _buildFrequentBanner(),
                               ],
                             ),
                           ),
@@ -518,10 +507,224 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // 배너 메서드들
+  Widget _buildWelcomeBanner() {
+    return Container(
+      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: AppTheme.welcomeContainerDecoration.gradient,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () {
+          if (_authService.isLoggedIn) {
+            // 로그인된 상태: 프로필 화면으로 이동
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileScreen(),
+              ),
+            );
+          }
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _authService.isLoggedIn 
+                ? '${_authService.currentUserName ?? '사용자'}님, 반가워요! 👋'
+                : '안녕하세요! 👋',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _authService.isLoggedIn
+                ? '내 정보를 확인하려면 탭하세요'
+                : '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOfficialBanner() {
+    return Container(
+      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2196F3),
+            Color(0xFF1976D2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const QuestionsListScreen(initialCategory: '공식'),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '📋 공식 정보',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '단국대학교 공식 자료와\n중요한 공지사항을 확인하세요',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPopularBanner() {
+    return Container(
+      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFFF5722),
+            Color(0xFFE64A19),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PopularQuestionsScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '🔥 인기 질문',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '많은 학생들이 궁금해하는\n인기 질문들을 확인하세요',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFrequentBanner() {
+    return Container(
+      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF9C27B0),
+            Color(0xFF7B1FA2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const FrequentQuestionsScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '❓ 자주 받은 질문',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '답변이 많이 달린\n자주 받은 질문들을 확인하세요',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     _animationController.dispose();
+    _bannerScrollController.dispose();
     super.dispose();
   }
 } 
