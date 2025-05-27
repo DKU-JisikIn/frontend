@@ -228,10 +228,21 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // AI 태그만 표시 (상단 좌측)
-          if (answer.isAIGenerated) ...[
-            Row(
-              children: [
+          // 상단 영역 (사용자 아이디와 AI 태그)
+          Row(
+            children: [
+              // 사용자 아이디 (좌측 상단)
+              Text(
+                answer.userName,
+                style: TextStyle(
+                  color: AppTheme.primaryTextColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // AI 태그 (있는 경우)
+              if (answer.isAIGenerated)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -247,10 +258,9 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-          ],
+            ],
+          ),
+          const SizedBox(height: 12),
           
           // 답변 내용
           Text(

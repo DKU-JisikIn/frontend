@@ -510,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // 배너 메서드들
   Widget _buildWelcomeBanner() {
     return Container(
-      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      width: 200, // 너비를 줄여서 더 많은 배너가 보이도록 조정
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -536,8 +536,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             Text(
               _authService.isLoggedIn 
-                ? '${_authService.currentUserName ?? '사용자'}님, 반가워요! 👋'
-                : '안녕하세요! 👋',
+                ? '${_authService.currentUserName ?? '사용자'}님,\n반가워요!'
+                : '안녕하세요!',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -547,8 +547,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(height: 12),
             Text(
               _authService.isLoggedIn
-                ? '내 정보를 확인하려면 탭하세요'
-                : '단국대학교 관련 궁금한 점이 있으시면\n언제든지 질문해주세요!',
+                ? '궁금한 점이 있으신가요?\n언제든지 질문해주세요!'
+                : '오늘은 무엇이\n궁금하시나요?',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
                 fontSize: 13,
@@ -563,7 +563,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildOfficialBanner() {
     return Container(
-      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      width: 200, // 너비를 줄여서 더 많은 배너가 보이도록 조정
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -592,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              '📋 공식 정보',
+              '공식 정보',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -601,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              '단국대학교 공식 자료와\n중요한 공지사항을 확인하세요',
+              '단국대 공식 정보에 대한\n질문을 확인하세요!',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
                 fontSize: 13,
@@ -616,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildPopularBanner() {
     return Container(
-      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      width: 200, // 너비를 줄여서 더 많은 배너가 보이도록 조정
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -645,7 +645,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              '🔥 인기 질문',
+              '인기 질문',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -654,7 +654,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              '많은 학생들이 궁금해하는\n인기 질문들을 확인하세요',
+              '많은 학생들이 살펴본\n인기 질문을 확인하세요!',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
                 fontSize: 13,
@@ -669,7 +669,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildFrequentBanner() {
     return Container(
-      width: 140, // 너비를 줄여서 더 많은 배너가 보이도록 조정
+      width: 200, // 너비를 줄여서 더 많은 배너가 보이도록 조정
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -677,8 +677,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF9C27B0),
-            Color(0xFF7B1FA2),
+            Color.fromARGB(255, 219, 112, 237),
+            Color.fromARGB(255, 181, 98, 217),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -698,7 +698,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              '❓ 자주 받은 질문',
+              '자주 받은 질문',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -707,7 +707,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              '답변이 많이 달린\n자주 받은 질문들을 확인하세요',
+              '어떤 질문이 자주 올라올까요?\n한 번 확인해보세요!',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
                 fontSize: 13,
