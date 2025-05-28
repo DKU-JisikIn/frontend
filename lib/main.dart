@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '단국대 도우미',
+      title: '단비',
       theme: AppTheme.lightTheme,
       home: const HomeScreen(),
       debugShowCheckedModeBanner: false,

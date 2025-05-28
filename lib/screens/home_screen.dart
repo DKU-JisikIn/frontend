@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         title: Text(
-          '단국대 도우미',
+          '단비',
           style: TextStyle(
             color: AppTheme.primaryTextColor,
             fontSize: 18,

@@ -52,11 +52,12 @@ class SignupCompleteScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      '단국대 도우미에 오신 것을\n환영합니다! 🎉',
+                      '단비에 오신 것을\n환영합니다! 🎉',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
-                        height: 1.4,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        height: 1.3,
                       ),
                       textAlign: TextAlign.center,
                     ),

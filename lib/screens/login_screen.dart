@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      '단국대 도우미',
+                      '단비',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,

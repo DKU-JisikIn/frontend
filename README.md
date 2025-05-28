@@ -1,4 +1,4 @@
-# 단국대 도우미 (Dankook University Helper) - Frontend
+# 단비 (Dankook University Helper) - Frontend
 
 단국대학교 교내 정보를 쉽게 찾을 수 있는 Q&A 모바일 애플리케이션의 프론트엔드입니다.
 
