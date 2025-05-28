@@ -486,6 +486,66 @@ class ApiService {
     return _getMockAnswers().length + 150; // 기존 답변들 포함한 누적 수
   }
 
+  // 우수 답변자 목록 조회
+  Future<List<TopAnswerer>> getTopAnswerers({int limit = 3}) async {
+    // TODO: 실제 API 호출로 대체
+    // GET /api/statistics/top-answerers?limit=$limit
+    await Future.delayed(const Duration(milliseconds: 400));
+    
+    return _getMockTopAnswerers().take(limit).toList();
+  }
+
+  // 우수 답변자 목업 데이터
+  List<TopAnswerer> _getMockTopAnswerers() {
+    return [
+      TopAnswerer(
+        id: 'user_top1',
+        userName: '김도우미',
+        profileImageUrl: 'https://via.placeholder.com/50/4FC3F7/FFFFFF?text=김',
+        score: 2850,
+        rank: 1,
+        answerCount: 127,
+        likeCount: 342,
+      ),
+      TopAnswerer(
+        id: 'user_top2',
+        userName: '박해결',
+        profileImageUrl: 'https://via.placeholder.com/50/29B6F6/FFFFFF?text=박',
+        score: 2340,
+        rank: 2,
+        answerCount: 98,
+        likeCount: 276,
+      ),
+      TopAnswerer(
+        id: 'user_top3',
+        userName: '이답변',
+        profileImageUrl: 'https://via.placeholder.com/50/81C784/FFFFFF?text=이',
+        score: 1920,
+        rank: 3,
+        answerCount: 85,
+        likeCount: 198,
+      ),
+      TopAnswerer(
+        id: 'user_top4',
+        userName: '최질문',
+        profileImageUrl: 'https://via.placeholder.com/50/FFB74D/FFFFFF?text=최',
+        score: 1650,
+        rank: 4,
+        answerCount: 72,
+        likeCount: 165,
+      ),
+      TopAnswerer(
+        id: 'user_top5',
+        userName: '정해답',
+        profileImageUrl: 'https://via.placeholder.com/50/F06292/FFFFFF?text=정',
+        score: 1420,
+        rank: 5,
+        answerCount: 63,
+        likeCount: 142,
+      ),
+    ];
+  }
+
   // 백엔드 개발자를 위한 API 엔드포인트 가이드
   /*
   
@@ -522,4 +582,25 @@ class ApiService {
      - 페이지네이션: ?page=1&limit=10
   
   */
+}
+
+// 우수 답변자 모델
+class TopAnswerer {
+  final String id;
+  final String userName;
+  final String profileImageUrl;
+  final int score;
+  final int rank;
+  final int answerCount;
+  final int likeCount;
+
+  TopAnswerer({
+    required this.id,
+    required this.userName,
+    required this.profileImageUrl,
+    required this.score,
+    required this.rank,
+    required this.answerCount,
+    required this.likeCount,
+  });
 } 

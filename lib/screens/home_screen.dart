@@ -47,6 +47,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late List<Animation<Offset>> _slideAnimations;
   late Animation<double> _questionFadeAnimation;
 
+  // 우수 답변자 데이터
+  List<TopAnswerer> _topAnswerers = [];
+
   @override
   void initState() {
     super.initState();
@@ -72,29 +75,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ));
 
     // 4개 요소에 대한 애니메이션 생성 (환영메시지, 공식정보, 인기질문, 자주받은질문)
-    _fadeAnimations = List.generate(6, (index) {
+    _fadeAnimations = List.generate(7, (index) {
       return Tween<double>(
         begin: 0.0,
         end: 1.0,
       ).animate(CurvedAnimation(
         parent: _animationController,
         curve: Interval(
-          index * 0.1, // 각 요소마다 0.1초씩 지연
-          (index * 0.1) + 0.4, // 0.4초 동안 애니메이션
+          index * 0.08, // 각 요소마다 0.08초씩 지연
+          (index * 0.08) + 0.4, // 0.4초 동안 애니메이션
           curve: Curves.easeOutCubic,
         ),
       ));
     });
 
-    _slideAnimations = List.generate(6, (index) {
+    _slideAnimations = List.generate(7, (index) {
       return Tween<Offset>(
         begin: const Offset(0, 0.3),
         end: Offset.zero,
       ).animate(CurvedAnimation(
         parent: _animationController,
         curve: Interval(
-          index * 0.1,
-          (index * 0.1) + 0.4,
+          index * 0.08,
+          (index * 0.08) + 0.4,
           curve: Curves.easeOutCubic,
         ),
       ));
@@ -127,11 +130,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final todayAnswerCount = await _apiService.getTodayAnswerCount();
       final totalAnswerCount = await _apiService.getTotalAnswerCount();
       
+      // 우수 답변자 데이터 로드
+      final topAnswerers = await _apiService.getTopAnswerers(limit: 5);
+      
       setState(() {
         _unansweredQuestions = unansweredQuestions;
         _todayQuestionCount = todayQuestionCount;
         _todayAnswerCount = todayAnswerCount;
         _totalAnswerCount = totalAnswerCount;
+        _topAnswerers = topAnswerers;
         _isLoading = false;
       });
 
@@ -327,11 +334,60 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         const SizedBox(height: 24),
                       ],
 
+                      // 우수 답변자 랭킹
+                      if (_topAnswerers.isNotEmpty) ...[
+                        SlideTransition(
+                          position: _slideAnimations[2],
+                          child: FadeTransition(
+                            opacity: _fadeAnimations[2],
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.star_fill,
+                                        color: AppTheme.primaryColor,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '우수 답변자',
+                                        style: TextStyle(
+                                          color: AppTheme.primaryTextColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: AppTheme.iosCardDecoration,
+                                  child: Column(
+                                    children: [
+                                      for (int i = 0; i < 3 && i < _topAnswerers.length; i++)
+                                        _buildTopAnswererItem(_topAnswerers[i], i == 2),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
                       // 오늘의 질문과 답변 통계
                       SlideTransition(
-                        position: _slideAnimations[2],
+                        position: _slideAnimations[3],
                         child: FadeTransition(
-                          opacity: _fadeAnimations[2],
+                          opacity: _fadeAnimations[3],
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -422,9 +478,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // 누적 답변 수
                       SlideTransition(
-                        position: _slideAnimations[3],
+                        position: _slideAnimations[5],
                         child: FadeTransition(
-                          opacity: _fadeAnimations[3],
+                          opacity: _fadeAnimations[5],
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -826,6 +882,123 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTopAnswererItem(TopAnswerer topAnswerer, bool isLast) {
+    // 랭킹에 따른 색상 설정
+    Color rankColor;
+    IconData rankIcon;
+    
+    switch (topAnswerer.rank) {
+      case 1:
+        rankColor = const Color(0xFFFFD700); // 금색
+        rankIcon = CupertinoIcons.star_fill;
+        break;
+      case 2:
+        rankColor = const Color(0xFFC0C0C0); // 은색
+        rankIcon = CupertinoIcons.star_fill;
+        break;
+      case 3:
+        rankColor = const Color(0xFFCD7F32); // 동색
+        rankIcon = CupertinoIcons.star_fill;
+        break;
+      default:
+        rankColor = AppTheme.secondaryTextColor;
+        rankIcon = CupertinoIcons.star;
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            // 랭킹 아이콘
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: rankColor,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '${topAnswerer.rank}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // 프로필 이미지
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  topAnswerer.userName.isNotEmpty ? topAnswerer.userName[0] : '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // 사용자 정보
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    topAnswerer.userName,
+                    style: TextStyle(
+                      color: AppTheme.primaryTextColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '답변 ${topAnswerer.answerCount}개',
+                    style: TextStyle(
+                      color: AppTheme.secondaryTextColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // 점수
+            Text(
+              '${topAnswerer.score}점',
+              style: TextStyle(
+                color: AppTheme.primaryColor,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        if (!isLast) ...[
+          const SizedBox(height: 16),
+          Divider(
+            height: 1,
+            color: AppTheme.borderColor,
+          ),
+          const SizedBox(height: 16),
+        ],
+      ],
     );
   }
 
