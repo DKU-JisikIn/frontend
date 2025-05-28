@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:async';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -8,11 +9,11 @@ import '../widgets/message_bubble.dart';
 import 'questions_list_screen.dart';
 import 'popular_questions_screen.dart';
 import 'frequent_questions_screen.dart';
-import 'question_detail_screen.dart';
 import 'new_question_screen.dart';
 import 'chat_screen.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
+import 'question_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,15 +28,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _bannerScrollController = ScrollController();
   
-  List<Question> _popularQuestions = [];
-  List<Question> _frequentQuestions = [];
-  List<Question> _officialQuestions = [];
   bool _isLoading = false;
+  
+  // 답변받지 못한 질문 관련
+  List<Question> _unansweredQuestions = [];
+  int _currentQuestionIndex = 0;
+  Timer? _questionTimer;
+
+  // 통계 데이터
+  int _todayQuestionCount = 0;
+  int _todayAnswerCount = 0;
+  int _totalAnswerCount = 0;
 
   // 애니메이션 컨트롤러들
   late AnimationController _animationController;
+  late AnimationController _questionAnimationController;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
+  late Animation<double> _questionFadeAnimation;
 
   @override
   void initState() {
@@ -47,30 +57,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     );
 
+    // 질문 카드 애니메이션 컨트롤러 초기화
+    _questionAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _questionFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _questionAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
     // 4개 요소에 대한 애니메이션 생성 (환영메시지, 공식정보, 인기질문, 자주받은질문)
-    _fadeAnimations = List.generate(4, (index) {
+    _fadeAnimations = List.generate(6, (index) {
       return Tween<double>(
         begin: 0.0,
         end: 1.0,
       ).animate(CurvedAnimation(
         parent: _animationController,
         curve: Interval(
-          index * 0.15, // 각 요소마다 0.15초씩 지연
-          (index * 0.15) + 0.4, // 0.4초 동안 애니메이션
+          index * 0.1, // 각 요소마다 0.1초씩 지연
+          (index * 0.1) + 0.4, // 0.4초 동안 애니메이션
           curve: Curves.easeOutCubic,
         ),
       ));
     });
 
-    _slideAnimations = List.generate(4, (index) {
+    _slideAnimations = List.generate(6, (index) {
       return Tween<Offset>(
         begin: const Offset(0, 0.3),
         end: Offset.zero,
       ).animate(CurvedAnimation(
         parent: _animationController,
         curve: Interval(
-          index * 0.15,
-          (index * 0.15) + 0.4,
+          index * 0.1,
+          (index * 0.1) + 0.4,
           curve: Curves.easeOutCubic,
         ),
       ));
@@ -95,20 +119,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
     try {
-      final popularQuestions = await _apiService.getPopularQuestions(limit: 3);
-      final frequentQuestions = await _apiService.getFrequentlyAskedQuestions(limit: 3);
-      final officialQuestions = await _apiService.getOfficialQuestions(limit: 3);
+      // 답변받지 못한 질문들 로드 (테스트용으로 더 많이 로드)
+      final unansweredQuestions = await _apiService.getUnansweredQuestions(limit: 8);
+      
+      // 통계 데이터 로드
+      final todayQuestionCount = await _apiService.getTodayQuestionCount();
+      final todayAnswerCount = await _apiService.getTodayAnswerCount();
+      final totalAnswerCount = await _apiService.getTotalAnswerCount();
       
       setState(() {
-        _popularQuestions = popularQuestions;
-        _frequentQuestions = frequentQuestions;
-        _officialQuestions = officialQuestions;
+        _unansweredQuestions = unansweredQuestions;
+        _todayQuestionCount = todayQuestionCount;
+        _todayAnswerCount = todayAnswerCount;
+        _totalAnswerCount = totalAnswerCount;
         _isLoading = false;
       });
 
       // 데이터 로딩 완료 후 애니메이션 시작
       if (!_isLoading) {
         _animationController.forward();
+        if (_unansweredQuestions.isNotEmpty) {
+          _startQuestionTimer();
+        }
       }
     } catch (e) {
       setState(() => _isLoading = false);
@@ -118,6 +150,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       }
     }
+  }
+
+  void _startQuestionTimer() {
+    _questionAnimationController.forward();
+    _questionTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_unansweredQuestions.isNotEmpty) {
+        _questionAnimationController.reverse().then((_) {
+          setState(() {
+            _currentQuestionIndex = (_currentQuestionIndex + 1) % _unansweredQuestions.length;
+          });
+          _questionAnimationController.forward();
+        });
+      }
+    });
+  }
+
+  void _onQuestionTap(Question question) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuestionDetailScreen(question: question),
+      ),
+    );
   }
 
   void _performSearch() {
@@ -132,15 +187,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       );
       _searchController.clear();
     }
-  }
-
-  void _onQuestionTap(Question question) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => QuestionDetailScreen(question: question),
-      ),
-    );
   }
 
   @override
@@ -236,86 +282,195 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 24),
 
-                      // 공식 정보
-                      if (_officialQuestions.isNotEmpty) ...[
+                      // 답변받지 못한 질문 카드
+                      if (_unansweredQuestions.isNotEmpty) ...[
                         SlideTransition(
                           position: _slideAnimations[1],
                           child: FadeTransition(
                             opacity: _fadeAnimations[1],
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildSectionHeader(
-                                  '📋 공식 정보',
-                                  '단국대학교 공식 자료',
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const QuestionsListScreen(initialCategory: '공식'),
-                                    ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.question_circle,
+                                        color: AppTheme.primaryColor,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '답변을 기다리는 질문',
+                                        style: TextStyle(
+                                          color: AppTheme.primaryTextColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                _buildQuestionsList(_officialQuestions),
+                                FadeTransition(
+                                  opacity: _questionFadeAnimation,
+                                  child: MessageBubble(
+                                    question: _unansweredQuestions[_currentQuestionIndex],
+                                    onTap: () => _onQuestionTap(_unansweredQuestions[_currentQuestionIndex]),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                       ],
 
-                      // 인기 질문
-                      if (_popularQuestions.isNotEmpty) ...[
-                        SlideTransition(
-                          position: _slideAnimations[2],
-                          child: FadeTransition(
-                            opacity: _fadeAnimations[2],
-                            child: Column(
-                              children: [
-                                _buildSectionHeader(
-                                  '🔥 인기 질문',
-                                  '조회수가 많은 질문들',
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const PopularQuestionsScreen(),
+                      // 오늘의 질문과 답변 통계
+                      SlideTransition(
+                        position: _slideAnimations[2],
+                        child: FadeTransition(
+                          opacity: _fadeAnimations[2],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.chart_bar,
+                                      color: AppTheme.primaryColor,
+                                      size: 20,
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '오늘의 질문과 답변',
+                                      style: TextStyle(
+                                        color: AppTheme.primaryTextColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 16),
-                                _buildQuestionsList(_popularQuestions),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 16),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(20),
+                                decoration: AppTheme.iosCardDecoration,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Text(
+                                          '질문 수',
+                                          style: TextStyle(
+                                            color: AppTheme.secondaryTextColor,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '$_todayQuestionCount',
+                                          style: TextStyle(
+                                            color: AppTheme.primaryTextColor,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      width: 1,
+                                      height: 40,
+                                      color: AppTheme.borderColor,
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          '답변 수',
+                                          style: TextStyle(
+                                            color: AppTheme.secondaryTextColor,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '$_todayAnswerCount',
+                                          style: TextStyle(
+                                            color: AppTheme.primaryTextColor,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 32),
-                      ],
+                      ),
+                      const SizedBox(height: 24),
 
-                      // 자주 받은 질문
-                      if (_frequentQuestions.isNotEmpty) ...[
-                        SlideTransition(
-                          position: _slideAnimations[3],
-                          child: FadeTransition(
-                            opacity: _fadeAnimations[3],
-                            child: Column(
-                              children: [
-                                _buildSectionHeader(
-                                  '❓ 자주 받은 질문',
-                                  '비슷한 유형의 질문들',
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const FrequentQuestionsScreen(),
+                      // 누적 답변 수
+                      SlideTransition(
+                        position: _slideAnimations[3],
+                        child: FadeTransition(
+                          opacity: _fadeAnimations[3],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.checkmark_seal,
+                                      color: AppTheme.primaryColor,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '누적 답변 수',
+                                      style: TextStyle(
+                                        color: AppTheme.primaryTextColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(20),
+                                decoration: AppTheme.iosCardDecoration,
+                                child: Center(
+                                  child: Text(
+                                    '$_totalAnswerCount',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryTextColor,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                _buildQuestionsList(_frequentQuestions),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 120), // 하단 검색창을 위한 여백
-                      ],
+                      ),
+
+                      const SizedBox(height: 120), // 하단 검색창을 위한 여백
                     ],
                   ),
                 ),
@@ -414,52 +569,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         style: TextStyle(color: AppTheme.primaryTextColor),
       ),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildSectionHeader(String title, String subtitle, VoidCallback onMoreTap) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: AppTheme.headingStyle,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: AppTheme.subheadingStyle,
-            ),
-          ],
-        ),
-        TextButton(
-          onPressed: onMoreTap,
-          child: Text(
-            '더보기',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuestionsList(List<Question> questions) {
-    return Column(
-      children: questions.map((question) => 
-        Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: MessageBubble(
-            question: question,
-            onTap: () => _onQuestionTap(question),
-          ),
-        ),
-      ).toList(),
     );
   }
 
@@ -571,8 +680,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2196F3),
-            Color(0xFF1976D2),
+            AppTheme.primaryColor,
+            AppTheme.secondaryColor,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -624,8 +733,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFFF5722),
-            Color(0xFFE64A19),
+            AppTheme.primaryColor,
+            AppTheme.secondaryColor,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -677,8 +786,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.fromARGB(255, 219, 112, 237),
-            Color.fromARGB(255, 181, 98, 217),
+            AppTheme.primaryColor,
+            AppTheme.secondaryColor,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -724,7 +833,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _searchController.dispose();
     _animationController.dispose();
+    _questionAnimationController.dispose();
     _bannerScrollController.dispose();
+    _questionTimer?.cancel();
     super.dispose();
   }
 } 

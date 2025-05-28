@@ -83,6 +83,12 @@ class ApiService {
     return _getMockQuestions().where((q) => q.isOfficial).take(limit).toList();
   }
 
+  Future<List<Question>> getUnansweredQuestions({int limit = 10}) async {
+    // TODO: 실제 API 호출로 대체
+    // 답변 수가 0인 질문들을 반환
+    return _getMockQuestions().where((q) => q.answerCount == 0).take(limit).toList();
+  }
+
   Future<List<Question>> searchQuestions(String query) async {
     // TODO: 실제 API 호출로 대체
     return _getMockQuestions()
@@ -310,6 +316,103 @@ class ApiService {
         answerCount: 1,
         tags: ['교환학생', '해외'],
       ),
+      // 답변받지 못한 질문들 (테스트용)
+      Question(
+        id: '11',
+        title: '기숙사 신청은 언제부터 가능한가요?',
+        content: '새 학기 기숙사 신청 일정을 알고 싶습니다.',
+        userId: 'user7',
+        userName: '신입생A',
+        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        category: '기타',
+        viewCount: 15,
+        answerCount: 0,
+        tags: ['기숙사', '신청'],
+      ),
+      Question(
+        id: '12',
+        title: '전과 절차가 어떻게 되나요?',
+        content: '다른 학과로 전과하고 싶은데 절차를 알려주세요.',
+        userId: 'user8',
+        userName: '2학년',
+        createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+        category: '학사',
+        viewCount: 32,
+        answerCount: 0,
+        tags: ['전과', '절차'],
+      ),
+      Question(
+        id: '13',
+        title: '학생증 재발급 방법',
+        content: '학생증을 분실했는데 재발급 받으려면 어떻게 해야 하나요?',
+        userId: 'user9',
+        userName: '학생B',
+        createdAt: DateTime.now().subtract(const Duration(hours: 8)),
+        category: '기타',
+        viewCount: 28,
+        answerCount: 0,
+        tags: ['학생증', '재발급'],
+      ),
+      Question(
+        id: '14',
+        title: '복수전공 신청 조건이 궁금해요',
+        content: '복수전공을 하려면 어떤 조건을 만족해야 하나요?',
+        userId: 'user10',
+        userName: '3학년',
+        createdAt: DateTime.now().subtract(const Duration(hours: 10)),
+        category: '학사',
+        viewCount: 41,
+        answerCount: 0,
+        tags: ['복수전공', '조건'],
+      ),
+      Question(
+        id: '15',
+        title: '교내 아르바이트 구하는 방법',
+        content: '교내에서 아르바이트를 하고 싶은데 어디서 구할 수 있나요?',
+        userId: 'user11',
+        userName: '학생C',
+        createdAt: DateTime.now().subtract(const Duration(hours: 14)),
+        category: '기타',
+        viewCount: 19,
+        answerCount: 0,
+        tags: ['아르바이트', '교내'],
+      ),
+      Question(
+        id: '16',
+        title: '휴학 신청 기간이 언제인가요?',
+        content: '다음 학기 휴학을 하려고 하는데 언제까지 신청해야 하나요?',
+        userId: 'user12',
+        userName: '재학생D',
+        createdAt: DateTime.now().subtract(const Duration(hours: 18)),
+        category: '학사',
+        viewCount: 37,
+        answerCount: 0,
+        tags: ['휴학', '신청기간'],
+      ),
+      Question(
+        id: '17',
+        title: '캠퍼스 내 프린터 사용법',
+        content: '도서관이나 학과 사무실 프린터 사용 방법을 알려주세요.',
+        userId: 'user13',
+        userName: '신입생E',
+        createdAt: DateTime.now().subtract(const Duration(hours: 22)),
+        category: '기타',
+        viewCount: 12,
+        answerCount: 0,
+        tags: ['프린터', '사용법'],
+      ),
+      Question(
+        id: '18',
+        title: '졸업논문 제출 일정',
+        content: '졸업논문은 언제까지 제출해야 하나요?',
+        userId: 'user14',
+        userName: '4학년F',
+        createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
+        category: '학사',
+        viewCount: 55,
+        answerCount: 0,
+        tags: ['졸업논문', '제출일정'],
+      ),
     ];
   }
 
@@ -345,6 +448,42 @@ class ApiService {
         likeCount: 18,
       ),
     ];
+  }
+
+  // 오늘의 통계 관련 API
+  Future<int> getTodayQuestionCount() async {
+    // TODO: 실제 API 호출로 대체
+    // GET /api/statistics/today/questions
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    
+    return _getMockQuestions()
+        .where((q) => q.createdAt.isAfter(todayStart))
+        .length;
+  }
+
+  Future<int> getTodayAnswerCount() async {
+    // TODO: 실제 API 호출로 대체
+    // GET /api/statistics/today/answers
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    
+    return _getMockAnswers()
+        .where((a) => a.createdAt.isAfter(todayStart))
+        .length;
+  }
+
+  Future<int> getTotalAnswerCount() async {
+    // TODO: 실제 API 호출로 대체
+    // GET /api/statistics/total/answers
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    // 목업 데이터에서 전체 답변 수 계산
+    return _getMockAnswers().length + 150; // 기존 답변들 포함한 누적 수
   }
 
   // 백엔드 개발자를 위한 API 엔드포인트 가이드

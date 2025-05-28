@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 
 class AppTheme {
   // 기본 색상 정의
-  static const Color primaryColor = Color(0xFF6366F1); // 연한 파랑색
-  static const Color secondaryColor = Color(0xFF8B5CF6); // 보라색
+  static const Color primaryColor = Color(0xFF4FC3F7); // 연한 파랑색
+  static const Color secondaryColor = Color(0xFF29B6F6); // 조금 더 진한 파랑색
   static const Color backgroundColor = Colors.white;
   static const Color surfaceColor = Color(0xFFF8FAFC);
   static const Color borderColor = Color(0xFFE2E8F0);
