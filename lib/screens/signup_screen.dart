@@ -139,10 +139,14 @@ class _SignupScreenState extends State<SignupScreen> {
               Row(
                 children: [
                   _buildStepIndicator(1, '이메일', true),
-                  _buildStepLine(),
+                  _buildStepLine(false),
                   _buildStepIndicator(2, '인증', false),
-                  _buildStepLine(),
+                  _buildStepLine(false),
                   _buildStepIndicator(3, '비밀번호', false),
+                  _buildStepLine(false),
+                  _buildStepIndicator(4, '닉네임', false),
+                  _buildStepLine(false),
+                  _buildStepIndicator(5, '추가정보', false),
                 ],
               ),
               
@@ -289,11 +293,11 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildStepLine() {
+  Widget _buildStepLine(bool isActive) {
     return Container(
       height: 2,
-      width: 40,
-      color: Colors.grey[300],
+      width: 32,
+      color: isActive ? AppTheme.primaryColor : Colors.grey[300],
       margin: const EdgeInsets.only(bottom: 20),
     );
   }

@@ -9,6 +9,8 @@ class AuthService {
   bool _isLoggedIn = false;
   String? _currentUserEmail;
   String? _currentUserName;
+  String? _currentUserNickname;
+  String? _currentUserProfileImageUrl;
 
   // 상태 변경 스트림
   final StreamController<bool> _authStateController = StreamController<bool>.broadcast();
@@ -18,6 +20,8 @@ class AuthService {
   bool get isLoggedIn => _isLoggedIn;
   String? get currentUserEmail => _currentUserEmail;
   String? get currentUserName => _currentUserName;
+  String? get currentUserNickname => _currentUserNickname;
+  String? get currentUserProfileImageUrl => _currentUserProfileImageUrl;
 
   // 로그인
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -40,6 +44,8 @@ class AuthService {
         _isLoggedIn = true;
         _currentUserEmail = email;
         _currentUserName = email.split('@')[0]; // 이메일에서 이름 추출
+        _currentUserNickname = '테스트사용자'; // 테스트용 닉네임
+        _currentUserProfileImageUrl = 'https://via.placeholder.com/150/4A90E2/FFFFFF?text=T'; // 테스트용 프로필 이미지
         _authStateController.add(true);
         
         return {
@@ -48,6 +54,8 @@ class AuthService {
           'user': {
             'email': _currentUserEmail,
             'name': _currentUserName,
+            'nickname': _currentUserNickname,
+            'profileImageUrl': _currentUserProfileImageUrl,
           }
         };
       } else {
@@ -73,6 +81,8 @@ class AuthService {
       _isLoggedIn = false;
       _currentUserEmail = null;
       _currentUserName = null;
+      _currentUserNickname = null;
+      _currentUserProfileImageUrl = null;
       _authStateController.add(false);
     } catch (e) {
       print('로그아웃 중 오류: $e');
@@ -128,16 +138,31 @@ class AuthService {
   }
 
   // 회원가입
-  Future<Map<String, dynamic>> register(String email, String password) async {
+  Future<Map<String, dynamic>> register(
+    String email, 
+    String password, {
+    String? nickname,
+    dynamic profileImage,  // File? for actual implementation
+    dynamic verificationDocument,  // File? for actual implementation
+  }) async {
     try {
       // TODO: 백엔드 API 호출
-      // final response = await http.post('/api/auth/register', body: {'email': email, 'password': password});
+      // final response = await http.post('/api/auth/register', body: {
+      //   'email': email, 
+      //   'password': password,
+      //   'nickname': nickname,
+      //   // profileImage와 verificationDocument는 multipart/form-data로 전송
+      // });
       
       await Future.delayed(const Duration(seconds: 1)); // API 호출 시뮬레이션
       
       return {
         'success': true,
         'message': '회원가입이 완료되었습니다.',
+        'user': {
+          'email': email,
+          'nickname': nickname ?? email.split('@')[0],
+        }
       };
     } catch (e) {
       return {

@@ -8,6 +8,9 @@ class ApiService {
   // TODO: 백엔드 개발자가 실제 API 엔드포인트로 변경해야 함
   static const String baseUrl = 'https://your-backend-api.com/api';
   
+  // 목업 데이터를 static으로 선언하여 상태 유지
+  static List<Answer>? _mockAnswers;
+  
   // 질문 관련 API
   Future<List<Question>> getQuestions({String? category, String? search}) async {
     // TODO: 실제 API 호출로 대체
@@ -117,6 +120,37 @@ class ApiService {
     // TODO: 실제 API 호출로 대체
     // POST /api/answers
     return answer;
+  }
+
+  // 답변 채택
+  Future<Answer> acceptAnswer(String answerId, String questionId) async {
+    // TODO: 실제 API 호출로 대체
+    // PUT /api/answers/{answerId}/accept
+    
+    await Future.delayed(const Duration(milliseconds: 500)); // API 호출 시뮬레이션
+    
+    // 목업: 해당 답변을 채택된 상태로 변경
+    final answers = _getMockAnswers(); // static 데이터 가져오기
+    final answerIndex = answers.indexWhere((a) => a.id == answerId);
+    
+    if (answerIndex != -1) {
+      // 같은 질문의 다른 답변들의 채택 상태를 해제
+      for (int i = 0; i < answers.length; i++) {
+        if (answers[i].questionId == questionId && answers[i].isAccepted) {
+          answers[i] = answers[i].copyWith(isAccepted: false);
+        }
+      }
+      
+      // 선택된 답변을 채택 상태로 변경
+      answers[answerIndex] = answers[answerIndex].copyWith(isAccepted: true);
+      
+      // static 데이터 업데이트
+      _mockAnswers = answers;
+      
+      return answers[answerIndex];
+    }
+    
+    throw Exception('답변을 찾을 수 없습니다.');
   }
 
   // 채팅 관련 API
@@ -365,8 +399,21 @@ class ApiService {
         answerCount: 0,
         tags: ['복수전공', '조건'],
       ),
+      // 테스트 사용자가 작성한 질문 (답변 채택 테스트용)
       Question(
         id: '15',
+        title: '프로그래밍 과제 도움이 필요해요',
+        content: 'C++ 과제를 하고 있는데 포인터 부분이 이해가 안 됩니다. 도움 주세요!',
+        userId: 'test',
+        userName: 'test',
+        createdAt: DateTime.now().subtract(const Duration(hours: 6)),
+        category: '학사',
+        viewCount: 23,
+        answerCount: 3,
+        tags: ['프로그래밍', 'C++', '과제'],
+      ),
+      Question(
+        id: '16',
         title: '교내 아르바이트 구하는 방법',
         content: '교내에서 아르바이트를 하고 싶은데 어디서 구할 수 있나요?',
         userId: 'user11',
@@ -378,7 +425,7 @@ class ApiService {
         tags: ['아르바이트', '교내'],
       ),
       Question(
-        id: '16',
+        id: '17',
         title: '휴학 신청 기간이 언제인가요?',
         content: '다음 학기 휴학을 하려고 하는데 언제까지 신청해야 하나요?',
         userId: 'user12',
@@ -390,7 +437,7 @@ class ApiService {
         tags: ['휴학', '신청기간'],
       ),
       Question(
-        id: '17',
+        id: '18',
         title: '캠퍼스 내 프린터 사용법',
         content: '도서관이나 학과 사무실 프린터 사용 방법을 알려주세요.',
         userId: 'user13',
@@ -401,20 +448,6 @@ class ApiService {
         answerCount: 0,
         tags: ['프린터', '사용법'],
       ),
-      Question(
-        id: '18',
-        title: '졸업논문 제출 일정',
-        content: '졸업논문은 언제까지 제출해야 하나요?',
-        userId: 'user14',
-        userName: '4학년F',
-        createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
-        category: '학사',
-        viewCount: 55,
-        answerCount: 0,
-        tags: ['졸업논문', '제출일정'],
-      ),
-      
-      // 현재 로그인된 사용자(test)의 질문들
       Question(
         id: '19',
         title: '컴퓨터공학과 전공 필수 과목이 궁금해요',
@@ -479,7 +512,8 @@ class ApiService {
   }
 
   List<Answer> _getMockAnswers() {
-    return [
+    // static 변수가 null이면 초기화
+    _mockAnswers ??= [
       Answer(
         id: '1',
         questionId: '1',
@@ -501,6 +535,15 @@ class ApiService {
       ),
       Answer(
         id: '3',
+        questionId: '2',
+        content: '장학금 신청 시 성적증명서와 가족관계증명서가 필요합니다.\n서류는 온라인으로 제출 가능해요.',
+        userId: 'user3',
+        userName: '도우미',
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        likeCount: 8,
+      ),
+      Answer(
+        id: '4',
         questionId: '3',
         content: '중앙도서관 이용시간:\n평일: 09:00 - 22:00\n주말: 09:00 - 18:00',
         userId: 'admin',
@@ -509,7 +552,64 @@ class ApiService {
         isAccepted: true,
         likeCount: 18,
       ),
+      Answer(
+        id: '5',
+        questionId: '4',
+        content: '컴퓨터공학과 졸업요건:\n- 전공 72학점 이상\n- 교양 30학점 이상\n- 총 130학점 이상',
+        userId: 'user4',
+        userName: '졸업생',
+        createdAt: DateTime.now().subtract(const Duration(days: 6)),
+        likeCount: 15,
+      ),
+      Answer(
+        id: '6',
+        questionId: '4',
+        content: '졸업논문 또는 졸업작품 중 하나를 선택해서 제출해야 합니다.\n지도교수님과 상담 후 결정하세요.',
+        userId: 'user5',
+        userName: '선배',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+        likeCount: 9,
+      ),
+      Answer(
+        id: '7',
+        questionId: '4',
+        content: '캡스톤 디자인 과목도 필수로 이수해야 합니다.\n4학년 때 수강하시면 됩니다.',
+        userId: 'user6',
+        userName: '조교',
+        createdAt: DateTime.now().subtract(const Duration(days: 4)),
+        likeCount: 6,
+      ),
+      // 테스트 질문(id: '15')에 대한 답변들
+      Answer(
+        id: '8',
+        questionId: '15',
+        content: '포인터는 메모리 주소를 저장하는 변수입니다.\nint* ptr = &variable; 이런 식으로 선언하고 사용해요.',
+        userId: 'user7',
+        userName: '프로그래밍 선배',
+        createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+        likeCount: 12,
+      ),
+      Answer(
+        id: '9',
+        questionId: '15',
+        content: '포인터 개념이 어려우시면 먼저 메모리 구조부터 이해하시는 게 좋아요.\n참고서적: C++ Primer Plus',
+        userId: 'user8',
+        userName: '컴공 조교',
+        createdAt: DateTime.now().subtract(const Duration(hours: 4)),
+        likeCount: 8,
+      ),
+      Answer(
+        id: '10',
+        questionId: '15',
+        content: '실습을 많이 해보시는 게 중요해요.\n간단한 예제부터 차근차근 따라해보세요.\n\n```cpp\nint x = 10;\nint* ptr = &x;\ncout << *ptr; // 10 출력\n```',
+        userId: 'user9',
+        userName: '4학년 선배',
+        createdAt: DateTime.now().subtract(const Duration(hours: 3)),
+        likeCount: 15,
+      ),
     ];
+    
+    return _mockAnswers!;
   }
 
   // 오늘의 통계 관련 API

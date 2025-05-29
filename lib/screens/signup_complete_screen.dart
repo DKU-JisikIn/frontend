@@ -5,10 +5,12 @@ import 'login_screen.dart';
 
 class SignupCompleteScreen extends StatelessWidget {
   final String email;
+  final String? nickname;
   
   const SignupCompleteScreen({
     super.key,
     required this.email,
+    this.nickname,
   });
 
   @override
@@ -51,9 +53,11 @@ class SignupCompleteScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      '단비에 오신 것을\n환영합니다! 🎉',
-                      style: TextStyle(
+                    Text(
+                      nickname != null 
+                          ? '$nickname님,\n단비에 오신 것을\n환영합니다! 🎉'
+                          : '단비에 오신 것을\n환영합니다! 🎉',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

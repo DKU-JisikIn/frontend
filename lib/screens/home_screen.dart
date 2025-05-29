@@ -234,28 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(CupertinoIcons.person_circle, color: AppTheme.primaryTextColor),
-            onPressed: () {
-              if (_authService.isLoggedIn) {
-                // 로그인된 상태: 프로필 화면으로 이동
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
-                  ),
-                );
-              } else {
-                // 로그인되지 않은 상태: 로그인 화면으로 이동
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
-                );
-              }
-            },
-          ),
+          _buildProfileButton(),
         ],
         elevation: 0,
       ),
@@ -1169,5 +1148,86 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _bannerScrollController.dispose();
     _questionTimer?.cancel();
     super.dispose();
+  }
+
+  Widget _buildProfileButton() {
+    if (_authService.isLoggedIn) {
+      // 프로필 이미지가 있으면 CircleAvatar로 표시, 없으면 기본 아이콘
+      final profileImageUrl = _authService.currentUserProfileImageUrl;
+      
+      return IconButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProfileScreen(),
+            ),
+          );
+        },
+        icon: profileImageUrl != null && profileImageUrl.isNotEmpty
+            ? CircleAvatar(
+                radius: 15,
+                backgroundColor: AppTheme.primaryColor,
+                child: ClipOval(
+                  child: Image.network(
+                    profileImageUrl,
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // 이미지 로딩 실패시 기본 아이콘 표시
+                      return Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          CupertinoIcons.person,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              )
+            : Icon(CupertinoIcons.person_circle, color: AppTheme.primaryTextColor),
+      );
+    } else {
+      return IconButton(
+        icon: Icon(CupertinoIcons.person_circle, color: AppTheme.primaryTextColor),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ),
+          );
+        },
+      );
+    }
   }
 } 

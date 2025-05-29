@@ -197,6 +197,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   _buildStepIndicator(2, '인증', true),
                   _buildStepLine(false),
                   _buildStepIndicator(3, '비밀번호', false),
+                  _buildStepLine(false),
+                  _buildStepIndicator(4, '닉네임', false),
+                  _buildStepLine(false),
+                  _buildStepIndicator(5, '추가정보', false),
                 ],
               ),
               
@@ -374,7 +378,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: isActive && step < 3
+              child: isActive && step < 2
                   ? const Icon(
                       CupertinoIcons.check_mark,
                       color: Colors.white,
@@ -407,7 +411,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Widget _buildStepLine(bool isCompleted) {
     return Container(
       height: 2,
-      width: 40,
+      width: 32,
       color: isCompleted ? AppTheme.primaryColor : Colors.grey[300],
       margin: const EdgeInsets.only(bottom: 20),
     );
