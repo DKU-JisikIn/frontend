@@ -413,6 +413,68 @@ class ApiService {
         answerCount: 0,
         tags: ['졸업논문', '제출일정'],
       ),
+      
+      // 현재 로그인된 사용자(test)의 질문들
+      Question(
+        id: '19',
+        title: '컴퓨터공학과 전공 필수 과목이 궁금해요',
+        content: '컴퓨터공학과에서 꼭 들어야 하는 전공 필수 과목들이 무엇인지 알고 싶습니다.',
+        userId: 'test',
+        userName: 'test',
+        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        category: '학사',
+        viewCount: 45,
+        answerCount: 2,
+        tags: ['전공필수', '컴퓨터공학과'],
+      ),
+      Question(
+        id: '20',
+        title: '도서관 스터디룸 예약 방법',
+        content: '중앙도서관 스터디룸을 예약하려면 어떻게 해야 하나요?',
+        userId: 'test',
+        userName: 'test',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+        category: '기타',
+        viewCount: 32,
+        answerCount: 1,
+        tags: ['도서관', '스터디룸', '예약'],
+      ),
+      Question(
+        id: '21',
+        title: '교내 Wi-Fi 연결 문제',
+        content: '교내 Wi-Fi에 연결이 안 되는데 해결 방법이 있을까요?',
+        userId: 'test',
+        userName: 'test',
+        createdAt: DateTime.now().subtract(const Duration(hours: 6)),
+        category: '기타',
+        viewCount: 18,
+        answerCount: 0,
+        tags: ['Wi-Fi', '연결문제'],
+      ),
+      Question(
+        id: '22',
+        title: '인턴십 프로그램 신청 기간',
+        content: '여름 인턴십 프로그램 신청은 언제부터 시작되나요?',
+        userId: 'test',
+        userName: 'test',
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        category: '취업',
+        viewCount: 67,
+        answerCount: 0,
+        tags: ['인턴십', '신청기간'],
+      ),
+      Question(
+        id: '23',
+        title: '학점 교류 프로그램 문의',
+        content: '타 대학과의 학점 교류 프로그램에 대해 알고 싶습니다.',
+        userId: 'test',
+        userName: 'test',
+        createdAt: DateTime.now().subtract(const Duration(days: 7)),
+        category: '학사',
+        viewCount: 29,
+        answerCount: 1,
+        tags: ['학점교류', '타대학'],
+      ),
     ];
   }
 
@@ -544,6 +606,43 @@ class ApiService {
         likeCount: 142,
       ),
     ];
+  }
+
+  // 사용자 질문 통계 관련 API
+  Future<Map<String, int>> getUserQuestionStats(String userId) async {
+    // TODO: 실제 API 호출로 대체
+    // GET /api/users/{userId}/question-stats
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    final userQuestions = _getMockQuestions().where((q) => q.userId == userId).toList();
+    final answeredQuestions = userQuestions.where((q) => q.answerCount > 0).length;
+    final unansweredQuestions = userQuestions.where((q) => q.answerCount == 0).length;
+    
+    return {
+      'total': userQuestions.length,
+      'answered': answeredQuestions,
+      'unanswered': unansweredQuestions,
+    };
+  }
+
+  Future<List<Question>> getUserQuestions(String userId, {String? filter}) async {
+    // TODO: 실제 API 호출로 대체
+    // GET /api/users/{userId}/questions?filter={filter}
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    var userQuestions = _getMockQuestions().where((q) => q.userId == userId).toList();
+    
+    // 필터 적용
+    if (filter == 'answered') {
+      userQuestions = userQuestions.where((q) => q.answerCount > 0).toList();
+    } else if (filter == 'unanswered') {
+      userQuestions = userQuestions.where((q) => q.answerCount == 0).toList();
+    }
+    
+    // 최신순으로 정렬
+    userQuestions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return userQuestions;
   }
 
   // 백엔드 개발자를 위한 API 엔드포인트 가이드

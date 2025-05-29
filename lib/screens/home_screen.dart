@@ -14,6 +14,7 @@ import 'chat_screen.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'question_detail_screen.dart';
+import 'my_questions_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,6 +51,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // 우수 답변자 데이터
   List<TopAnswerer> _topAnswerers = [];
 
+  // 사용자 질문 통계 데이터
+  Map<String, int> _userQuestionStats = {};
+
   @override
   void initState() {
     super.initState();
@@ -75,29 +79,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ));
 
     // 4개 요소에 대한 애니메이션 생성 (환영메시지, 공식정보, 인기질문, 자주받은질문)
-    _fadeAnimations = List.generate(7, (index) {
+    _fadeAnimations = List.generate(8, (index) {
       return Tween<double>(
         begin: 0.0,
         end: 1.0,
       ).animate(CurvedAnimation(
         parent: _animationController,
         curve: Interval(
-          index * 0.08, // 각 요소마다 0.08초씩 지연
-          (index * 0.08) + 0.4, // 0.4초 동안 애니메이션
+          index * 0.07, // 각 요소마다 0.07초씩 지연
+          (index * 0.07) + 0.4, // 0.4초 동안 애니메이션
           curve: Curves.easeOutCubic,
         ),
       ));
     });
 
-    _slideAnimations = List.generate(7, (index) {
+    _slideAnimations = List.generate(8, (index) {
       return Tween<Offset>(
         begin: const Offset(0, 0.3),
         end: Offset.zero,
       ).animate(CurvedAnimation(
         parent: _animationController,
         curve: Interval(
-          index * 0.08,
-          (index * 0.08) + 0.4,
+          index * 0.07,
+          (index * 0.07) + 0.4,
           curve: Curves.easeOutCubic,
         ),
       ));
@@ -109,6 +113,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _authService.authStateStream.listen((isLoggedIn) {
       if (mounted) {
         setState(() {}); // UI 업데이트
+        // 로그인 상태가 변경되면 데이터 다시 로드
+        _loadDashboardData();
       }
     });
     
@@ -133,12 +139,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       // 우수 답변자 데이터 로드
       final topAnswerers = await _apiService.getTopAnswerers(limit: 5);
       
+      // 사용자 질문 통계 로드 (로그인된 경우에만)
+      Map<String, int> userQuestionStats = {};
+      if (_authService.isLoggedIn) {
+        final userId = _authService.currentUserEmail?.split('@')[0] ?? 'test';
+        print('Loading user question stats for userId: $userId'); // 디버그 로그
+        userQuestionStats = await _apiService.getUserQuestionStats(userId);
+        print('User question stats loaded: $userQuestionStats'); // 디버그 로그
+      }
+      
       setState(() {
         _unansweredQuestions = unansweredQuestions;
         _todayQuestionCount = todayQuestionCount;
         _todayAnswerCount = todayAnswerCount;
         _totalAnswerCount = totalAnswerCount;
         _topAnswerers = topAnswerers;
+        _userQuestionStats = userQuestionStats;
         _isLoading = false;
       });
 
@@ -289,12 +305,93 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 24),
 
-                      // 답변받지 못한 질문 카드
-                      if (_unansweredQuestions.isNotEmpty) ...[
+                      // 사용자 질문 통계 (로그인된 경우에만 표시)
+                      if (_authService.isLoggedIn) ...[
                         SlideTransition(
                           position: _slideAnimations[1],
                           child: FadeTransition(
                             opacity: _fadeAnimations[1],
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.person_crop_circle,
+                                        color: AppTheme.primaryColor,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '내 질문 현황',
+                                        style: TextStyle(
+                                          color: AppTheme.primaryTextColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: AppTheme.iosCardDecoration,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildUserStatItem(
+                                          '올린 질문',
+                                          _userQuestionStats['total'] ?? 0,
+                                          CupertinoIcons.chat_bubble_text,
+                                          () => _navigateToMyQuestions('all'),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 1,
+                                        height: 50,
+                                        color: AppTheme.borderColor,
+                                      ),
+                                      Expanded(
+                                        child: _buildUserStatItem(
+                                          '답변받은 질문',
+                                          _userQuestionStats['answered'] ?? 0,
+                                          CupertinoIcons.checkmark_circle,
+                                          () => _navigateToMyQuestions('answered'),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 1,
+                                        height: 50,
+                                        color: AppTheme.borderColor,
+                                      ),
+                                      Expanded(
+                                        child: _buildUserStatItem(
+                                          '답변 대기중',
+                                          _userQuestionStats['unanswered'] ?? 0,
+                                          CupertinoIcons.clock,
+                                          () => _navigateToMyQuestions('unanswered'),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // 답변받지 못한 질문 카드
+                      if (_unansweredQuestions.isNotEmpty) ...[
+                        SlideTransition(
+                          position: _slideAnimations[2],
+                          child: FadeTransition(
+                            opacity: _fadeAnimations[2],
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -337,9 +434,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       // 우수 답변자 랭킹
                       if (_topAnswerers.isNotEmpty) ...[
                         SlideTransition(
-                          position: _slideAnimations[2],
+                          position: _slideAnimations[3],
                           child: FadeTransition(
-                            opacity: _fadeAnimations[2],
+                            opacity: _fadeAnimations[3],
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -385,9 +482,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // 오늘의 질문과 답변 통계
                       SlideTransition(
-                        position: _slideAnimations[3],
+                        position: _slideAnimations[5],
                         child: FadeTransition(
-                          opacity: _fadeAnimations[3],
+                          opacity: _fadeAnimations[5],
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -478,9 +575,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // 누적 답변 수
                       SlideTransition(
-                        position: _slideAnimations[5],
+                        position: _slideAnimations[6],
                         child: FadeTransition(
-                          opacity: _fadeAnimations[5],
+                          opacity: _fadeAnimations[6],
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -999,6 +1096,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(height: 16),
         ],
       ],
+    );
+  }
+
+  Widget _buildUserStatItem(String label, int count, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: AppTheme.primaryColor,
+              size: 24,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$count',
+              style: TextStyle(
+                color: AppTheme.primaryTextColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: AppTheme.secondaryTextColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToMyQuestions(String filter) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyQuestionsScreen(initialFilter: filter),
+      ),
     );
   }
 
