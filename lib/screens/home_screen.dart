@@ -644,16 +644,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           
           // 메뉴 아이템들
           _buildDrawerItem(
-            icon: CupertinoIcons.person,
-            title: '내정보',
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('내정보 기능은 추후 구현 예정입니다.')),
-              );
-            },
-          ),
-          _buildDrawerItem(
             icon: CupertinoIcons.settings,
             title: '설정',
             onTap: () {
@@ -664,25 +654,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             },
           ),
           _buildDrawerItem(
-            icon: CupertinoIcons.chat_bubble_text,
-            title: '내가 올린 질문',
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('내가 올린 질문 기능은 추후 구현 예정입니다.')),
-              );
-            },
-          ),
-          _buildDrawerItem(
             icon: CupertinoIcons.list_bullet,
-            title: '질문목록',
+            title: '전체 질문',
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const QuestionsListScreen(),
+                  builder: (context) => const QuestionsListScreen(initialCategory: '전체'),
                 ),
+              );
+            },
+          ),
+          _buildDrawerItem(
+            icon: CupertinoIcons.flame,
+            title: '인기 질문',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PopularQuestionsScreen(),
+                ),
+              );
+            },
+          ),
+          _buildDrawerItem(
+            icon: CupertinoIcons.question_circle,
+            title: '자주 받은 질문',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FrequentQuestionsScreen(),
+                ),
+              );
+            },
+          ),
+          _buildDrawerItem(
+            icon: CupertinoIcons.star_fill,
+            title: '랭킹',
+            onTap: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('랭킹 기능은 추후 구현 예정입니다.')),
               );
             },
           ),
