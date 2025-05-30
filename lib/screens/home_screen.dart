@@ -15,6 +15,7 @@ import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'question_detail_screen.dart';
 import 'my_questions_screen.dart';
+import 'ranking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -623,16 +624,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           
           // 메뉴 아이템들
           _buildDrawerItem(
-            icon: CupertinoIcons.settings,
-            title: '설정',
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('설정 기능은 추후 구현 예정입니다.')),
-              );
-            },
-          ),
-          _buildDrawerItem(
             icon: CupertinoIcons.list_bullet,
             title: '전체 질문',
             onTap: () {
@@ -676,8 +667,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             title: '랭킹',
             onTap: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('랭킹 기능은 추후 구현 예정입니다.')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RankingScreen(),
+                ),
               );
             },
           ),

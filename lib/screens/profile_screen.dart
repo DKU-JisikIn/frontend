@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import 'profile_edit_screen.dart';
+import 'password_change_screen.dart';
+import 'verification_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -122,10 +125,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildMenuItem(
                 icon: CupertinoIcons.person_circle,
                 title: '프로필 수정',
-                subtitle: '이름, 프로필 사진 변경',
+                subtitle: '닉네임, 프로필 사진 변경',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('프로필 수정 기능은 추후 구현 예정입니다.')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileEditScreen(),
+                    ),
                   );
                 },
               ),
@@ -134,8 +140,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: '비밀번호 변경',
                 subtitle: '계정 보안을 위해 정기적으로 변경하세요',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('비밀번호 변경 기능은 추후 구현 예정입니다.')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PasswordChangeScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                icon: CupertinoIcons.checkmark_seal,
+                title: '인증 받기',
+                subtitle: '소속 학과, 학번 등을 인증하세요',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VerificationScreen(),
+                    ),
                   );
                 },
               ),
