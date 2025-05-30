@@ -12,10 +12,10 @@ class AccountDeletionScreen extends StatefulWidget {
 
 class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _userIdFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   
   bool _isLoading = false;
@@ -28,23 +28,24 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
     '원하는 정보를 찾기 어려워요',
     '개인정보 보호가 걱정돼요',
     '다른 서비스를 이용하게 되었어요',
-    '계정이 너무 많아요',
     '기타'
   ];
 
   @override
   void initState() {
     super.initState();
-    // 현재 이메일로 초기화
-    _emailController.text = _authService.currentUserEmail ?? '';
+    // 현재 이메일에서 아이디 부분만 추출
+    final currentEmail = _authService.currentUserEmail ?? '';
+    final userId = currentEmail.split('@')[0];
+    _userIdController.text = userId;
   }
 
   Future<void> _handleAccountDeletion() async {
-    final email = _emailController.text.trim();
+    final userId = _userIdController.text.trim();
     final password = _passwordController.text.trim();
     
-    if (email.isEmpty) {
-      setState(() => _errorMessage = '이메일을 입력해주세요.');
+    if (userId.isEmpty) {
+      setState(() => _errorMessage = '아이디를 입력해주세요.');
       return;
     }
     
@@ -53,8 +54,12 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
       return;
     }
 
-    if (email != _authService.currentUserEmail) {
-      setState(() => _errorMessage = '현재 계정의 이메일과 일치하지 않습니다.');
+    // 현재 사용자의 아이디와 비교
+    final currentEmail = _authService.currentUserEmail ?? '';
+    final currentUserId = currentEmail.split('@')[0];
+    
+    if (userId != currentUserId) {
+      setState(() => _errorMessage = '현재 계정의 아이디와 일치하지 않습니다.');
       return;
     }
 
@@ -66,76 +71,163 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
     // 최종 확인 다이얼로그
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundColor,
-        title: Row(
-          children: [
-            Icon(
-              CupertinoIcons.exclamationmark_triangle,
-              color: Colors.red,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '회원탈퇴',
-              style: TextStyle(color: AppTheme.primaryTextColor),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '정말로 회원탈퇴를 진행하시겠습니까?',
-              style: TextStyle(color: AppTheme.secondaryTextColor),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 340),
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            color: AppTheme.backgroundColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '주의사항',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 경고 아이콘
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    CupertinoIcons.exclamationmark_triangle_fill,
+                    color: Colors.red,
+                    size: 32,
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // 제목
+                Text(
+                  '회원탈퇴',
+                  style: TextStyle(
+                    color: AppTheme.primaryTextColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // 설명
+                Text(
+                  '정말로 회원탈퇴를 진행하시겠습니까?',
+                  style: TextStyle(
+                    color: AppTheme.secondaryTextColor,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // 주의사항 박스
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text('• 모든 개인정보가 삭제됩니다', 
-                       style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
-                  Text('• 작성한 질문과 답변은 유지됩니다', 
-                       style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
-                  Text('• 탈퇴 후 복구가 불가능합니다', 
-                       style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
-                ],
-              ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.info_circle_fill,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '주의사항',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _buildWarningItem('모든 개인정보가 삭제됩니다'),
+                      _buildWarningItem('작성한 질문과 답변은 유지됩니다'),
+                      _buildWarningItem('탈퇴 후 복구가 불가능합니다'),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // 버튼들
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.secondaryTextColor,
+                          side: BorderSide(color: AppTheme.borderColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          '탈퇴하기',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              '취소',
-              style: TextStyle(color: AppTheme.secondaryTextColor),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              '탈퇴하기',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
       ),
     );
 
@@ -263,24 +355,34 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
               
               // 이메일 입력
               Text(
-                '이메일',
+                '단국대 아이디',
                 style: AppTheme.headingStyle.copyWith(fontSize: 14),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: AppTheme.inputContainerDecoration,
                 child: TextField(
-                  controller: _emailController,
-                  focusNode: _emailFocusNode,
+                  controller: _userIdController,
+                  focusNode: _userIdFocusNode,
                   style: AppTheme.bodyStyle,
-                  readOnly: true, // 수정 불가능하도록
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    hintText: '현재 계정 이메일',
+                    hintText: '아이디 입력',
                     hintStyle: AppTheme.hintStyle,
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    prefixIcon: Icon(CupertinoIcons.mail, color: AppTheme.hintTextColor),
+                    prefixIcon: Icon(CupertinoIcons.person, color: AppTheme.hintTextColor),
+                    suffixText: '@dankook.ac.kr',
+                    suffixStyle: TextStyle(
+                      color: AppTheme.secondaryTextColor,
+                      fontSize: 16,
+                    ),
                   ),
+                  onChanged: (_) {
+                    if (_errorMessage != null) {
+                      setState(() => _errorMessage = null);
+                    }
+                  },
                 ),
               ),
               
@@ -442,11 +544,42 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
     );
   }
 
+  Widget _buildWarningItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '•',
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: AppTheme.primaryTextColor,
+                fontSize: 13,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
-    _emailController.dispose();
+    _userIdController.dispose();
     _passwordController.dispose();
-    _emailFocusNode.dispose();
+    _userIdFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
   }

@@ -312,7 +312,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceColor,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
