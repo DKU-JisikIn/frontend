@@ -7,31 +7,31 @@ part of 'question.dart';
 // **************************************************************************
 
 Question _$QuestionFromJson(Map<String, dynamic> json) => Question(
-  id: json['id'] as String,
-  title: json['title'] as String,
-  content: json['content'] as String,
-  userId: json['userId'] as String,
-  userName: json['userName'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
-  answerCount: (json['answerCount'] as num?)?.toInt() ?? 0,
-  isOfficial: json['isOfficial'] as bool? ?? false,
-  category: json['category'] as String,
-  tags:
-      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const [],
-);
+      id: json['id'] as String,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      userId: json['userId'] as String,
+      userName: json['userName'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
+      answerCount: (json['answerCount'] as num?)?.toInt() ?? 0,
+      isOfficial: json['isOfficial'] as bool? ?? false,
+      category: json['category'] as String,
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
+    );
 
 Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
-  'id': instance.id,
-  'title': instance.title,
-  'content': instance.content,
-  'userId': instance.userId,
-  'userName': instance.userName,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'viewCount': instance.viewCount,
-  'answerCount': instance.answerCount,
-  'isOfficial': instance.isOfficial,
-  'category': instance.category,
-  'tags': instance.tags,
-};
+      'id': instance.id,
+      'title': instance.title,
+      'content': instance.content,
+      'userId': instance.userId,
+      'userName': instance.userName,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'viewCount': instance.viewCount,
+      'answerCount': instance.answerCount,
+      'isOfficial': instance.isOfficial,
+      'category': instance.category,
+      'tags': instance.tags,
+    };

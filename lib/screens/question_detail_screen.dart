@@ -357,8 +357,42 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                 ),
                 const SizedBox(width: 8),
                 
+                // 사용자 레벨 아이콘
+                _buildUserLevelIcon(answer.userLevel),
+                const SizedBox(width: 6),
+                
+                // 인증 배지 (인증된 사용자인 경우)
+                if (answer.isVerified)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[600],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.checkmark_seal_fill,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '인증',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                
                 // AI 태그 (있는 경우)
-                if (answer.isAIGenerated)
+                if (answer.isAIGenerated) ...[
+                  const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -374,6 +408,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                       ),
                     ),
                   ),
+                ],
                 
                 const Spacer(),
                 
@@ -407,6 +442,57 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                   ),
               ],
             ),
+            
+            // 소속 정보 (있는 경우)
+            if (answer.department != null || answer.studentId != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  if (answer.department != null) ...[
+                    Icon(
+                      CupertinoIcons.building_2_fill,
+                      size: 12,
+                      color: AppTheme.secondaryTextColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      answer.department!,
+                      style: TextStyle(
+                        color: AppTheme.secondaryTextColor,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                  if (answer.department != null && answer.studentId != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '•',
+                      style: TextStyle(
+                        color: AppTheme.secondaryTextColor,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  if (answer.studentId != null) ...[
+                    Icon(
+                      CupertinoIcons.person_crop_square,
+                      size: 12,
+                      color: AppTheme.secondaryTextColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      answer.studentId!,
+                      style: TextStyle(
+                        color: AppTheme.secondaryTextColor,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+            
             const SizedBox(height: 12),
             
             // 답변 내용
@@ -463,6 +549,61 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildUserLevelIcon(int userLevel) {
+    // 사용자 레벨에 따른 아이콘과 색상 결정
+    IconData icon;
+    Color color;
+    
+    switch (userLevel) {
+      case 5:
+        icon = CupertinoIcons.star_fill;
+        color = const Color(0xFFFFD700); // 금색
+        break;
+      case 4:
+        icon = CupertinoIcons.star_fill;
+        color = const Color(0xFFC0C0C0); // 은색
+        break;
+      case 3:
+        icon = CupertinoIcons.star_fill;
+        color = const Color(0xFFCD7F32); // 동색
+        break;
+      case 2:
+        icon = CupertinoIcons.star;
+        color = AppTheme.primaryColor;
+        break;
+      case 1:
+      default:
+        icon = CupertinoIcons.circle;
+        color = AppTheme.secondaryTextColor;
+        break;
+    }
+    
+    return Container(
+      width: 16,
+      height: 16,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: userLevel >= 2 
+            ? Icon(
+                icon,
+                size: 10,
+                color: userLevel >= 3 ? Colors.white : color,
+              )
+            : Text(
+                userLevel.toString(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
       ),
     );
   }

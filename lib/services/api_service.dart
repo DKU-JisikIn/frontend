@@ -523,6 +523,9 @@ class ApiService {
         createdAt: DateTime.now().subtract(const Duration(days: 4)),
         isAccepted: true,
         likeCount: 25,
+        department: '학사처',
+        isVerified: true,
+        userLevel: 5,
       ),
       Answer(
         id: '2',
@@ -532,6 +535,10 @@ class ApiService {
         userName: '선배',
         createdAt: DateTime.now().subtract(const Duration(days: 2)),
         likeCount: 12,
+        department: '컴퓨터공학과',
+        studentId: '****1234',
+        isVerified: true,
+        userLevel: 3,
       ),
       Answer(
         id: '3',
@@ -541,6 +548,7 @@ class ApiService {
         userName: '도우미',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
         likeCount: 8,
+        userLevel: 2,
       ),
       Answer(
         id: '4',
@@ -551,6 +559,9 @@ class ApiService {
         createdAt: DateTime.now().subtract(const Duration(hours: 12)),
         isAccepted: true,
         likeCount: 18,
+        department: '도서관',
+        isVerified: true,
+        userLevel: 5,
       ),
       Answer(
         id: '5',
@@ -560,6 +571,10 @@ class ApiService {
         userName: '졸업생',
         createdAt: DateTime.now().subtract(const Duration(days: 6)),
         likeCount: 15,
+        department: '컴퓨터공학과',
+        studentId: '****5678',
+        isVerified: true,
+        userLevel: 4,
       ),
       Answer(
         id: '6',
@@ -569,6 +584,10 @@ class ApiService {
         userName: '선배',
         createdAt: DateTime.now().subtract(const Duration(days: 5)),
         likeCount: 9,
+        department: '전자공학과',
+        studentId: '****9012',
+        isVerified: true,
+        userLevel: 3,
       ),
       Answer(
         id: '7',
@@ -578,6 +597,9 @@ class ApiService {
         userName: '조교',
         createdAt: DateTime.now().subtract(const Duration(days: 4)),
         likeCount: 6,
+        department: '컴퓨터공학과',
+        isVerified: true,
+        userLevel: 4,
       ),
       // 테스트 질문(id: '15')에 대한 답변들
       Answer(
@@ -588,6 +610,10 @@ class ApiService {
         userName: '프로그래밍 선배',
         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
         likeCount: 12,
+        department: '컴퓨터공학과',
+        studentId: '****3456',
+        isVerified: true,
+        userLevel: 4,
       ),
       Answer(
         id: '9',
@@ -597,6 +623,9 @@ class ApiService {
         userName: '컴공 조교',
         createdAt: DateTime.now().subtract(const Duration(hours: 4)),
         likeCount: 8,
+        department: '컴퓨터공학과',
+        isVerified: true,
+        userLevel: 5,
       ),
       Answer(
         id: '10',
@@ -606,6 +635,7 @@ class ApiService {
         userName: '4학년 선배',
         createdAt: DateTime.now().subtract(const Duration(hours: 3)),
         likeCount: 15,
+        userLevel: 2,
       ),
     ];
     

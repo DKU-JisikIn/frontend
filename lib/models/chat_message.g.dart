@@ -7,15 +7,14 @@ part of 'chat_message.dart';
 // **************************************************************************
 
 ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) => ChatMessage(
-  id: json['id'] as String,
-  content: json['content'] as String,
-  type: $enumDecode(_$MessageTypeEnumMap, json['type']),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  status:
-      $enumDecodeNullable(_$MessageStatusEnumMap, json['status']) ??
-      MessageStatus.sent,
-  metadata: json['metadata'] as Map<String, dynamic>?,
-);
+      id: json['id'] as String,
+      content: json['content'] as String,
+      type: $enumDecode(_$MessageTypeEnumMap, json['type']),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      status: $enumDecodeNullable(_$MessageStatusEnumMap, json['status']) ??
+          MessageStatus.sent,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
 
 Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
     <String, dynamic>{

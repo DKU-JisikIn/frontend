@@ -13,6 +13,12 @@ class Answer {
   final int likeCount;
   final bool isAccepted; // 채택된 답변인지
   final bool isAIGenerated; // AI가 생성한 답변인지
+  
+  // 사용자 인증 정보
+  final String? department; // 소속 학과/부서
+  final String? studentId; // 학번 (일부만 표시용)
+  final bool isVerified; // 소속 인증 여부
+  final int userLevel; // 사용자 레벨 (1-5)
 
   Answer({
     required this.id,
@@ -24,6 +30,10 @@ class Answer {
     this.likeCount = 0,
     this.isAccepted = false,
     this.isAIGenerated = false,
+    this.department,
+    this.studentId,
+    this.isVerified = false,
+    this.userLevel = 1,
   });
 
   factory Answer.fromJson(Map<String, dynamic> json) => _$AnswerFromJson(json);
@@ -39,6 +49,10 @@ class Answer {
     int? likeCount,
     bool? isAccepted,
     bool? isAIGenerated,
+    String? department,
+    String? studentId,
+    bool? isVerified,
+    int? userLevel,
   }) {
     return Answer(
       id: id ?? this.id,
@@ -50,6 +64,10 @@ class Answer {
       likeCount: likeCount ?? this.likeCount,
       isAccepted: isAccepted ?? this.isAccepted,
       isAIGenerated: isAIGenerated ?? this.isAIGenerated,
+      department: department ?? this.department,
+      studentId: studentId ?? this.studentId,
+      isVerified: isVerified ?? this.isVerified,
+      userLevel: userLevel ?? this.userLevel,
     );
   }
 } 
