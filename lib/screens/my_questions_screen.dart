@@ -128,7 +128,7 @@ class _MyQuestionsScreenState extends State<MyQuestionsScreen> {
           // 질문 목록
           Expanded(
             child: _isLoading
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                     ),

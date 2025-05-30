@@ -80,33 +80,17 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppTheme.backgroundColor,
-            title: Text(
-              '비밀번호 변경 완료',
-              style: TextStyle(color: AppTheme.primaryTextColor),
-            ),
-            content: Text(
-              '비밀번호가 성공적으로 변경되었습니다.',
-              style: TextStyle(color: AppTheme.secondaryTextColor),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  '확인',
-                  style: TextStyle(color: AppTheme.primaryColor),
-                ),
-              ),
-            ],
+        // 성공 메시지를 스낵바로 표시
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('비밀번호가 성공적으로 변경되었습니다.'),
+            backgroundColor: AppTheme.primaryColor,
+            duration: const Duration(seconds: 3),
           ),
         );
+        
+        // 이전 화면으로 돌아가기
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {

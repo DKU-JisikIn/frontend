@@ -1,28 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import '../services/theme_service.dart';
 
 class AppTheme {
-  // 기본 색상 정의
-  static const Color primaryColor = Color(0xFF4FC3F7); // 연한 파랑색
-  static const Color secondaryColor = Color(0xFF29B6F6); // 조금 더 진한 파랑색
-  static const Color backgroundColor = Colors.white;
-  static const Color surfaceColor = Color(0xFFF8FAFC);
-  static const Color borderColor = Color(0xFFE2E8F0);
+  // 라이트 모드 색상 정의
+  static const Color lightPrimaryColor = Color(0xFF4FC3F7); // 연한 파랑색
+  static const Color lightSecondaryColor = Color(0xFF29B6F6); // 조금 더 진한 파랑색
+  static const Color lightBackgroundColor = Colors.white;
+  static const Color lightSurfaceColor = Color(0xFFF8FAFC);
+  static const Color lightBorderColor = Color(0xFFE2E8F0);
   
-  // 텍스트 색상
-  static final Color primaryTextColor = Colors.grey[800]!;
-  static final Color secondaryTextColor = Colors.grey[600]!;
-  static final Color hintTextColor = Colors.grey[500]!;
-  static final Color lightTextColor = Colors.grey[400]!;
+  // 다크 모드 색상 정의
+  static const Color darkPrimaryColor = Color(0xFF81C6E8); // 밝은 파랑색
+  static const Color darkSecondaryColor = Color(0xFF56B3E5); // 중간 파랑색
+  static const Color darkBackgroundColor = Color(0xFF121212); // 매우 어두운 배경
+  static const Color darkSurfaceColor = Color(0xFF1E1E1E); // 어두운 표면
+  static const Color darkBorderColor = Color(0xFF2E2E2E); // 어두운 경계선
+  
+  // 라이트 모드 텍스트 색상
+  static final Color lightPrimaryTextColor = Colors.grey[800]!;
+  static final Color lightSecondaryTextColor = Colors.grey[600]!;
+  static final Color lightHintTextColor = Colors.grey[500]!;
+  static final Color lightLightTextColor = Colors.grey[400]!;
+  
+  // 다크 모드 텍스트 색상
+  static const Color darkPrimaryTextColor = Color(0xFFE0E0E0);
+  static const Color darkSecondaryTextColor = Color(0xFFB0B0B0);
+  static const Color darkHintTextColor = Color(0xFF808080);
+  static const Color darkLightTextColor = Color(0xFF606060);
+  
+  // 현재 테마에 따른 색상 반환
+  static Color get primaryColor => ThemeService().isDarkMode ? darkPrimaryColor : lightPrimaryColor;
+  static Color get secondaryColor => ThemeService().isDarkMode ? darkSecondaryColor : lightSecondaryColor;
+  static Color get backgroundColor => ThemeService().isDarkMode ? darkBackgroundColor : lightBackgroundColor;
+  static Color get surfaceColor => ThemeService().isDarkMode ? darkSurfaceColor : lightSurfaceColor;
+  static Color get borderColor => ThemeService().isDarkMode ? darkBorderColor : lightBorderColor;
+  
+  static Color get primaryTextColor => ThemeService().isDarkMode ? darkPrimaryTextColor : lightPrimaryTextColor;
+  static Color get secondaryTextColor => ThemeService().isDarkMode ? darkSecondaryTextColor : lightSecondaryTextColor;
+  static Color get hintTextColor => ThemeService().isDarkMode ? darkHintTextColor : lightHintTextColor;
+  static Color get lightTextColor => ThemeService().isDarkMode ? darkLightTextColor : lightLightTextColor;
   
   // 메시지 버블 색상
-  static const Color userMessageColor = primaryColor;
-  static const Color assistantMessageColor = Color(0xFFF1F5F9);
-  static const Color assistantMessageBorderColor = borderColor;
+  static Color get userMessageColor => primaryColor;
+  static Color get assistantMessageColor => ThemeService().isDarkMode ? Color(0xFF2A2A2A) : Color(0xFFF1F5F9);
+  static Color get assistantMessageBorderColor => borderColor;
   
   // iOS 스타일 그라데이션
-  static const LinearGradient primaryGradient = LinearGradient(
+  static LinearGradient get primaryGradient => LinearGradient(
     colors: [primaryColor, secondaryColor],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -57,32 +83,33 @@ class AppTheme {
   // 테마 데이터
   static ThemeData get lightTheme {
     return ThemeData(
+      brightness: Brightness.light,
       // iOS 스타일 폰트 패밀리 설정
       fontFamily: '.SF Pro Text', // iOS San Francisco 폰트
       primarySwatch: Colors.blue,
-      primaryColor: primaryColor,
-      scaffoldBackgroundColor: backgroundColor,
+      primaryColor: lightPrimaryColor,
+      scaffoldBackgroundColor: lightBackgroundColor,
       
       // iOS 스타일 AppBar
       appBarTheme: AppBarTheme(
-        backgroundColor: backgroundColor,
-        foregroundColor: primaryTextColor,
+        backgroundColor: lightBackgroundColor,
+        foregroundColor: lightPrimaryTextColor,
         elevation: 0,
         titleTextStyle: TextStyle(
           fontFamily: '.SF Pro Display',
-          color: primaryTextColor,
+          color: lightPrimaryTextColor,
           fontSize: 17, // iOS 표준 타이틀 크기
           fontWeight: FontWeight.w600,
           letterSpacing: -0.4, // iOS 스타일 letter spacing
         ),
-        iconTheme: IconThemeData(color: primaryTextColor, size: 22),
+        iconTheme: IconThemeData(color: lightPrimaryTextColor, size: 22),
         systemOverlayStyle: SystemUiOverlayStyle.dark, // 상태바 아이콘을 어둡게
       ),
       
       // iOS 스타일 버튼
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
+          backgroundColor: lightPrimaryColor,
           foregroundColor: Colors.white,
           elevation: 0,
           shadowColor: Colors.transparent,
@@ -102,22 +129,22 @@ class AppTheme {
       // iOS 스타일 입력 필드
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceColor,
+        fillColor: lightSurfaceColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12), // iOS 스타일 둥근 모서리
-          borderSide: const BorderSide(color: borderColor, width: 0.5),
+          borderSide: BorderSide(color: lightBorderColor, width: 0.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: borderColor, width: 0.5),
+          borderSide: BorderSide(color: lightBorderColor, width: 0.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryColor, width: 1.5),
+          borderSide: BorderSide(color: lightPrimaryColor, width: 1.5),
         ),
         hintStyle: TextStyle(
           fontFamily: '.SF Pro Text',
-          color: hintTextColor,
+          color: lightHintTextColor,
           fontSize: 16,
           fontWeight: FontWeight.w400,
         ),
@@ -125,23 +152,23 @@ class AppTheme {
       ),
       
       // iOS 스타일 Drawer
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: backgroundColor,
+      drawerTheme: DrawerThemeData(
+        backgroundColor: lightBackgroundColor,
         elevation: 0,
         shadowColor: Colors.transparent,
       ),
       
       // iOS 스타일 Divider
-      dividerTheme: const DividerThemeData(
-        color: borderColor,
+      dividerTheme: DividerThemeData(
+        color: lightBorderColor,
         thickness: 0.5, // iOS 스타일 얇은 구분선
         space: 0.5,
       ),
       
       // iOS 스타일 ListTile
       listTileTheme: ListTileThemeData(
-        iconColor: secondaryTextColor,
-        textColor: primaryTextColor,
+        iconColor: lightSecondaryTextColor,
+        textColor: lightPrimaryTextColor,
         titleTextStyle: const TextStyle(
           fontFamily: '.SF Pro Text',
           fontSize: 16,
@@ -152,24 +179,121 @@ class AppTheme {
           fontFamily: '.SF Pro Text',
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: secondaryTextColor,
+          color: lightSecondaryTextColor,
+          letterSpacing: -0.2,
         ),
       ),
       
-      // iOS 스타일 Progress Indicator
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: primaryColor,
+      // 기타 테마 설정
+      useMaterial3: true,
+    );
+  }
+  
+  static ThemeData get darkTheme {
+    return ThemeData(
+      brightness: Brightness.dark,
+      // iOS 스타일 폰트 패밀리 설정
+      fontFamily: '.SF Pro Text', // iOS San Francisco 폰트
+      primarySwatch: Colors.blue,
+      primaryColor: darkPrimaryColor,
+      scaffoldBackgroundColor: darkBackgroundColor,
+      
+      // iOS 스타일 AppBar
+      appBarTheme: AppBarTheme(
+        backgroundColor: darkBackgroundColor,
+        foregroundColor: darkPrimaryTextColor,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          fontFamily: '.SF Pro Display',
+          color: darkPrimaryTextColor,
+          fontSize: 17, // iOS 표준 타이틀 크기
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.4, // iOS 스타일 letter spacing
+        ),
+        iconTheme: IconThemeData(color: darkPrimaryTextColor, size: 22),
+        systemOverlayStyle: SystemUiOverlayStyle.light, // 상태바 아이콘을 밝게
       ),
       
-      // iOS 스타일 Card
-      cardTheme: CardTheme(
+      // iOS 스타일 버튼
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: darkPrimaryColor,
+          foregroundColor: Colors.black,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // iOS 스타일 둥근 모서리
+          ),
+          textStyle: const TextStyle(
+            fontFamily: '.SF Pro Text',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      ),
+      
+      // iOS 스타일 입력 필드
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurfaceColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // iOS 스타일 둥근 모서리
+          borderSide: BorderSide(color: darkBorderColor, width: 0.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: darkBorderColor, width: 0.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: darkPrimaryColor, width: 1.5),
+        ),
+        hintStyle: TextStyle(
+          fontFamily: '.SF Pro Text',
+          color: darkHintTextColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      
+      // iOS 스타일 Drawer
+      drawerTheme: DrawerThemeData(
+        backgroundColor: darkBackgroundColor,
         elevation: 0,
         shadowColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        color: surfaceColor,
       ),
+      
+      // iOS 스타일 Divider
+      dividerTheme: DividerThemeData(
+        color: darkBorderColor,
+        thickness: 0.5, // iOS 스타일 얇은 구분선
+        space: 0.5,
+      ),
+      
+      // iOS 스타일 ListTile
+      listTileTheme: ListTileThemeData(
+        iconColor: darkSecondaryTextColor,
+        textColor: darkPrimaryTextColor,
+        titleTextStyle: const TextStyle(
+          fontFamily: '.SF Pro Text',
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -0.3,
+        ),
+        subtitleTextStyle: TextStyle(
+          fontFamily: '.SF Pro Text',
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: darkSecondaryTextColor,
+          letterSpacing: -0.2,
+        ),
+      ),
+      
+      // 기타 테마 설정
+      useMaterial3: true,
     );
   }
   
@@ -206,9 +330,9 @@ class AppTheme {
   );
   
   // 메시지 버블 데코레이션
-  static BoxDecoration userMessageDecoration = const BoxDecoration(
+  static BoxDecoration get userMessageDecoration => BoxDecoration(
     color: userMessageColor,
-    borderRadius: BorderRadius.only(
+    borderRadius: const BorderRadius.only(
       topLeft: Radius.circular(18),
       topRight: Radius.circular(18),
       bottomLeft: Radius.circular(18),
@@ -217,9 +341,9 @@ class AppTheme {
     boxShadow: iosShadow,
   );
   
-  static BoxDecoration assistantMessageDecoration = const BoxDecoration(
+  static BoxDecoration get assistantMessageDecoration => BoxDecoration(
     color: assistantMessageColor,
-    borderRadius: BorderRadius.only(
+    borderRadius: const BorderRadius.only(
       topLeft: Radius.circular(18),
       topRight: Radius.circular(18),
       bottomLeft: Radius.circular(4),
@@ -235,16 +359,16 @@ class AppTheme {
   static BoxDecoration get inputContainerDecoration => BoxDecoration(
     color: surfaceColor,
     borderRadius: BorderRadius.circular(25),
-    border: const Border.fromBorderSide(
+    border: Border.fromBorderSide(
       BorderSide(color: borderColor, width: 0.5),
     ),
     boxShadow: iosShadow,
   );
   
   // 검색바 컨테이너 데코레이션
-  static BoxDecoration get searchBarContainerDecoration => const BoxDecoration(
+  static BoxDecoration get searchBarContainerDecoration => BoxDecoration(
     color: backgroundColor,
-    borderRadius: BorderRadius.only(
+    borderRadius: const BorderRadius.only(
       topLeft: Radius.circular(16),
       topRight: Radius.circular(16),
     ),
@@ -255,16 +379,16 @@ class AppTheme {
   );
   
   // 환영 메시지 컨테이너 데코레이션
-  static BoxDecoration get welcomeContainerDecoration => const BoxDecoration(
+  static BoxDecoration get welcomeContainerDecoration => BoxDecoration(
     gradient: primaryGradient,
-    borderRadius: BorderRadius.all(Radius.circular(16)),
+    borderRadius: const BorderRadius.all(Radius.circular(16)),
     boxShadow: iosCardShadow,
   );
   
   // 카드 데코레이션
-  static BoxDecoration get iosCardDecoration => const BoxDecoration(
+  static BoxDecoration get iosCardDecoration => BoxDecoration(
     color: surfaceColor,
-    borderRadius: BorderRadius.all(Radius.circular(12)),
+    borderRadius: const BorderRadius.all(Radius.circular(12)),
     border: Border.fromBorderSide(
       BorderSide(color: borderColor, width: 0.5),
     ),

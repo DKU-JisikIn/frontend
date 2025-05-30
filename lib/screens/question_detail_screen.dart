@@ -252,7 +252,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                   
                   // 답변 리스트
                   if (_isLoading)
-                    const Center(
+                    Center(
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),

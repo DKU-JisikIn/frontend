@@ -98,7 +98,7 @@ class _FrequentQuestionsScreenState extends State<FrequentQuestionsScreen> {
               onRefresh: _loadQuestions,
               color: AppTheme.primaryColor,
               child: _isLoading
-                  ? const Center(
+                  ? Center(
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),

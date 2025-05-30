@@ -91,7 +91,7 @@ class _RankingScreenState extends State<RankingScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
               ),

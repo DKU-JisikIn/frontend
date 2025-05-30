@@ -23,7 +23,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   File? _verificationDocument;
   String _selectedAffiliationType = '학과';
 
-  final List<String> _affiliationTypes = ['학과', '동아리', '학회', '기타'];
+  final List<String> _affiliationTypes = ['학과', '동아리', '회사', '기타'];
 
   Future<void> _pickDocument() async {
     await showCupertinoModalPopup<void>(

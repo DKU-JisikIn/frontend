@@ -102,7 +102,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
               color: AppTheme.primaryColor,
               backgroundColor: AppTheme.backgroundColor,
               child: _isLoading
-                  ? const Center(
+                  ? Center(
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),

@@ -4,6 +4,7 @@ import 'dart:async';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 import '../models/question.dart';
 import '../widgets/message_bubble.dart';
 import 'questions_list_screen.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final AuthService _authService = AuthService();
+  final ThemeService _themeService = ThemeService();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _bannerScrollController = ScrollController();
   
@@ -160,8 +162,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
 
       // 데이터 로딩 완료 후 애니메이션 시작
-      if (!_isLoading) {
+      if (!_isLoading && mounted) {
         _animationController.forward();
+        // 기존 타이머 정리 후 새로 시작
+        _stopQuestionTimer();
         if (_unansweredQuestions.isNotEmpty) {
           _startQuestionTimer();
         }
@@ -177,26 +181,73 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _startQuestionTimer() {
-    _questionAnimationController.forward();
-    _questionTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_unansweredQuestions.isNotEmpty) {
-        _questionAnimationController.reverse().then((_) {
-          setState(() {
-            _currentQuestionIndex = (_currentQuestionIndex + 1) % _unansweredQuestions.length;
-          });
-          _questionAnimationController.forward();
-        });
+    // 기존 타이머가 있으면 취소
+    _questionTimer?.cancel();
+    
+    // 질문이 없으면 타이머 시작하지 않음
+    if (_unansweredQuestions.isEmpty) return;
+    
+    // 질문이 1개뿐이면 애니메이션만 시작하고 타이머는 시작하지 않음
+    if (_unansweredQuestions.length == 1) {
+      if (mounted && _questionAnimationController.status != AnimationStatus.forward) {
+        _questionAnimationController.forward();
       }
+      return;
+    }
+    
+    // 초기 애니메이션 시작
+    if (mounted && _questionAnimationController.status != AnimationStatus.forward) {
+      _questionAnimationController.forward();
+    }
+    
+    // 타이머 시작 (3초마다 질문 변경)
+    _questionTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!mounted || _unansweredQuestions.isEmpty) {
+        timer.cancel();
+        return;
+      }
+      
+      // 애니메이션이 이미 실행 중이면 스킵
+      if (_questionAnimationController.isAnimating) {
+        return;
+      }
+      
+      // 페이드 아웃
+      _questionAnimationController.reverse().then((_) {
+        if (!mounted || _unansweredQuestions.isEmpty) return;
+        
+        setState(() {
+          _currentQuestionIndex = (_currentQuestionIndex + 1) % _unansweredQuestions.length;
+        });
+        
+        // 페이드 인
+        if (mounted) {
+          _questionAnimationController.forward();
+        }
+      });
     });
+  }
+  
+  void _stopQuestionTimer() {
+    _questionTimer?.cancel();
+    _questionTimer = null;
   }
 
   void _onQuestionTap(Question question) {
+    // 질문 상세로 이동하기 전에 타이머 일시 정지
+    _stopQuestionTimer();
+    
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => QuestionDetailScreen(question: question),
       ),
-    );
+    ).then((_) {
+      // 돌아왔을 때 타이머 다시 시작
+      if (mounted && _unansweredQuestions.isNotEmpty) {
+        _startQuestionTimer();
+      }
+    });
   }
 
   void _performSearch() {
@@ -248,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           color: AppTheme.primaryColor,
           backgroundColor: AppTheme.backgroundColor,
           child: _isLoading
-              ? const Center(
+              ? Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                   ),
@@ -399,10 +450,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 const SizedBox(height: 16),
                                 FadeTransition(
                                   opacity: _questionFadeAnimation,
-                                  child: MessageBubble(
-                                    question: _unansweredQuestions[_currentQuestionIndex],
-                                    onTap: () => _onQuestionTap(_unansweredQuestions[_currentQuestionIndex]),
-                                  ),
+                                  child: _unansweredQuestions.isNotEmpty && 
+                                         _currentQuestionIndex < _unansweredQuestions.length
+                                      ? MessageBubble(
+                                          question: _unansweredQuestions[_currentQuestionIndex],
+                                          onTap: () => _onQuestionTap(_unansweredQuestions[_currentQuestionIndex]),
+                                        )
+                                      : Container(), // 안전한 대체 위젯
                                 ),
                               ],
                             ),
@@ -679,6 +733,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(height: 20),
           const Divider(),
           
+          // 다크 모드 스위치
+          ListenableBuilder(
+            listenable: _themeService,
+            builder: (context, child) {
+              return ListTile(
+                leading: Icon(
+                  _themeService.isDarkMode ? CupertinoIcons.moon_fill : CupertinoIcons.sun_max_fill,
+                  color: AppTheme.secondaryTextColor,
+                ),
+                title: Text(
+                  '다크 모드',
+                  style: TextStyle(color: AppTheme.primaryTextColor),
+                ),
+                trailing: CupertinoSwitch(
+                  value: _themeService.isDarkMode,
+                  activeColor: AppTheme.primaryColor,
+                  onChanged: (value) {
+                    _themeService.toggleTheme();
+                    setState(() {}); // UI 업데이트
+                  },
+                ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 20),
+          
           // 하단 여백
           const SizedBox(height: 40),
           
@@ -744,7 +825,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 8),
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppTheme.primaryColor,
               shape: BoxShape.circle,
             ),
@@ -818,7 +899,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -871,7 +952,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -924,7 +1005,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -1140,7 +1221,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _animationController.dispose();
     _questionAnimationController.dispose();
     _bannerScrollController.dispose();
-    _questionTimer?.cancel();
+    _stopQuestionTimer(); // 타이머 정리
     super.dispose();
   }
 

@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import 'profile_edit_screen.dart';
 import 'password_change_screen.dart';
 import 'verification_screen.dart';
+import 'account_deletion_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -254,6 +255,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: const Text(
                   '로그아웃',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // 회원탈퇴 버튼
+            SizedBox(
+              height: 56,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AccountDeletionScreen(),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.grey.shade600,
+                  side: BorderSide(color: Colors.grey.shade400),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '회원탈퇴',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
