@@ -1,255 +1,219 @@
-# 단비 (Dankook University Helper) - Frontend
+# 단비 (단국대 교내정보 Q&A 앱)
 
-단국대학교 교내 정보를 쉽게 찾을 수 있는 Q&A 모바일 애플리케이션의 프론트엔드입니다.
+단국대학교 학생들을 위한 교내정보 공유 플랫폼입니다.
 
-## 📱 프로젝트 개요
+## 📱 주요 기능
 
-이 앱은 단국대학교 학생들이 학사, 장학금, 교내 프로그램, 취업 등 다양한 교내 정보를 쉽게 찾고 공유할 수 있도록 도와주는 플랫폼입니다. ChatGPT 스타일의 직관적인 UI/UX를 제공하여 사용자 경험을 극대화했습니다.
+### 🏠 홈 화면
+- **다양한 정보 배너**: 환영 메시지, 공식 정보, 인기 질문, 자주 받은 질문
+- **실시간 통계**: 오늘의 질문/답변 수, 누적 답변 수
+- **우수 답변자 랭킹**: 상위 3명 답변자 표시
+- **답변 대기 질문**: 답변받지 못한 질문들을 순환 표시
+- **사용자 질문 현황**: 로그인 시 개인 질문 통계 표시
 
-## ✨ 주요 기능
+### 🔐 인증 시스템
+- **단계별 회원가입**: 이메일 인증 → 비밀번호 설정 → 닉네임 설정 → 추가 정보
+- **단국대 이메일 시스템**: @dankook.ac.kr 도메인 전용
+- **로그인/로그아웃**: JWT 토큰 기반 인증
+- **프로필 관리**: 닉네임, 프로필 사진 수정
+- **비밀번호 변경**: 보안 강화
+- **회원탈퇴**: 계정 확인 및 탈퇴 사유 선택
 
-### 🏠 대시보드 홈화면
-- 환영 메시지와 그라데이션 디자인
-- 📋 공식 정보 미리보기
-- 🔥 인기 질문 (조회수 기준)
-- ❓ 자주 받은 질문 (답변 수 기준)
-- 🔍 하단 고정 검색바
+### ❓ 질문 & 답변
+- **질문 작성**: 카테고리별 질문 작성
+- **질문 조회**: 전체, 인기, 자주 받은 질문 등
+- **답변 시스템**: 질문에 대한 답변 작성
+- **답변 채택**: 질문자가 최적의 답변 선택
+- **익명 옵션**: 익명으로 질문/답변 가능
 
-### 🤖 AI 채팅 도우미
-- ChatGPT 스타일 대화형 인터페이스
-- 질문 검색 및 자동 답변
-- 새 질문 작성 제안
-- 실시간 메시지 처리
+### 🏆 커뮤니티 기능
+- **랭킹 시스템**: 답변 기여도에 따른 순위
+- **카테고리 분류**: 학사, 장학, 시설, 기숙사, 동아리, 취업, 기타, 공식
+- **검색 기능**: 궁금한 내용 검색
+- **내 질문 관리**: 작성한 질문들 관리
 
-### 📋 질문 관리
-- 질문 작성 및 편집
-- 카테고리별 필터링
-- 태그 시스템 (최대 5개)
-- 실시간 검색 기능
+### 🎨 UI/UX
+- **다크/라이트 모드**: 사용자 환경에 맞는 테마 선택
+- **iOS 스타일 디자인**: 깔끔하고 직관적인 인터페이스
+- **애니메이션**: 부드러운 전환 효과
+- **반응형 디자인**: 다양한 화면 크기 지원
 
-### 💬 답변 시스템
-- 답변 작성 및 조회
-- 채택 답변 시스템
-- 좋아요 기능
+### ✅ 인증 시스템
+- **학과/학번 인증**: 재학생 신분 확인
+- **소속 선택**: 학부생, 대학원생, 교직원, 회사
 
 ## 🛠 기술 스택
 
-- **프레임워크**: Flutter 3.7.2
+- **프레임워크**: Flutter 3.x
 - **언어**: Dart
-- **UI 컴포넌트**: Material Design 3
-- **플랫폼**: iOS (주요 타겟), Android 지원
-- **HTTP 클라이언트**: http package
+- **상태 관리**: ChangeNotifier 패턴
+- **네트워킹**: HTTP 패키지
+- **로컬 저장소**: SharedPreferences
+- **아키텍처**: 서비스 기반 아키텍처
 
-## 📦 주요 Dependencies
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.8
-  http: ^1.1.0
-  cached_network_image: ^3.3.0
-  flutter_svg: ^2.0.9
-  intl: ^0.19.0
-  json_annotation: ^4.8.1
-  uuid: ^4.2.1
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^5.0.0
-  json_serializable: ^6.7.1
-  build_runner: ^2.4.7
-```
-
-## 🏗 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 lib/
-├── main.dart                    # 앱 진입점
-├── models/                      # 데이터 모델
-│   ├── question.dart           # 질문 모델
-│   ├── answer.dart             # 답변 모델
-│   └── chat_message.dart       # 채팅 메시지 모델
-├── services/                    # API 서비스
-│   └── api_service.dart        # 백엔드 API 인터페이스
-├── screens/                     # 화면
-│   ├── home_screen.dart        # 대시보드 홈화면
-│   ├── chat_screen.dart        # AI 채팅 화면
-│   ├── questions_list_screen.dart # 질문 목록 화면
-│   ├── question_detail_screen.dart # 질문 상세 화면
-│   └── new_question_screen.dart # 새 질문 작성 화면
-└── widgets/                     # 재사용 위젯
-    ├── chat_input.dart         # 채팅 입력 위젯
-    ├── chat_message_widget.dart # 채팅 메시지 위젯
-    ├── message_bubble.dart     # 메시지 버블
-    └── category_selector.dart  # 카테고리 선택기
+├── main.dart                 # 앱 진입점
+├── models/                   # 데이터 모델
+├── screens/                  # 화면 위젯들 (21개 화면)
+├── services/                 # 비즈니스 로직 서비스
+│   ├── api_service.dart     # API 호출 관리
+│   ├── auth_service.dart    # 인증 관리
+│   └── theme_service.dart   # 테마 관리
+├── theme/                    # UI 테마 시스템
+├── widgets/                  # 재사용 가능한 위젯
+│   ├── common/              # 공통 위젯
+│   ├── home/                # 홈 화면 전용 위젯
+│   └── auth/                # 인증 관련 위젯
+└── docs/                     # 프로젝트 문서
 ```
+
+## 🏗 아키텍처
+
+### 코드 정리 완료 ✅
+- **홈 화면 최적화**: 1,308줄 → 433줄 (67% 감소)
+- **위젯 모듈화**: 배너, 통계, 드로어, 앱바 등 별도 파일로 분리
+- **재사용성 향상**: 공통 컴포넌트 추출
+- **가독성 개선**: 명확한 구조와 네이밍
+
+### 서비스 레이어
+- **ApiService**: HTTP 요청 및 응답 처리
+- **AuthService**: 사용자 인증 상태 관리
+- **ThemeService**: 다크/라이트 모드 관리
+
+### 데이터 모델
+- **Question**: 질문 데이터 구조
+- **Answer**: 답변 데이터 구조
+- **TopAnswerer**: 우수 답변자 정보
 
 ## 🚀 설치 및 실행
 
-### 사전 요구사항
-- Flutter SDK 3.7.2 이상
-- Dart SDK
-- iOS 개발환경 (Xcode)
-- Android 개발환경 (Android Studio, 선택사항)
+### 요구사항
+- Flutter SDK 3.0 이상
+- Dart SDK 3.0 이상
+- Android Studio / VS Code
+- iOS Simulator / Android Emulator
 
-### 설치 방법
-
-1. 저장소 클론
+### 설치 과정
 ```bash
-git clone https://github.com/seoulorigin/taba_project.git
+# 프로젝트 클론
+git clone <repository-url>
 cd taba_project
-```
 
-2. 의존성 설치
-```bash
+# 의존성 설치
 flutter pub get
-```
 
-3. 코드 생성 (JSON serialization)
-```bash
+# 모델 코드 생성
 flutter packages pub run build_runner build
-```
 
-4. 앱 실행
-```bash
+# 앱 실행
 flutter run
 ```
 
-## 🔌 백엔드 연동 가이드
+## 🔧 개발 환경
 
-현재 프론트엔드는 목업 데이터로 작동하며, 백엔드 개발자가 다음 API를 구현하면 완전한 기능을 제공할 수 있습니다.
-
-### API 엔드포인트
-
-#### 1. 질문 관련 API
-```
-GET  /api/questions                    - 질문 목록 조회
-GET  /api/questions/{id}               - 특정 질문 조회
-POST /api/questions                    - 새 질문 작성
-GET  /api/questions/popular            - 인기 질문 목록
-GET  /api/questions/frequent           - 자주 받은 질문 목록
-GET  /api/questions/official           - 공식 질문 목록
-GET  /api/questions/search?q={query}   - 질문 검색
-```
-
-#### 2. 답변 관련 API
-```
-GET  /api/questions/{id}/answers       - 특정 질문의 답변 목록
-POST /api/answers                      - 새 답변 작성
-PUT  /api/answers/{id}/accept          - 답변 채택
-PUT  /api/answers/{id}/like            - 답변 좋아요
-```
-
-#### 3. 채팅 관련 API
-```
-POST /api/chat/process                 - 채팅 메시지 처리 (AI 응답)
-```
-
-### 데이터 모델
-
-#### Question 모델
-```json
-{
-  "id": "string",
-  "title": "string",
-  "content": "string",
-  "userId": "string",
-  "userName": "string",
-  "createdAt": "2024-01-01T00:00:00Z",
-  "category": "학사|장학금|교내프로그램|취업|기타",
-  "isOfficial": "boolean",
-  "viewCount": "number",
-  "answerCount": "number",
-  "tags": ["string"]
-}
-```
-
-#### Answer 모델
-```json
-{
-  "id": "string",
-  "questionId": "string",
-  "content": "string",
-  "userId": "string",
-  "userName": "string",
-  "createdAt": "2024-01-01T00:00:00Z",
-  "isAccepted": "boolean",
-  "isAIGenerated": "boolean",
-  "likeCount": "number"
-}
-```
-
-#### ChatMessage 모델
-```json
-{
-  "id": "string",
-  "content": "string",
-  "type": "user|assistant|system",
-  "createdAt": "2024-01-01T00:00:00Z",
-  "status": "sending|sent|error",
-  "metadata": "object"
-}
-```
-
-### API 연동 방법
-
-1. `lib/services/api_service.dart` 파일에서 `baseUrl` 변경
-2. 각 메서드의 TODO 주석 부분을 실제 HTTP 요청으로 대체
-3. 에러 핸들링 및 인증 로직 추가
-
-### 예시: 질문 목록 조회 API 연동
-
+### API 설정
+현재 로컬 테스트용 API를 사용 중입니다:
 ```dart
-Future<List<Question>> getQuestions({String? category, String? search}) async {
-  final uri = Uri.parse('$baseUrl/questions').replace(queryParameters: {
-    if (category != null) 'category': category,
-    if (search != null) 'search': search,
-  });
-  
-  final response = await http.get(uri);
-  
-  if (response.statusCode == 200) {
-    final List<dynamic> data = json.decode(response.body);
-    return data.map((json) => Question.fromJson(json)).toList();
-  } else {
-    throw Exception('Failed to load questions');
-  }
-}
+static const String baseUrl = 'http://localhost:3000/api';
 ```
 
-## 📊 현재 상태
+백엔드 서버 배포 시 `lib/services/api_service.dart`에서 URL을 변경하세요.
 
-- ✅ **프론트엔드**: 완성 (목업 데이터로 작동)
-- ⏳ **백엔드**: 연동 대기 중
-- ⏳ **AI 기능**: 백엔드 API 구현 필요
+### 테스트 계정
+- **이메일**: test@dankook.ac.kr
+- **비밀번호**: password123
 
-## 🎯 백엔드 개발 우선순위
+## 📖 문서
 
-1. **기본 CRUD API** (질문, 답변)
-2. **검색 및 필터링 API**
-3. **AI 채팅 처리 API**
-4. **사용자 인증 시스템**
-5. **관리자 기능**
+### 백엔드 연동 가이드
+[`docs/backend_integration_guide.md`](docs/backend_integration_guide.md)
+- API 엔드포인트 명세
+- 데이터 모델 정의
+- 인증 시스템 구조
+- 에러 처리 방법
+
+### 코드 구조 가이드
+[`docs/code_structure.md`](docs/code_structure.md)
+- 아키텍처 패턴 설명
+- 코딩 컨벤션
+- 성능 최적화 방법
+- 확장성 고려사항
+
+## 🔗 백엔드 연동 준비사항
+
+### 필요한 API 엔드포인트
+- **인증**: 로그인, 회원가입, 비밀번호 변경, 회원탈퇴
+- **질문**: CRUD, 검색, 카테고리별 조회
+- **답변**: 작성, 채택, 좋아요
+- **통계**: 질문/답변 수, 랭킹, 사용자 통계
+- **인증**: 학과/학번 인증
+
+### 데이터베이스 스키마
+- **Users**: 사용자 정보 (이메일, 비밀번호, 프로필)
+- **Questions**: 질문 정보 (제목, 내용, 카테고리, 작성자)
+- **Answers**: 답변 정보 (내용, 작성자, 채택 여부)
+- **Categories**: 카테고리 정보
+- **Verifications**: 인증 정보
+
+## 🎯 주요 특징
+
+### 사용자 중심 설계
+- 단국대 학생들의 실제 니즈 반영
+- 직관적인 질문/답변 플로우
+- 효율적인 정보 검색 및 탐색
+
+### 확장 가능한 구조
+- 모듈화된 컴포넌트
+- 재사용 가능한 위젯
+- 서비스 기반 아키텍처
+
+### 성능 최적화
+- 지연 로딩
+- 메모리 효율적 관리
+- 부드러운 애니메이션
+
+## 🔄 개발 현황
+
+### 완료된 기능 ✅
+- [x] 회원가입/로그인 시스템
+- [x] 질문/답변 CRUD
+- [x] 답변 채택 기능
+- [x] 다크/라이트 모드
+- [x] 프로필 관리
+- [x] 비밀번호 변경
+- [x] 회원탈퇴
+- [x] 통계 대시보드
+- [x] 랭킹 시스템
+- [x] 카테고리 분류
+- [x] 검색 기능
+- [x] 인증 시스템
+- [x] 코드 정리 및 모듈화
+
+### 백엔드 연동 대기 🔄
+- [ ] 실제 API 서버 구축
+- [ ] 데이터베이스 연동
+- [ ] 파일 업로드 서비스
+- [ ] 푸시 알림 시스템
+
+## 👥 기여하기
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## 📄 라이선스
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+This project is licensed under the MIT License.
 
-## 👨‍💻 개발자
+## 📞 문의사항
 
-- **Frontend**: seoulorigin - [GitHub](https://github.com/seoulorigin)
-- **Backend**: 연동 대기 중
-
-## 🤝 백엔드 개발자를 위한 참고사항
-
-- 모든 API는 JSON 형식으로 통신
-- 날짜는 ISO 8601 형식 사용
-- 페이지네이션: `?page=1&limit=10`
-- 에러 응답: `{"error": "message", "code": "ERROR_CODE"}`
-- 인증: Bearer Token 방식 권장
+프로젝트 관련 문의사항이 있으시면 이슈를 등록해주세요.
 
 ---
 
-**프론트엔드 개발 완료. 백엔드 연동을 기다리고 있습니다!** 🚀
+**단비**로 단국대 교내 정보를 더 쉽고 빠르게 공유하세요! 🌟
