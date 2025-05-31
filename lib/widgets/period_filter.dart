@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
+import '../services/theme_service.dart';
 
 class PeriodFilter extends StatelessWidget {
   final String selectedPeriod;
@@ -11,16 +13,10 @@ class PeriodFilter extends StatelessWidget {
     required this.onPeriodChanged,
   });
 
-  static const List<Map<String, String>> periods = [
-    {'id': '전체기간', 'name': '전체기간'},
-    {'id': '일주일', 'name': '일주일'},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.backgroundColor,
         border: Border(
@@ -29,52 +25,45 @@ class PeriodFilter extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 12),
-            child: Text(
-              '기간:',
-              style: TextStyle(
-                color: AppTheme.secondaryTextColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+          Text(
+            '기간:',
+            style: TextStyle(
+              color: AppTheme.secondaryTextColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(width: 16),
           Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: periods.length,
-              itemBuilder: (context, index) {
-                final period = periods[index];
-                final isSelected = selectedPeriod == period['id'];
-                
-                return Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  child: FilterChip(
-                    label: Text(
-                      period['name']!,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : AppTheme.primaryTextColor,
-                        fontSize: 14,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                    ),
-                    selected: isSelected,
-                    onSelected: (_) => onPeriodChanged(period['id']!),
-                    backgroundColor: AppTheme.surfaceColor,
-                    selectedColor: AppTheme.primaryColor,
-                    checkmarkColor: Colors.white,
-                    side: BorderSide(
-                      color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
-                      width: 1,
-                    ),
-                    showCheckmark: false,
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.standard,
+            child: CupertinoSlidingSegmentedControl<String>(
+              groupValue: selectedPeriod,
+              children: const {
+                '전체기간': Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    '전체',
+                    style: TextStyle(fontSize: 14),
                   ),
-                );
+                ),
+                '일주일': Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    '일주일',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
               },
+              onValueChanged: (String? value) {
+                if (value != null) {
+                  onPeriodChanged(value);
+                }
+              },
+              backgroundColor: ThemeService().isDarkMode 
+                  ? const Color(0xFF2C2C2E) 
+                  : const Color(0xFFF2F2F7),
+              thumbColor: ThemeService().isDarkMode 
+                  ? const Color(0xFF48484A) 
+                  : Colors.white,
             ),
           ),
         ],
