@@ -161,19 +161,6 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _handleSkip,
-            child: Text(
-              '건너뛰기',
-              style: TextStyle(
-                color: AppTheme.primaryColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -233,7 +220,84 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
               ],
             ),
             
-            const SizedBox(height: 40),
+            const SizedBox(height: 32),
+            
+            // 안내사항 (상단으로 이동)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryColor.withOpacity(0.1),
+                    AppTheme.secondaryColor.withOpacity(0.08),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          CupertinoIcons.lightbulb,
+                          color: AppTheme.primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '추가 정보 입력 안내',
+                        style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnhancedInfoItem(
+                    CupertinoIcons.heart,
+                    '선택사항입니다',
+                    '추가 정보는 모두 선택사항이며, 건너뛰기가 가능합니다',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildEnhancedInfoItem(
+                    CupertinoIcons.pencil_circle,
+                    '언제든 수정 가능',
+                    '나중에 프로필 설정에서 언제든 변경할 수 있습니다',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildEnhancedInfoItem(
+                    CupertinoIcons.checkmark_seal,
+                    '인증 마크 획득',
+                    '인증 문서 업로드 시 관리자 승인 후 인증 마크가 표시됩니다',
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
             
             // 프로필 사진 섹션
             Text(
@@ -357,79 +421,73 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
               ),
             ),
             
-            const SizedBox(height: 24),
-            
-            // 안내 메시지
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.primaryColor.withOpacity(0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.info_circle,
-                        color: AppTheme.primaryColor,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '안내사항',
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  _buildInfoItem('추가 정보는 선택사항입니다'),
-                  _buildInfoItem('나중에 프로필에서 수정 가능합니다'),
-                  _buildInfoItem('인증 문서는 관리자 승인 후 인증 마크가 표시됩니다'),
-                ],
-              ),
-            ),
-            
             const SizedBox(height: 40),
             
-            // 완료 버튼
-            SizedBox(
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _handleComplete,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+            // 버튼들
+            Row(
+              children: [
+                // 건너뛰기 버튼
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : _handleSkip,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primaryColor,
+                        side: BorderSide(color: AppTheme.primaryColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      )
-                    : const Text(
-                        '회원가입 완료',
+                      ),
+                      child: const Text(
+                        '건너뛰기',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-              ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // 회원가입 완료 버튼
+                Expanded(
+                  flex: 3,
+                  child: SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleComplete,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              '회원가입 완료',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             
             const SizedBox(height: 40),
@@ -439,25 +497,38 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     );
   }
 
-  Widget _buildInfoItem(String text) {
+  Widget _buildEnhancedInfoItem(IconData icon, String title, String description) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            CupertinoIcons.circle_fill,
-            size: 6,
+            icon,
+            size: 20,
             color: AppTheme.primaryColor,
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: AppTheme.primaryColor,
-                fontSize: 12,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: AppTheme.secondaryTextColor,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

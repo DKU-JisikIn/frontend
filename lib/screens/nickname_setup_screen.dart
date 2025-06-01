@@ -25,6 +25,11 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
   
   bool _isLoading = false;
   String? _errorMessage;
+  
+  // 닉네임 유효성 검사 상태
+  bool _hasValidLength = false;
+  bool _hasValidCharacters = false;
+  bool _isNotDuplicate = true; // 일단 true로 시작 (중복 검사는 서버에서)
 
   @override
   void initState() {
@@ -35,27 +40,36 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
     });
   }
 
+  void _validateNickname() {
+    final nickname = _nicknameController.text;
+    setState(() {
+      if (nickname.isEmpty) {
+        // 입력이 없을 때는 모두 미확인 상태
+        _hasValidLength = false;
+        _hasValidCharacters = false;
+        _isNotDuplicate = true; // 중복 검사는 기본적으로 통과
+      } else {
+        _hasValidLength = nickname.length >= 2 && nickname.length <= 10;
+        _hasValidCharacters = RegExp(r'^[가-힣a-zA-Z0-9]+$').hasMatch(nickname);
+        _isNotDuplicate = true; // 실제로는 서버에서 중복 확인
+      }
+      
+      if (_errorMessage != null) {
+        _errorMessage = null;
+      }
+    });
+  }
+
+  bool get _isNicknameValid => _hasValidLength && _hasValidCharacters && _isNotDuplicate;
+  bool get _canProceed => _isNicknameValid && _nicknameController.text.isNotEmpty;
+
   Future<void> _handleNext() async {
-    final nickname = _nicknameController.text.trim();
-    
-    if (nickname.isEmpty) {
-      setState(() => _errorMessage = '닉네임을 입력해주세요.');
-      return;
-    }
-    
-    if (nickname.length < 2) {
-      setState(() => _errorMessage = '닉네임은 2자 이상이어야 합니다.');
-      return;
-    }
-    
-    if (nickname.length > 10) {
-      setState(() => _errorMessage = '닉네임은 10자 이하여야 합니다.');
-      return;
-    }
-    
-    // 한글, 영문, 숫자만 허용
-    if (!RegExp(r'^[가-힣a-zA-Z0-9]+$').hasMatch(nickname)) {
-      setState(() => _errorMessage = '닉네임은 한글, 영문, 숫자만 입력 가능합니다.');
+    if (!_canProceed) {
+      if (!_hasValidLength) {
+        setState(() => _errorMessage = '닉네임은 2자 이상 10자 이하여야 합니다.');
+      } else if (!_hasValidCharacters) {
+        setState(() => _errorMessage = '닉네임은 한글, 영문, 숫자만 입력 가능합니다.');
+      }
       return;
     }
 
@@ -78,7 +92,7 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
             builder: (context) => AdditionalInfoScreen(
               email: widget.email,
               password: widget.password,
-              nickname: nickname,
+              nickname: _nicknameController.text.trim(),
             ),
           ),
         );
@@ -205,15 +219,15 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
                     counterText: '', // 글자 수 카운터 숨김
                   ),
                   onSubmitted: (_) => _handleNext(),
-                  onChanged: (_) {
-                    if (_errorMessage != null) {
-                      setState(() => _errorMessage = null);
-                    }
-                  },
+                  onChanged: (value) => _validateNickname(),
                 ),
               ),
               
-              const SizedBox(height: 16),
+              // 닉네임 조건 표시
+              const SizedBox(height: 8),
+              _buildNicknameRequirement('2자 이상 10자 이하', _hasValidLength),
+              _buildNicknameRequirement('한글, 영문, 숫자만 가능', _hasValidCharacters),
+              _buildNicknameRequirement('중복되지 않은 닉네임', _isNotDuplicate),
               
               // 오류 메시지
               if (_errorMessage != null)
@@ -245,57 +259,16 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
                   ),
                 ),
               
-              const SizedBox(height: 16),
-              
-              // 닉네임 조건 안내
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.info_circle,
-                          color: AppTheme.primaryColor,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '닉네임 조건',
-                          style: TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildNicknameRequirement('2자 이상 10자 이하'),
-                    _buildNicknameRequirement('한글, 영문, 숫자만 가능'),
-                    _buildNicknameRequirement('중복되지 않은 닉네임'),
-                  ],
-                ),
-              ),
-              
               const SizedBox(height: 40),
               
               // 다음 버튼
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleNext,
+                  onPressed: (_isLoading || !_canProceed) ? null : _handleNext,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _canProceed ? AppTheme.primaryColor : Colors.grey[300],
+                    foregroundColor: _canProceed ? Colors.white : Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -328,25 +301,54 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
     );
   }
 
-  Widget _buildNicknameRequirement(String text) {
+  Widget _buildNicknameRequirement(String text, bool isValid) {
+    final nickname = _nicknameController.text;
+    String displayText;
+    Color textColor;
+
+    // 입력이 없을 때는 기본 안내 메시지 표시
+    if (nickname.isEmpty) {
+      switch (text) {
+        case '2자 이상 10자 이하':
+          displayText = '○ 2자 이상 10자 이하';
+          break;
+        case '한글, 영문, 숫자만 가능':
+          displayText = '○ 한글, 영문, 숫자만 사용';
+          break;
+        case '중복되지 않은 닉네임':
+          displayText = '○ 중복되지 않은 닉네임';
+          break;
+        default:
+          displayText = text;
+      }
+      textColor = Colors.grey[600]!;
+    } else {
+      // 입력이 있을 때는 유효성 검사 결과 표시
+      switch (text) {
+        case '2자 이상 10자 이하':
+          displayText = isValid ? '✓ 2자 이상 10자 이하입니다' : '✗ 2자 이상 10자 이하여야 합니다';
+          break;
+        case '한글, 영문, 숫자만 가능':
+          displayText = isValid ? '✓ 올바른 문자를 사용했습니다' : '✗ 한글, 영문, 숫자만 입력 가능합니다';
+          break;
+        case '중복되지 않은 닉네임':
+          displayText = isValid ? '✓ 사용 가능한 닉네임입니다' : '✗ 중복된 닉네임입니다';
+          break;
+        default:
+          displayText = text;
+      }
+      textColor = isValid ? Colors.green[600]! : Colors.red[600]!;
+    }
+
     return Padding(
-      padding: const EdgeInsets.only(left: 8, top: 4),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.circle_fill,
-            size: 6,
-            color: AppTheme.primaryColor,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              color: AppTheme.primaryColor,
-              fontSize: 12,
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(left: 4, top: 2),
+      child: Text(
+        displayText,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

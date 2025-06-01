@@ -26,23 +26,48 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  
+  // 비밀번호 유효성 검사 상태
+  bool _hasMinLength = false;
+  bool _hasLetter = false;
+  bool _hasNumber = false;
+  bool _passwordsMatch = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _validatePassword() {
+    final password = _passwordController.text;
+    setState(() {
+      _hasMinLength = password.length >= 8;
+      _hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
+      _hasNumber = RegExp(r'[0-9]').hasMatch(password);
+    });
+    _validatePasswordMatch(); // 비밀번호가 변경되면 확인 필드도 다시 검사
+  }
+
+  void _validatePasswordMatch() {
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    setState(() {
+      _passwordsMatch = password.isNotEmpty && 
+                      confirmPassword.isNotEmpty && 
+                      password == confirmPassword;
+    });
+  }
+
+  bool get _isPasswordValid => _hasMinLength && _hasLetter && _hasNumber;
+  bool get _canProceed => _isPasswordValid && _passwordsMatch;
 
   Future<void> _handleSignup() async {
-    final password = _passwordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
-    
-    if (password.isEmpty || confirmPassword.isEmpty) {
-      _showSnackBar('비밀번호를 입력해주세요.');
-      return;
-    }
-
-    if (!_authService.isValidPassword(password)) {
-      _showSnackBar('비밀번호는 최소 8자, 영문과 숫자를 포함해야 합니다.');
-      return;
-    }
-
-    if (password != confirmPassword) {
-      _showSnackBar('비밀번호가 일치하지 않습니다.');
+    if (!_canProceed) {
+      if (!_isPasswordValid) {
+        _showSnackBar('비밀번호 조건을 모두 만족해주세요.');
+      } else if (!_passwordsMatch) {
+        _showSnackBar('비밀번호가 일치하지 않습니다.');
+      }
       return;
     }
 
@@ -60,7 +85,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
         MaterialPageRoute(
           builder: (context) => NicknameSetupScreen(
             email: widget.email,
-            password: password,
+            password: _passwordController.text.trim(),
           ),
         ),
       );
@@ -185,8 +210,17 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                     ),
                   ),
                   onSubmitted: (_) => _confirmPasswordFocusNode.requestFocus(),
+                  onChanged: (value) => _validatePassword(),
                 ),
               ),
+              
+              // 비밀번호 조건 표시
+              if (_passwordController.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildPasswordRequirement('최소 8자 이상', _hasMinLength),
+                _buildPasswordRequirement('영문 포함', _hasLetter),
+                _buildPasswordRequirement('숫자 포함', _hasNumber),
+              ],
               
               const SizedBox(height: 24),
               
@@ -218,49 +252,15 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                     ),
                   ),
                   onSubmitted: (_) => _handleSignup(),
+                  onChanged: (value) => _validatePasswordMatch(),
                 ),
               ),
               
-              const SizedBox(height: 16),
-              
-              // 비밀번호 조건 안내
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.info_circle,
-                          color: AppTheme.primaryColor,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '비밀번호 조건',
-                          style: TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildPasswordRequirement('최소 8자 이상'),
-                    _buildPasswordRequirement('영문 포함'),
-                    _buildPasswordRequirement('숫자 포함'),
-                  ],
-                ),
-              ),
+              // 비밀번호 일치 여부 표시
+              if (_confirmPasswordController.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildPasswordRequirement('비밀번호 일치', _passwordsMatch),
+              ],
               
               const SizedBox(height: 40),
               
@@ -268,10 +268,10 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSignup,
+                  onPressed: (_isLoading || !_canProceed) ? null : _handleSignup,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _canProceed ? AppTheme.primaryColor : Colors.grey[300],
+                    foregroundColor: _canProceed ? Colors.white : Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -304,25 +304,39 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
     );
   }
 
-  Widget _buildPasswordRequirement(String text) {
+  Widget _buildPasswordRequirement(String text, bool isValid) {
+    String displayText;
+    Color textColor;
+    IconData iconData;
+
+    switch (text) {
+      case '최소 8자 이상':
+        displayText = isValid ? '✓ 8자 이상입니다' : '✗ 8자 이상이어야 합니다';
+        break;
+      case '영문 포함':
+        displayText = isValid ? '✓ 영문이 포함되었습니다' : '✗ 영문을 포함해야 합니다';
+        break;
+      case '숫자 포함':
+        displayText = isValid ? '✓ 숫자가 포함되었습니다' : '✗ 숫자를 포함해야 합니다';
+        break;
+      case '비밀번호 일치':
+        displayText = isValid ? '✓ 비밀번호가 일치합니다' : '✗ 비밀번호가 일치하지 않습니다';
+        break;
+      default:
+        displayText = text;
+    }
+
+    textColor = isValid ? Colors.green[600]! : Colors.red[600]!;
+
     return Padding(
-      padding: const EdgeInsets.only(left: 8, top: 4),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.circle_fill,
-            size: 6,
-            color: AppTheme.primaryColor,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              color: AppTheme.primaryColor,
-              fontSize: 12,
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(left: 4, top: 2),
+      child: Text(
+        displayText,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

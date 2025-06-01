@@ -238,40 +238,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 children: List.generate(4, (index) => _buildCodeInput(index)),
               ),
               
-              const SizedBox(height: 24),
-              
-              // 안내 메시지
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.info_circle,
-                      color: AppTheme.primaryColor,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '테스트용 인증번호: 1234\n실제 서비스에서는 이메일로 전송된 번호를 입력하세요.',
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontSize: 14,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
               const SizedBox(height: 40),
               
               // 인증 버튼

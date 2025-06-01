@@ -74,7 +74,7 @@ class _FrequentQuestionsScreenState extends State<FrequentQuestionsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          '❓ 자주 받은 질문',
+          '자주 받은 질문',
           style: TextStyle(
             color: AppTheme.primaryTextColor,
             fontSize: 18,

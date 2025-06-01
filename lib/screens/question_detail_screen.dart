@@ -339,6 +339,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
       question: widget.question,
       onTap: () {}, // 상세 페이지에서는 탭 기능 불필요
       showDate: true, // 날짜를 우측 상단에 표시
+      showContent: true, // 내용을 표시
     );
   }
 
@@ -472,51 +473,23 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
             ),
             
             // 소속 정보 (있는 경우)
-            if (answer.department != null || answer.studentId != null) ...[
+            if (answer.department != null) ...[
               const SizedBox(height: 6),
               Row(
                 children: [
-                  if (answer.department != null) ...[
-                    Icon(
-                      CupertinoIcons.building_2_fill,
-                      size: 12,
+                  Icon(
+                    CupertinoIcons.building_2_fill,
+                    size: 12,
+                    color: AppTheme.secondaryTextColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    answer.department!,
+                    style: TextStyle(
                       color: AppTheme.secondaryTextColor,
+                      fontSize: 11,
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      answer.department!,
-                      style: TextStyle(
-                        color: AppTheme.secondaryTextColor,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                  if (answer.department != null && answer.studentId != null) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      '•',
-                      style: TextStyle(
-                        color: AppTheme.secondaryTextColor,
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  if (answer.studentId != null) ...[
-                    Icon(
-                      CupertinoIcons.person_crop_square,
-                      size: 12,
-                      color: AppTheme.secondaryTextColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      answer.studentId!,
-                      style: TextStyle(
-                        color: AppTheme.secondaryTextColor,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ],

@@ -8,12 +8,14 @@ class MessageBubble extends StatelessWidget {
   final Question question;
   final VoidCallback onTap;
   final bool showDate; // 날짜 표시 여부 (상세 페이지용)
+  final bool showContent; // 내용 표시 여부 (상세 페이지용)
 
   const MessageBubble({
     super.key,
     required this.question,
     required this.onTap,
     this.showDate = false,
+    this.showContent = false,
   });
 
   @override
@@ -29,8 +31,8 @@ class MessageBubble extends StatelessWidget {
             color: AppTheme.surfaceColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: question.isOfficial ? AppTheme.primaryColor : AppTheme.borderColor,
-              width: 1.5,
+              color: AppTheme.borderColor,
+              width: 1.0,
             ),
           ),
           child: Column(
@@ -88,9 +90,22 @@ class MessageBubble extends StatelessWidget {
               Text(
                 question.title,
                 style: AppTheme.headingStyle.copyWith(fontSize: 16),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+                maxLines: showContent ? null : 3,
+                overflow: showContent ? TextOverflow.visible : TextOverflow.ellipsis,
               ),
+              
+              // 내용 (상세 페이지에서만 표시)
+              if (showContent) ...[
+                const SizedBox(height: 12),
+                Text(
+                  question.content,
+                  style: AppTheme.bodyStyle.copyWith(
+                    color: AppTheme.secondaryTextColor,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+              
               const SizedBox(height: 12),
               
               // 하단 정보 (조회수와 댓글 수를 우측 하단에 한 줄로)

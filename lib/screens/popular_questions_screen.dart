@@ -74,7 +74,7 @@ class _PopularQuestionsScreenState extends State<PopularQuestionsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          '🔥 인기 질문',
+          '인기 질문',
           style: TextStyle(
             color: AppTheme.primaryTextColor,
             fontSize: 18,

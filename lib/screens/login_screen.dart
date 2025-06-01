@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
               
               // 이메일 입력
               Text(
-                '단국대 아이디',
+                '아이디',
                 style: AppTheme.headingStyle.copyWith(fontSize: 16),
               ),
               const SizedBox(height: 8),
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: AppTheme.bodyStyle,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    hintText: 'student',
+                    hintText: '아이디를 입력하세요',
                     hintStyle: AppTheme.hintStyle,
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -251,54 +251,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // 테스트 계정 안내
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.info_circle,
-                      color: AppTheme.primaryColor,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '테스트 계정',
-                            style: TextStyle(
-                              color: AppTheme.primaryColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '아이디: test\n비밀번호: password123',
-                            style: TextStyle(
-                              color: AppTheme.primaryColor,
-                              fontSize: 12,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
               
