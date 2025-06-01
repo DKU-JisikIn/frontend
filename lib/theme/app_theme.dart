@@ -4,6 +4,16 @@ import 'package:flutter/services.dart';
 import '../services/theme_service.dart';
 
 class AppTheme {
+  // 정적 초기화 블록
+  static bool _initialized = false;
+  
+  static void _ensureInitialized() {
+    if (!_initialized) {
+      ThemeService.setCacheInvalidator(invalidateCache);
+      _initialized = true;
+    }
+  }
+  
   // 라이트 모드 색상 정의
   static const Color lightPrimaryColor = Color(0xFF4FC3F7); // 연한 파랑색
   static const Color lightSecondaryColor = Color(0xFF29B6F6); // 조금 더 진한 파랑색
@@ -30,22 +40,82 @@ class AppTheme {
   static const Color darkHintTextColor = Color(0xFF808080);
   static const Color darkLightTextColor = Color(0xFF606060);
   
-  // 현재 테마에 따른 색상 반환
-  static Color get primaryColor => ThemeService().isDarkMode ? darkPrimaryColor : lightPrimaryColor;
-  static Color get secondaryColor => ThemeService().isDarkMode ? darkSecondaryColor : lightSecondaryColor;
-  static Color get backgroundColor => ThemeService().isDarkMode ? darkBackgroundColor : lightBackgroundColor;
-  static Color get surfaceColor => ThemeService().isDarkMode ? darkSurfaceColor : lightSurfaceColor;
-  static Color get borderColor => ThemeService().isDarkMode ? darkBorderColor : lightBorderColor;
+  // 캐시된 테마 상태
+  static bool? _cachedIsDarkMode;
   
-  static Color get primaryTextColor => ThemeService().isDarkMode ? darkPrimaryTextColor : lightPrimaryTextColor;
-  static Color get secondaryTextColor => ThemeService().isDarkMode ? darkSecondaryTextColor : lightSecondaryTextColor;
-  static Color get hintTextColor => ThemeService().isDarkMode ? darkHintTextColor : lightHintTextColor;
-  static Color get lightTextColor => ThemeService().isDarkMode ? darkLightTextColor : lightLightTextColor;
+  // 현재 테마 상태를 캐시하여 성능 향상
+  static bool get _isDarkMode {
+    _ensureInitialized();
+    _cachedIsDarkMode ??= ThemeService().isDarkMode;
+    return _cachedIsDarkMode!;
+  }
+  
+  // 테마 캐시 무효화 (테마 변경 시 호출)
+  static void invalidateCache() {
+    _cachedIsDarkMode = null;
+  }
+  
+  // 현재 테마에 따른 색상 반환 - 캐시된 값 사용
+  static Color get primaryColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkPrimaryColor : lightPrimaryColor;
+  }
+  
+  static Color get secondaryColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkSecondaryColor : lightSecondaryColor;
+  }
+  
+  static Color get backgroundColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkBackgroundColor : lightBackgroundColor;
+  }
+  
+  static Color get surfaceColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkSurfaceColor : lightSurfaceColor;
+  }
+  
+  static Color get borderColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkBorderColor : lightBorderColor;
+  }
+  
+  static Color get primaryTextColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkPrimaryTextColor : lightPrimaryTextColor;
+  }
+  
+  static Color get secondaryTextColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkSecondaryTextColor : lightSecondaryTextColor;
+  }
+  
+  static Color get hintTextColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkHintTextColor : lightHintTextColor;
+  }
+  
+  static Color get lightTextColor {
+    _ensureInitialized();
+    return _isDarkMode ? darkLightTextColor : lightLightTextColor;
+  }
   
   // 메시지 버블 색상
-  static Color get userMessageColor => primaryColor;
-  static Color get assistantMessageColor => ThemeService().isDarkMode ? Color(0xFF2A2A2A) : Color(0xFFF1F5F9);
-  static Color get assistantMessageBorderColor => borderColor;
+  static Color get userMessageColor {
+    _ensureInitialized();
+    return primaryColor;
+  }
+  
+  static Color get assistantMessageColor {
+    _ensureInitialized();
+    return _isDarkMode ? Color(0xFF2A2A2A) : Color(0xFFF1F5F9);
+  }
+  
+  static Color get assistantMessageBorderColor {
+    _ensureInitialized();
+    return borderColor;
+  }
   
   // iOS 스타일 그라데이션
   static LinearGradient get primaryGradient => LinearGradient(

@@ -28,6 +28,9 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
   File? _profileImage;
   File? _verificationDocument;
 
+  // 업로드된 파일이 있는지 확인하는 getter 추가
+  bool get _hasUploadedFile => _profileImage != null || _verificationDocument != null;
+
   Future<void> _pickProfileImage() async {
     // TODO: 이미지 피커 구현 (image_picker 패키지 필요)
     // 현재는 시뮬레이션
@@ -74,9 +77,11 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     // 실제 구현에서는 이미지 피커로 선택된 파일을 설정
     setState(() {
       if (type == '프로필 사진') {
-        // _profileImage = selectedFile;
+        // 시뮬레이션을 위해 임시 파일 경로 설정
+        _profileImage = File('simulated_profile_image.jpg');
       } else {
-        // _verificationDocument = selectedFile;
+        // 시뮬레이션을 위해 임시 파일 경로 설정
+        _verificationDocument = File('simulated_verification_document.jpg');
       }
     });
     
@@ -277,9 +282,9 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
                   ),
                   const SizedBox(height: 16),
                   _buildEnhancedInfoItem(
-                    CupertinoIcons.heart,
+                    CupertinoIcons.exclamationmark_circle,
                     '선택사항입니다',
-                    '추가 정보는 모두 선택사항이며, 건너뛰기가 가능합니다',
+                    '프로필 사진 또는 소속 인증 문서 업로드는 선택사항입니다',
                   ),
                   const SizedBox(height: 12),
                   _buildEnhancedInfoItem(
@@ -424,67 +429,67 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
             const SizedBox(height: 40),
             
             // 버튼들
-            Row(
+            Column(
               children: [
                 // 건너뛰기 버튼
-                Expanded(
-                  flex: 2,
-                  child: SizedBox(
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: _isLoading ? null : _handleSkip,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.primaryColor,
-                        side: BorderSide(color: AppTheme.primaryColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : _handleSkip,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primaryColor,
+                      side: BorderSide(color: AppTheme.primaryColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        '건너뛰기',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    child: const Text(
+                      '건너뛰고 가입완료',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ),
                 
-                const SizedBox(width: 16),
+                const SizedBox(height: 16),
                 
                 // 회원가입 완료 버튼
-                Expanded(
-                  flex: 3,
-                  child: SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleComplete,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: (_isLoading || !_hasUploadedFile) ? null : _handleComplete,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _hasUploadedFile 
+                          ? AppTheme.primaryColor 
+                          : Colors.grey[400],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              '회원가입 완료',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                      elevation: 0,
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            _hasUploadedFile 
+                                ? '파일과 함께 가입완료' 
+                                : '파일을 업로드하고 가입완료',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
               ],

@@ -26,38 +26,65 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   bool _isNewPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
+  // 실시간 비밀번호 유효성 검사 상태
+  bool _hasMinLength = false;
+  bool _hasLetter = false;
+  bool _hasNumber = false;
+  bool _passwordsMatch = false;
+  bool _isDifferentFromCurrent = true;
+
+  void _validateNewPassword() {
+    final newPassword = _newPasswordController.text;
+    final currentPassword = _currentPasswordController.text;
+    setState(() {
+      _hasMinLength = newPassword.length >= 8;
+      _hasLetter = RegExp(r'[a-zA-Z]').hasMatch(newPassword);
+      _hasNumber = RegExp(r'[0-9]').hasMatch(newPassword);
+      _isDifferentFromCurrent = newPassword.isEmpty || 
+                               currentPassword.isEmpty || 
+                               newPassword != currentPassword;
+    });
+    _validatePasswordMatch(); // 새 비밀번호가 변경되면 확인 필드도 다시 검사
+  }
+
+  void _validatePasswordMatch() {
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    setState(() {
+      _passwordsMatch = newPassword.isNotEmpty && 
+                      confirmPassword.isNotEmpty && 
+                      newPassword == confirmPassword;
+    });
+  }
+
+  void _validateCurrentPassword() {
+    final newPassword = _newPasswordController.text;
+    final currentPassword = _currentPasswordController.text;
+    setState(() {
+      _isDifferentFromCurrent = newPassword.isEmpty || 
+                               currentPassword.isEmpty || 
+                               newPassword != currentPassword;
+    });
+  }
+
+  bool get _isNewPasswordValid => _hasMinLength && _hasLetter && _hasNumber && _isDifferentFromCurrent;
+  bool get _canProceed => _currentPasswordController.text.isNotEmpty && 
+                          _isNewPasswordValid && 
+                          _passwordsMatch;
+
   Future<void> _handleChangePassword() async {
     final currentPassword = _currentPasswordController.text.trim();
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
     
-    if (currentPassword.isEmpty) {
-      setState(() => _errorMessage = '현재 비밀번호를 입력해주세요.');
-      return;
-    }
-    
-    if (newPassword.isEmpty) {
-      setState(() => _errorMessage = '새 비밀번호를 입력해주세요.');
-      return;
-    }
-    
-    if (confirmPassword.isEmpty) {
-      setState(() => _errorMessage = '새 비밀번호 확인을 입력해주세요.');
-      return;
-    }
-
-    if (!_authService.isValidPassword(newPassword)) {
-      setState(() => _errorMessage = '새 비밀번호는 최소 8자, 영문과 숫자를 포함해야 합니다.');
-      return;
-    }
-
-    if (newPassword != confirmPassword) {
-      setState(() => _errorMessage = '새 비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    if (currentPassword == newPassword) {
-      setState(() => _errorMessage = '현재 비밀번호와 새 비밀번호가 동일합니다.');
+    if (!_canProceed) {
+      if (currentPassword.isEmpty) {
+        setState(() => _errorMessage = '현재 비밀번호를 입력해주세요.');
+      } else if (!_isNewPasswordValid) {
+        setState(() => _errorMessage = '새 비밀번호 조건을 모두 만족해주세요.');
+      } else if (!_passwordsMatch) {
+        setState(() => _errorMessage = '새 비밀번호가 일치하지 않습니다.');
+      }
       return;
     }
 
@@ -200,6 +227,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                     if (_errorMessage != null) {
                       setState(() => _errorMessage = null);
                     }
+                    _validateCurrentPassword();
                   },
                 ),
               ),
@@ -241,9 +269,20 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                     if (_errorMessage != null) {
                       setState(() => _errorMessage = null);
                     }
+                    _validateNewPassword();
                   },
                 ),
               ),
+              
+              // 새 비밀번호 조건 실시간 표시
+              if (_newPasswordController.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildPasswordRequirement('최소 8자 이상', _hasMinLength),
+                _buildPasswordRequirement('영문 포함', _hasLetter),
+                _buildPasswordRequirement('숫자 포함', _hasNumber),
+                if (_currentPasswordController.text.isNotEmpty)
+                  _buildPasswordRequirement('현재 비밀번호와 다름', _isDifferentFromCurrent),
+              ],
               
               const SizedBox(height: 24),
               
@@ -282,9 +321,16 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                     if (_errorMessage != null) {
                       setState(() => _errorMessage = null);
                     }
+                    _validatePasswordMatch();
                   },
                 ),
               ),
+              
+              // 비밀번호 일치 여부 실시간 표시
+              if (_confirmPasswordController.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildPasswordRequirement('비밀번호 일치', _passwordsMatch),
+              ],
               
               const SizedBox(height: 16),
               
@@ -318,53 +364,15 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                   ),
                 ),
               
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.info_circle,
-                          color: AppTheme.primaryColor,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '새 비밀번호 조건',
-                          style: TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildRequirement('최소 8자 이상'),
-                    _buildRequirement('영문자와 숫자 포함'),
-                    _buildRequirement('현재 비밀번호와 다른 비밀번호'),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
               
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleChangePassword,
+                  onPressed: (_isLoading || !_canProceed) ? null : _handleChangePassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _canProceed ? AppTheme.primaryColor : Colors.grey[300],
+                    foregroundColor: _canProceed ? Colors.white : Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -379,9 +387,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          '비밀번호 변경',
-                          style: TextStyle(
+                      : Text(
+                          _canProceed ? '비밀번호 변경' : '조건을 모두 만족해주세요',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -397,25 +405,41 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
     );
   }
 
-  Widget _buildRequirement(String text) {
+  Widget _buildPasswordRequirement(String text, bool isValid) {
+    String displayText;
+    Color textColor;
+
+    switch (text) {
+      case '최소 8자 이상':
+        displayText = isValid ? '✓ 8자 이상입니다' : '✗ 8자 이상이어야 합니다';
+        break;
+      case '영문 포함':
+        displayText = isValid ? '✓ 영문이 포함되었습니다' : '✗ 영문을 포함해야 합니다';
+        break;
+      case '숫자 포함':
+        displayText = isValid ? '✓ 숫자가 포함되었습니다' : '✗ 숫자를 포함해야 합니다';
+        break;
+      case '현재 비밀번호와 다름':
+        displayText = isValid ? '✓ 현재 비밀번호와 다릅니다' : '✗ 현재 비밀번호와 동일합니다';
+        break;
+      case '비밀번호 일치':
+        displayText = isValid ? '✓ 비밀번호가 일치합니다' : '✗ 비밀번호가 일치하지 않습니다';
+        break;
+      default:
+        displayText = text;
+    }
+
+    textColor = isValid ? Colors.green[600]! : Colors.red[600]!;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.checkmark,
-            color: AppTheme.primaryColor,
-            size: 14,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              color: AppTheme.secondaryTextColor,
-              fontSize: 13,
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(left: 4, top: 2),
+      child: Text(
+        displayText,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

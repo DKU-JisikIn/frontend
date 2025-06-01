@@ -13,17 +13,10 @@ class VerificationScreen extends StatefulWidget {
 
 class _VerificationScreenState extends State<VerificationScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _departmentController = TextEditingController();
-  final TextEditingController _studentIdController = TextEditingController();
-  final FocusNode _departmentFocusNode = FocusNode();
-  final FocusNode _studentIdFocusNode = FocusNode();
   
   bool _isLoading = false;
   String? _errorMessage;
   File? _verificationDocument;
-  String _selectedAffiliationType = '학과';
-
-  final List<String> _affiliationTypes = ['학과', '동아리', '회사', '기타'];
 
   Future<void> _pickDocument() async {
     await showCupertinoModalPopup<void>(
@@ -77,25 +70,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
   }
 
   Future<void> _handleSubmit() async {
-    final department = _departmentController.text.trim();
-    final studentId = _studentIdController.text.trim();
-    
-    if (department.isEmpty) {
-      setState(() => _errorMessage = '소속을 입력해주세요.');
-      return;
-    }
-    
-    if (studentId.isEmpty) {
-      setState(() => _errorMessage = '학번을 입력해주세요.');
-      return;
-    }
-    
-    // 학번 유효성 검사 (숫자만 허용, 6-10자)
-    if (!RegExp(r'^\d{6,10}$').hasMatch(studentId)) {
-      setState(() => _errorMessage = '학번은 6-10자리 숫자만 입력 가능합니다.');
-      return;
-    }
-
     if (_verificationDocument == null) {
       setState(() => _errorMessage = '인증 서류를 업로드해주세요.');
       return;
@@ -160,11 +134,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text('소속 유형: $_selectedAffiliationType', 
-                           style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
-                      Text('소속: $department', 
-                           style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
-                      Text('학번: $studentId', 
+                      Text('업로드된 서류: 인증 서류', 
                            style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
                     ],
                   ),
@@ -215,7 +185,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          '인증 받기',
+          '소속 인증',
           style: TextStyle(
             color: AppTheme.primaryTextColor,
             fontSize: 18,
@@ -225,337 +195,248 @@ class _VerificationScreenState extends State<VerificationScreen> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              
-              // 안내 메시지
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primaryColor,
-                      AppTheme.primaryColor.withOpacity(0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      CupertinoIcons.checkmark_seal_fill,
-                      size: 48,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      '소속 인증하기',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '학과, 동아리 등의 소속을 인증하여\n신뢰도 높은 답변자가 되어보세요!',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 20),
+            
+            // 안내 메시지
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryColor.withOpacity(0.1),
+                    AppTheme.secondaryColor.withOpacity(0.08),
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  width: 1.5,
                 ),
               ),
-              
-              const SizedBox(height: 32),
-              
-              // 소속 유형 선택
-              Text(
-                '소속 유형',
-                style: AppTheme.headingStyle.copyWith(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: AppTheme.inputContainerDecoration,
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedAffiliationType,
-                    isExpanded: true,
-                    icon: Icon(CupertinoIcons.chevron_down, color: AppTheme.hintTextColor),
-                    style: AppTheme.bodyStyle,
-                    dropdownColor: AppTheme.surfaceColor,
-                    items: _affiliationTypes.map((String type) {
-                      return DropdownMenuItem<String>(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() => _selectedAffiliationType = newValue);
-                      }
-                    },
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // 소속 입력
-              Text(
-                _selectedAffiliationType == '학과' ? '학과명' : '소속명',
-                style: AppTheme.headingStyle.copyWith(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: AppTheme.inputContainerDecoration,
-                child: TextField(
-                  controller: _departmentController,
-                  focusNode: _departmentFocusNode,
-                  style: AppTheme.bodyStyle,
-                  decoration: InputDecoration(
-                    hintText: _selectedAffiliationType == '학과' 
-                        ? '예: 컴퓨터공학과' 
-                        : '예: 프로그래밍 동아리',
-                    hintStyle: AppTheme.hintStyle,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    prefixIcon: Icon(CupertinoIcons.building_2_fill, color: AppTheme.hintTextColor),
-                  ),
-                  onSubmitted: (_) => _studentIdFocusNode.requestFocus(),
-                  onChanged: (_) {
-                    if (_errorMessage != null) {
-                      setState(() => _errorMessage = null);
-                    }
-                  },
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // 학번 입력
-              Text(
-                '학번',
-                style: AppTheme.headingStyle.copyWith(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: AppTheme.inputContainerDecoration,
-                child: TextField(
-                  controller: _studentIdController,
-                  focusNode: _studentIdFocusNode,
-                  style: AppTheme.bodyStyle,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                  decoration: InputDecoration(
-                    hintText: '예: 32171234',
-                    hintStyle: AppTheme.hintStyle,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    prefixIcon: Icon(CupertinoIcons.person_crop_square, color: AppTheme.hintTextColor),
-                    counterText: '', // 글자 수 카운터 숨김
-                  ),
-                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
-                  onChanged: (_) {
-                    if (_errorMessage != null) {
-                      setState(() => _errorMessage = null);
-                    }
-                  },
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // 인증 서류 업로드
-              Text(
-                '인증 서류',
-                style: AppTheme.headingStyle.copyWith(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '학생증, 재학증명서, 동아리 가입증명서 등 소속을 확인할 수 있는 서류를 업로드해주세요',
-                style: TextStyle(
-                  color: AppTheme.secondaryTextColor,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 12),
-              
-              GestureDetector(
-                onTap: _pickDocument,
-                child: Container(
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _verificationDocument != null ? AppTheme.primaryColor : AppTheme.borderColor,
-                      style: BorderStyle.solid,
-                      width: 2,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.checkmark_shield,
+                      size: 40,
+                      color: AppTheme.primaryColor,
                     ),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _verificationDocument != null 
-                              ? CupertinoIcons.checkmark_circle_fill 
-                              : CupertinoIcons.doc_on_clipboard,
-                          size: 40,
+                  const SizedBox(height: 16),
+                  Text(
+                    '소속 인증하기',
+                    style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '단국대학교 재학생임을 인증하여\n신뢰도 높은 답변자가 되어보세요!',
+                    style: TextStyle(
+                      color: AppTheme.secondaryTextColor,
+                      fontSize: 15,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 40),
+            
+            // 인증 서류 업로드
+            Text(
+              '인증 서류',
+              style: AppTheme.headingStyle.copyWith(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '학생증, 재학증명서 등 단국대학교 소속을 확인할 수 있는 서류를 업로드해주세요',
+              style: TextStyle(
+                color: AppTheme.secondaryTextColor,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            GestureDetector(
+              onTap: _pickDocument,
+              child: Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _verificationDocument != null ? AppTheme.primaryColor : AppTheme.borderColor,
+                    style: BorderStyle.solid,
+                    width: 2,
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _verificationDocument != null 
+                            ? CupertinoIcons.checkmark_circle_fill 
+                            : CupertinoIcons.doc_on_clipboard,
+                        size: 40,
+                        color: _verificationDocument != null 
+                            ? AppTheme.primaryColor 
+                            : AppTheme.hintTextColor,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _verificationDocument != null 
+                            ? '서류 업로드 완료' 
+                            : '서류 업로드',
+                        style: TextStyle(
                           color: _verificationDocument != null 
                               ? AppTheme.primaryColor 
                               : AppTheme.hintTextColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(height: 8),
+                      ),
+                      if (_verificationDocument == null) ...[
+                        const SizedBox(height: 4),
                         Text(
-                          _verificationDocument != null 
-                              ? '서류 업로드 완료' 
-                              : '서류 업로드',
+                          '탭하여 선택',
                           style: TextStyle(
-                            color: _verificationDocument != null 
-                                ? AppTheme.primaryColor 
-                                : AppTheme.hintTextColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                            color: AppTheme.lightTextColor,
+                            fontSize: 12,
                           ),
                         ),
-                        if (_verificationDocument == null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '탭하여 선택',
-                            style: TextStyle(
-                              color: AppTheme.lightTextColor,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              // 오류 메시지
-              if (_errorMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
-                  ),
-                  child: Row(
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // 오류 메시지
+            if (_errorMessage != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.exclamationmark_triangle,
+                      color: Colors.red,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            
+            // 주의사항
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
                       Icon(
-                        CupertinoIcons.exclamationmark_triangle,
-                        color: Colors.red,
-                        size: 16,
+                        CupertinoIcons.info_circle,
+                        color: Colors.orange,
+                        size: 20,
                       ),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
+                      Text(
+                        '주의사항',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                ),
-              
-              // 주의사항
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.orange.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.info_circle,
-                          color: Colors.orange,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '주의사항',
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildNotice('개인정보가 포함된 부분은 가려주세요'),
-                    _buildNotice('관리자 검토 후 1-3일 내에 결과 통보'),
-                    _buildNotice('허위 정보 제출 시 계정 제재 가능'),
-                  ],
-                ),
+                  const SizedBox(height: 8),
+                  _buildNotice('개인정보가 포함된 부분은 가려주세요'),
+                  _buildNotice('관리자 검토 후 1-3일 내에 결과 통보'),
+                  _buildNotice('허위 정보 제출 시 계정 제재 가능'),
+                ],
               ),
-              
-              const SizedBox(height: 40),
-              
-              // 신청 버튼
-              SizedBox(
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
+            ),
+            
+            const SizedBox(height: 40),
+            
+            // 신청 버튼
+            SizedBox(
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _handleSubmit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text(
-                          '인증 신청',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  elevation: 0,
                 ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        '인증 신청',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
-              
-              const SizedBox(height: 40),
-            ],
-          ),
+            ),
+            
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
@@ -588,14 +469,5 @@ class _VerificationScreenState extends State<VerificationScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _departmentController.dispose();
-    _studentIdController.dispose();
-    _departmentFocusNode.dispose();
-    _studentIdFocusNode.dispose();
-    super.dispose();
   }
 } 

@@ -20,12 +20,40 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   String? _errorMessage;
   File? _newProfileImage;
 
+  // 실시간 닉네임 유효성 검사 상태
+  bool _hasValidLength = false;
+  bool _hasValidCharacters = false;
+  bool _isNotDuplicate = true;
+  bool _isNotEmpty = false;
+
   @override
   void initState() {
     super.initState();
-    // 현재 닉네임으로 초기화
-    _nicknameController.text = _authService.currentUserNickname ?? '';
+    // 현재 닉네임으로 초기화 - 제거하여 빈 상태로 시작
+    // _nicknameController.text = _authService.currentUserNickname ?? '';
   }
+
+  void _validateNickname() {
+    final nickname = _nicknameController.text;
+    setState(() {
+      _isNotEmpty = nickname.isNotEmpty;
+      
+      if (nickname.isEmpty) {
+        // 빈 문자열일 때는 모든 조건 불만족
+        _hasValidLength = false;
+        _hasValidCharacters = false;
+        _isNotDuplicate = false;
+      } else {
+        _hasValidLength = nickname.length >= 2 && nickname.length <= 10;
+        _hasValidCharacters = RegExp(r'^[가-힣a-zA-Z0-9]+$').hasMatch(nickname);
+        // 현재 닉네임과 다르거나 허용되지 않은 닉네임이 아니면 사용 가능
+        _isNotDuplicate = nickname == _authService.currentUserNickname ||
+                         !['admin', 'test', '관리자'].contains(nickname.toLowerCase());
+      }
+    });
+  }
+
+  bool get _isNicknameValid => _isNotEmpty && _hasValidLength && _hasValidCharacters && _isNotDuplicate;
 
   Future<void> _pickProfileImage() async {
     await showCupertinoModalPopup<void>(
@@ -74,23 +102,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Future<void> _handleSave() async {
     final nickname = _nicknameController.text.trim();
     
-    if (nickname.isEmpty) {
-      setState(() => _errorMessage = '닉네임을 입력해주세요.');
-      return;
-    }
-    
-    if (nickname.length < 2) {
-      setState(() => _errorMessage = '닉네임은 2자 이상이어야 합니다.');
-      return;
-    }
-    
-    if (nickname.length > 10) {
-      setState(() => _errorMessage = '닉네임은 10자 이하여야 합니다.');
-      return;
-    }
-    
-    if (!RegExp(r'^[가-힣a-zA-Z0-9]+$').hasMatch(nickname)) {
-      setState(() => _errorMessage = '닉네임은 한글, 영문, 숫자만 입력 가능합니다.');
+    // 실시간 검증으로 이미 확인했으므로 간단한 체크만
+    if (!_isNicknameValid) {
+      setState(() => _errorMessage = '닉네임 조건을 모두 만족해주세요.');
       return;
     }
 
@@ -247,7 +261,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   style: AppTheme.bodyStyle,
                   maxLength: 10,
                   decoration: InputDecoration(
-                    hintText: '닉네임을 입력하세요',
+                    hintText: _authService.currentUserNickname?.isNotEmpty == true 
+                        ? _authService.currentUserNickname! 
+                        : '닉네임을 입력하세요',
                     hintStyle: AppTheme.hintStyle,
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -259,6 +275,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     if (_errorMessage != null) {
                       setState(() => _errorMessage = null);
                     }
+                    _validateNickname();
                   },
                 ),
               ),
@@ -296,44 +313,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ),
                 ),
               
-              // 닉네임 조건 안내
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.info_circle,
-                          color: AppTheme.primaryColor,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '닉네임 조건',
-                          style: TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildRequirement('2자 이상 10자 이하'),
-                    _buildRequirement('한글, 영문, 숫자만 가능'),
-                    _buildRequirement('중복되지 않은 닉네임'),
-                  ],
-                ),
-              ),
+              // 닉네임 조건 안내 - 항상 표시
+              const SizedBox(height: 8),
+              _buildNicknameRequirement('2자 이상 10자 이하', _hasValidLength),
+              _buildNicknameRequirement('한글, 영문, 숫자만 가능', _hasValidCharacters),
+              _buildNicknameRequirement('사용 가능한 닉네임', _isNotDuplicate),
               
               const SizedBox(height: 40),
               
@@ -341,10 +325,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSave,
+                  onPressed: (_isLoading || !_isNicknameValid) ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _isNicknameValid ? AppTheme.primaryColor : Colors.grey[300],
+                    foregroundColor: _isNicknameValid ? Colors.white : Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -359,9 +343,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          '저장',
-                          style: TextStyle(
+                      : Text(
+                          _isNicknameValid ? '저장' : '닉네임 조건을 확인해주세요',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -377,14 +361,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _buildRequirement(String text) {
+  Widget _buildNicknameRequirement(String text, bool isSatisfied) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           Icon(
-            CupertinoIcons.checkmark,
-            color: AppTheme.primaryColor,
+            isSatisfied ? CupertinoIcons.checkmark : CupertinoIcons.exclamationmark_triangle,
+            color: isSatisfied ? AppTheme.primaryColor : Colors.red,
             size: 14,
           ),
           const SizedBox(width: 8),

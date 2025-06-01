@@ -355,7 +355,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
               
               // 이메일 입력
               Text(
-                '단국대 아이디',
+                '아이디',
                 style: AppTheme.headingStyle.copyWith(fontSize: 14),
               ),
               const SizedBox(height: 8),

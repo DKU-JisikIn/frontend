@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
+import 'signup_complete_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -130,10 +131,28 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: AppTheme.welcomeContainerDecoration,
                 child: Column(
                   children: [
-                    const Icon(
-                      CupertinoIcons.person_circle_fill,
-                      size: 80,
-                      color: Colors.white,
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(40),
+                        child: Image.asset(
+                          'assets/images/bear_umbrella.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              CupertinoIcons.person_circle_fill,
+                              size: 72,
+                              color: AppTheme.primaryColor,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -282,6 +301,76 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // 개발자 테스트 버튼
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.orange.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.wrench,
+                          color: Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '개발자 테스트',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignupCompleteScreen(
+                                email: 'test@dankook.ac.kr',
+                                nickname: '테스트',
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          '가입완료 페이지 테스트',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               
