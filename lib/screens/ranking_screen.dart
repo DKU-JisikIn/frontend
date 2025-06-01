@@ -60,7 +60,7 @@ class _RankingScreenState extends State<RankingScreen> {
       return TopAnswerer(
         id: 'test',
         userName: '테스트사용자',
-        profileImageUrl: 'https://via.placeholder.com/50/4A90E2/FFFFFF?text=T',
+        profileImageUrl: '',
         score: 1250,
         rank: 42,
         answerCount: 28,
@@ -182,14 +182,33 @@ class _RankingScreenState extends State<RankingScreen> {
               CircleAvatar(
                 radius: 25,
                 backgroundColor: AppTheme.primaryColor,
-                child: ClipOval(
-                  child: Image.network(
-                    _myRanking!.profileImageUrl,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
+                child: _myRanking!.profileImageUrl.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          _myRanking!.profileImageUrl,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 50,
+                              height: 50,
+                              color: AppTheme.primaryColor,
+                              child: Center(
+                                child: Text(
+                                  _myRanking!.userName[0],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Container(
                         width: 50,
                         height: 50,
                         color: AppTheme.primaryColor,
@@ -203,10 +222,7 @@ class _RankingScreenState extends State<RankingScreen> {
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
               ),
               
               const SizedBox(width: 16),
@@ -343,14 +359,33 @@ class _RankingScreenState extends State<RankingScreen> {
           CircleAvatar(
             radius: 20,
             backgroundColor: AppTheme.primaryColor,
-            child: ClipOval(
-              child: Image.network(
-                user.profileImageUrl,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
+            child: user.profileImageUrl.isNotEmpty
+                ? ClipOval(
+                    child: Image.network(
+                      user.profileImageUrl,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 40,
+                          height: 40,
+                          color: AppTheme.primaryColor,
+                          child: Center(
+                            child: Text(
+                              user.userName[0],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : Container(
                     width: 40,
                     height: 40,
                     color: AppTheme.primaryColor,
@@ -364,10 +399,7 @@ class _RankingScreenState extends State<RankingScreen> {
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
+                  ),
           ),
           
           const SizedBox(width: 12),

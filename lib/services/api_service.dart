@@ -153,6 +153,39 @@ class ApiService {
     throw Exception('답변을 찾을 수 없습니다.');
   }
 
+  // 답변 좋아요/좋아요 취소
+  Future<Answer> toggleAnswerLike(String answerId) async {
+    // TODO: 실제 API 호출로 대체
+    // PUT /api/answers/{answerId}/like
+    
+    await Future.delayed(const Duration(milliseconds: 300)); // API 호출 시뮬레이션
+    
+    // 목업: 해당 답변의 좋아요 상태 토글
+    final answers = _getMockAnswers(); // static 데이터 가져오기
+    final answerIndex = answers.indexWhere((a) => a.id == answerId);
+    
+    if (answerIndex != -1) {
+      final currentAnswer = answers[answerIndex];
+      final newIsLiked = !currentAnswer.isLiked;
+      final newLikeCount = newIsLiked 
+          ? currentAnswer.likeCount + 1 
+          : currentAnswer.likeCount - 1;
+      
+      // 답변 업데이트
+      answers[answerIndex] = currentAnswer.copyWith(
+        isLiked: newIsLiked,
+        likeCount: newLikeCount,
+      );
+      
+      // static 데이터 업데이트
+      _mockAnswers = answers;
+      
+      return answers[answerIndex];
+    }
+    
+    throw Exception('답변을 찾을 수 없습니다.');
+  }
+
   // 채팅 관련 API
   Future<List<ChatMessage>> processChatMessage(String message) async {
     // TODO: 실제 AI/백엔드 API 호출로 대체
@@ -522,6 +555,7 @@ class ApiService {
         userName: '학사팀',
         createdAt: DateTime.now().subtract(const Duration(days: 4)),
         isAccepted: true,
+        isLiked: false,
         likeCount: 25,
         department: '학사처',
         isVerified: true,
@@ -534,6 +568,7 @@ class ApiService {
         userId: 'user2',
         userName: '선배',
         createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        isLiked: false,
         likeCount: 12,
         department: '컴퓨터공학과',
         studentId: '****1234',
@@ -547,6 +582,7 @@ class ApiService {
         userId: 'user3',
         userName: '도우미',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        isLiked: false,
         likeCount: 8,
         userLevel: 2,
       ),
@@ -558,6 +594,7 @@ class ApiService {
         userName: '도서관',
         createdAt: DateTime.now().subtract(const Duration(hours: 12)),
         isAccepted: true,
+        isLiked: false,
         likeCount: 18,
         department: '도서관',
         isVerified: true,
@@ -570,6 +607,7 @@ class ApiService {
         userId: 'user4',
         userName: '졸업생',
         createdAt: DateTime.now().subtract(const Duration(days: 6)),
+        isLiked: false,
         likeCount: 15,
         department: '컴퓨터공학과',
         studentId: '****5678',
@@ -583,6 +621,7 @@ class ApiService {
         userId: 'user5',
         userName: '선배',
         createdAt: DateTime.now().subtract(const Duration(days: 5)),
+        isLiked: false,
         likeCount: 9,
         department: '전자공학과',
         studentId: '****9012',
@@ -596,6 +635,7 @@ class ApiService {
         userId: 'user6',
         userName: '조교',
         createdAt: DateTime.now().subtract(const Duration(days: 4)),
+        isLiked: false,
         likeCount: 6,
         department: '컴퓨터공학과',
         isVerified: true,
@@ -609,6 +649,7 @@ class ApiService {
         userId: 'user7',
         userName: '프로그래밍 선배',
         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+        isLiked: false,
         likeCount: 12,
         department: '컴퓨터공학과',
         studentId: '****3456',
@@ -622,6 +663,7 @@ class ApiService {
         userId: 'user8',
         userName: '컴공 조교',
         createdAt: DateTime.now().subtract(const Duration(hours: 4)),
+        isLiked: false,
         likeCount: 8,
         department: '컴퓨터공학과',
         isVerified: true,
@@ -634,6 +676,7 @@ class ApiService {
         userId: 'user9',
         userName: '4학년 선배',
         createdAt: DateTime.now().subtract(const Duration(hours: 3)),
+        isLiked: false,
         likeCount: 15,
         userLevel: 2,
       ),
@@ -692,48 +735,48 @@ class ApiService {
     return [
       TopAnswerer(
         id: 'user_top1',
-        userName: '김도우미',
-        profileImageUrl: 'https://via.placeholder.com/50/4FC3F7/FFFFFF?text=김',
-        score: 2850,
+        userName: '김단국',
+        profileImageUrl: '', // 빈 문자열로 설정하여 기본 아이콘 사용
+        score: 128,
         rank: 1,
-        answerCount: 127,
-        likeCount: 342,
+        answerCount: 42,
+        likeCount: 85,
       ),
       TopAnswerer(
         id: 'user_top2',
-        userName: '박해결',
-        profileImageUrl: 'https://via.placeholder.com/50/29B6F6/FFFFFF?text=박',
-        score: 2340,
+        userName: '박대학',
+        profileImageUrl: '', // 빈 문자열로 설정하여 기본 아이콘 사용
+        score: 105,
         rank: 2,
-        answerCount: 98,
-        likeCount: 276,
+        answerCount: 35,
+        likeCount: 70,
       ),
       TopAnswerer(
         id: 'user_top3',
-        userName: '이답변',
-        profileImageUrl: 'https://via.placeholder.com/50/81C784/FFFFFF?text=이',
-        score: 1920,
+        userName: '이학생',
+        profileImageUrl: '', // 빈 문자열로 설정하여 기본 아이콘 사용
+        score: 84,
         rank: 3,
-        answerCount: 85,
-        likeCount: 198,
+        answerCount: 28,
+        likeCount: 56,
       ),
       TopAnswerer(
         id: 'user_top4',
-        userName: '최질문',
-        profileImageUrl: 'https://via.placeholder.com/50/FFB74D/FFFFFF?text=최',
-        score: 1650,
+        userName: '최교수',
+        profileImageUrl: '', // 빈 문자열로 설정하여 기본 아이콘 사용
+        score: 66,
         rank: 4,
-        answerCount: 72,
-        likeCount: 165,
+        answerCount: 22,
+        likeCount: 44,
       ),
       TopAnswerer(
         id: 'user_top5',
-        userName: '정해답',
-        profileImageUrl: 'https://via.placeholder.com/50/F06292/FFFFFF?text=정',
-        score: 1420,
+        userName: '정선배',
+        profileImageUrl: '', // 빈 문자열로 설정하여 기본 아이콘 사용
+        score: 54,
         rank: 5,
-        answerCount: 63,
-        likeCount: 142,
+        answerCount: 18,
+        likeCount: 36,
       ),
     ];
   }

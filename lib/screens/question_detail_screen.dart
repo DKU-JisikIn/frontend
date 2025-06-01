@@ -136,6 +136,34 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
     }
   }
 
+  // 답변 좋아요 처리
+  Future<void> _toggleAnswerLike(Answer answer) async {
+    try {
+      // API 호출
+      final updatedAnswer = await _apiService.toggleAnswerLike(answer.id);
+      
+      // 답변 목록 업데이트
+      setState(() {
+        final answerIndex = _answers.indexWhere((a) => a.id == answer.id);
+        if (answerIndex != -1) {
+          _answers[answerIndex] = updatedAnswer;
+        }
+      });
+
+      // 햅틱 피드백
+      if (updatedAnswer.isLiked) {
+        // 좋아요 시 가벼운 피드백
+        // HapticFeedback.lightImpact(); // 필요 시 import 'package:flutter/services.dart';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('좋아요 처리 중 오류가 발생했습니다: $e')),
+        );
+      }
+    }
+  }
+
   // 더블탭 감지
   void _handleAnswerTap(Answer answer) {
     final now = DateTime.now();
@@ -509,19 +537,62 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               children: [
                 Row(
                   children: [
-                    // 좋아요 버튼 (좌측)
-                    if (answer.likeCount > 0) ...[
-                      Icon(
-                        CupertinoIcons.heart,
-                        size: 16,
-                        color: AppTheme.lightTextColor,
+                    // 좋아요 버튼 (좌측) - 항상 표시하고 클릭 가능하게 수정
+                    GestureDetector(
+                      onTap: () => _toggleAnswerLike(answer),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: answer.isLiked 
+                              ? AppTheme.primaryColor.withOpacity(0.1)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: answer.isLiked 
+                                ? AppTheme.primaryColor.withOpacity(0.3)
+                                : Colors.transparent,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: Icon(
+                                answer.isLiked 
+                                    ? CupertinoIcons.heart_fill 
+                                    : CupertinoIcons.heart,
+                                key: ValueKey(answer.isLiked),
+                                size: 16,
+                                color: answer.isLiked 
+                                    ? AppTheme.primaryColor 
+                                    : AppTheme.lightTextColor,
+                              ),
+                            ),
+                            if (answer.likeCount > 0) ...[
+                              const SizedBox(width: 4),
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                child: Text(
+                                  answer.likeCount.toString(),
+                                  key: ValueKey(answer.likeCount),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: answer.isLiked 
+                                        ? AppTheme.primaryColor 
+                                        : AppTheme.secondaryTextColor,
+                                    fontWeight: answer.isLiked 
+                                        ? FontWeight.w600 
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        answer.likeCount.toString(),
-                        style: AppTheme.subheadingStyle.copyWith(fontSize: 12),
-                      ),
-                    ],
+                    ),
                     
                     const Spacer(),
                     

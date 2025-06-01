@@ -13,6 +13,7 @@ class Answer {
   final int likeCount;
   final bool isAccepted; // 채택된 답변인지
   final bool isAIGenerated; // AI가 생성한 답변인지
+  final bool isLiked; // 현재 사용자가 좋아요를 눌렀는지
   
   // 사용자 인증 정보
   final String? department; // 소속 학과/부서
@@ -30,6 +31,7 @@ class Answer {
     this.likeCount = 0,
     this.isAccepted = false,
     this.isAIGenerated = false,
+    this.isLiked = false,
     this.department,
     this.studentId,
     this.isVerified = false,
@@ -49,6 +51,7 @@ class Answer {
     int? likeCount,
     bool? isAccepted,
     bool? isAIGenerated,
+    bool? isLiked,
     String? department,
     String? studentId,
     bool? isVerified,
@@ -64,6 +67,7 @@ class Answer {
       likeCount: likeCount ?? this.likeCount,
       isAccepted: isAccepted ?? this.isAccepted,
       isAIGenerated: isAIGenerated ?? this.isAIGenerated,
+      isLiked: isLiked ?? this.isLiked,
       department: department ?? this.department,
       studentId: studentId ?? this.studentId,
       isVerified: isVerified ?? this.isVerified,

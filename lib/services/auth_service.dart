@@ -43,9 +43,9 @@ class AuthService {
       if (email == 'test@dankook.ac.kr' && password == 'password123') {
         _isLoggedIn = true;
         _currentUserEmail = email;
-        _currentUserName = email.split('@')[0]; // 이메일에서 이름 추출
+        _currentUserName = 'Test User';
         _currentUserNickname = '테스트사용자'; // 테스트용 닉네임
-        _currentUserProfileImageUrl = 'https://via.placeholder.com/150/4A90E2/FFFFFF?text=T'; // 테스트용 프로필 이미지
+        _currentUserProfileImageUrl = null; // 기본 프로필 아이콘 사용
         _authStateController.add(true);
         
         return {
