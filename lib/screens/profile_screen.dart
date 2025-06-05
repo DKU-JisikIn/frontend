@@ -18,48 +18,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
 
   Future<void> _handleLogout() async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundColor,
-        title: Text(
-          '로그아웃',
-          style: TextStyle(color: AppTheme.primaryTextColor),
+    await _authService.logout();
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('로그아웃되었습니다.'),
+          backgroundColor: AppTheme.primaryColor,
         ),
-        content: Text(
-          '정말 로그아웃하시겠습니까?',
-          style: TextStyle(color: AppTheme.secondaryTextColor),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              '취소',
-              style: TextStyle(color: AppTheme.secondaryTextColor),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              '로그아웃',
-              style: TextStyle(color: AppTheme.primaryColor),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLogout == true) {
-      await _authService.logout();
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('로그아웃되었습니다.'),
-            backgroundColor: AppTheme.primaryColor,
-          ),
-        );
-      }
+      );
     }
   }
 

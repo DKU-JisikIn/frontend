@@ -5,16 +5,23 @@ part 'question.g.dart';
 @JsonSerializable()
 class Question {
   final String id;
+
   final String title;
   final String content;
+
   final String userId;
   final String userName;
+
   final DateTime createdAt;
   final int viewCount;
   final int answerCount;
+
   final bool isOfficial; // 공식 자료인지 여부
   final String category; // 학사, 장학금, 교내프로그램 등
   final List<String> tags;
+
+  // 추가 필드
+  // 1. 답변 수
 
   Question({
     required this.id,

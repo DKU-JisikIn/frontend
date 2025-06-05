@@ -1,8 +1,5 @@
 # 백엔드 연동 가이드
 
-## 개요
-단국대 교내정보 Q&A 앱의 백엔드 연동을 위한 가이드입니다. 현재 프론트엔드는 완전히 구현되어 있으며, 모든 API 호출은 `lib/services/api_service.dart`에서 관리됩니다.
-
 ## 1. API 서비스 구조
 
 ### 주요 파일 위치
@@ -56,9 +53,9 @@ static const String baseUrl = 'http://localhost:3000/api';
   "email": "student@dankook.ac.kr",
   "password": "password123",
   "name": "홍길동",
-  "studentNumber": "32200000",
-  "department": "컴퓨터소프트웨어학과",
-  "affiliation": "학부생"
+  // "studentNumber": "32200000",
+  // "department": "컴퓨터소프트웨어학과",
+  // "affiliation": "학부생"
 }
 ```
 

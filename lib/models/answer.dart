@@ -6,20 +6,27 @@ part 'answer.g.dart';
 class Answer {
   final String id;
   final String questionId;
+
   final String content;
+
   final String userId;
   final String userName;
+
   final DateTime createdAt;
   final int likeCount;
+
   final bool isAccepted; // 채택된 답변인지
-  final bool isAIGenerated; // AI가 생성한 답변인지
+  // final bool isAIGenerated; // AI가 생성한 답변인지
   final bool isLiked; // 현재 사용자가 좋아요를 눌렀는지
   
   // 사용자 인증 정보
   final String? department; // 소속 학과/부서
-  final String? studentId; // 학번 (일부만 표시용)
+  // final String? studentId; // 학번 (일부만 표시용)
   final bool isVerified; // 소속 인증 여부
   final int userLevel; // 사용자 레벨 (1-5)
+
+  // 추가 필드
+  // 1. 좋아요 개수
 
   Answer({
     required this.id,
