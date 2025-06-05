@@ -6,20 +6,33 @@ part of 'answer.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Answer _$AnswerFromJson(Map<String, dynamic> json) => Answer(
-      id: json['id'] as String,
-      questionId: json['questionId'] as String,
-      content: json['content'] as String,
-      userId: json['userId'] as String,
-      userName: json['userName'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      likeCount: (json['likeCount'] as num?)?.toInt() ?? 0,
-      isAccepted: json['isAccepted'] as bool? ?? false,
-      isLiked: json['isLiked'] as bool? ?? false,
-      department: json['department'] as String?,
-      isVerified: json['isVerified'] as bool? ?? false,
-      userLevel: (json['userLevel'] as num?)?.toInt() ?? 1,
-    );
+Answer _$AnswerFromJson(Map<String, dynamic> json) {
+  $checkKeys(
+    json,
+    requiredKeys: const ['id', 'questionId', 'content', 'userId', 'userName'],
+    disallowNullValues: const [
+      'id',
+      'questionId',
+      'content',
+      'userId',
+      'userName'
+    ],
+  );
+  return Answer(
+    id: json['id'] as String,
+    questionId: json['questionId'] as String,
+    content: json['content'] as String,
+    userId: json['userId'] as String,
+    userName: json['userName'] as String,
+    createdAt: Answer._dateTimeFromJson(json['createdAt']),
+    likeCount: (json['likeCount'] as num?)?.toInt() ?? 0,
+    isAccepted: json['isAccepted'] as bool? ?? false,
+    isLiked: json['isLiked'] as bool? ?? false,
+    department: json['department'] as String?,
+    isVerified: json['isVerified'] as bool? ?? false,
+    userLevel: (json['userLevel'] as num?)?.toInt() ?? 1,
+  );
+}
 
 Map<String, dynamic> _$AnswerToJson(Answer instance) => <String, dynamic>{
       'id': instance.id,

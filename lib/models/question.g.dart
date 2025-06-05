@@ -6,21 +6,42 @@ part of 'question.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Question _$QuestionFromJson(Map<String, dynamic> json) => Question(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      content: json['content'] as String,
-      userId: json['userId'] as String,
-      userName: json['userName'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
-      answerCount: (json['answerCount'] as num?)?.toInt() ?? 0,
-      isOfficial: json['isOfficial'] as bool? ?? false,
-      category: json['category'] as String,
-      tags:
-          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-              const [],
-    );
+Question _$QuestionFromJson(Map<String, dynamic> json) {
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'id',
+      'title',
+      'content',
+      'userId',
+      'userName',
+      'createdAt',
+      'category'
+    ],
+    disallowNullValues: const [
+      'id',
+      'title',
+      'content',
+      'userId',
+      'userName',
+      'category'
+    ],
+  );
+  return Question(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    content: json['content'] as String,
+    userId: json['userId'] as String,
+    userName: json['userName'] as String,
+    createdAt: Question._dateTimeFromJson(json['createdAt']),
+    viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
+    answerCount: (json['answerCount'] as num?)?.toInt() ?? 0,
+    isOfficial: json['isOfficial'] as bool? ?? false,
+    category: json['category'] as String,
+    tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+        [],
+  );
+}
 
 Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
       'id': instance.id,
