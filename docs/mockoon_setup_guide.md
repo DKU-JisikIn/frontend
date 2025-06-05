@@ -31,6 +31,16 @@ npm install -g @mockoon/cli
 ### 3.1 인증 관련 API
 
 #### 로그인 - POST /api/auth/login
+
+**요청 본문 예제:**
+```json
+{
+  "email": "student@dankook.ac.kr",
+  "password": "password123"
+}
+```
+
+**응답 예제:**
 ```json
 {
   "route": "/auth/login",
@@ -54,6 +64,10 @@ npm install -g @mockoon/cli
   }
 }
 ```
+
+**필수 필드:**
+- `email`: 단국대학교 이메일 주소 (전체 이메일 주소)
+- `password`: 계정 비밀번호
 
 #### 로그아웃 - POST /api/auth/logout
 ```json
@@ -95,6 +109,17 @@ npm install -g @mockoon/cli
 ```
 
 #### 회원가입 - POST /api/auth/register
+
+**요청 본문 예제:**
+```json
+{
+  "email": "newuser@dankook.ac.kr",
+  "password": "password123",
+  "nickname": "신입생닉네임"
+}
+```
+
+**응답 예제:**
 ```json
 {
   "route": "/auth/register",
@@ -107,11 +132,21 @@ npm install -g @mockoon/cli
       "id": "user_new_001",
       "email": "newuser@dankook.ac.kr",
       "name": "새사용자",
-      "nickname": "신입생"
+      "nickname": "신입생닉네임",
+      "profileImageUrl": "",
+      "department": "",
+      "studentId": "",
+      "isVerified": false,
+      "userLevel": 1
     }
   }
 }
 ```
+
+**필수 필드:**
+- `email`: 단국대학교 이메일 주소 (아이디@dankook.ac.kr)
+- `password`: 비밀번호 (8자 이상, 영문+숫자 포함)
+- `nickname`: 사용자 닉네임 (2-10자, 한글/영문/숫자)
 
 ### 3.2 질문 관련 API
 
@@ -211,6 +246,137 @@ npm install -g @mockoon/cli
   }
 }
 ```
+
+#### 자주 받은 질문 - GET /api/questions/frequent
+```json
+{
+  "route": "/questions/frequent",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "questions": [
+      {
+        "id": "q003",
+        "title": "기숙사 신청은 언제부터인가요?",
+        "content": "2024년도 기숙사 신청 일정을 알고 싶습니다.",
+        "userId": "admin",
+        "userName": "생활관팀",
+        "createdAt": "2024-01-18T11:00:00Z",
+        "category": "기타",
+        "isOfficial": true,
+        "viewCount": 189,
+        "answerCount": 1,
+        "tags": ["기숙사", "신청", "일정"]
+      },
+      {
+        "id": "q004", 
+        "title": "학생증 재발급은 어떻게 하나요?",
+        "content": "학생증을 분실해서 재발급 받고 싶습니다.",
+        "userId": "student002",
+        "userName": "김학생",
+        "createdAt": "2024-01-17T15:30:00Z",
+        "category": "기타",
+        "isOfficial": false,
+        "viewCount": 156,
+        "answerCount": 2,
+        "tags": ["학생증", "재발급"]
+      }
+    ]
+  }
+}
+```
+
+#### 공식 질문 - GET /api/questions/official
+```json
+{
+  "route": "/questions/official",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "questions": [
+      {
+        "id": "q005",
+        "title": "2024년도 등록금 납부 안내",
+        "content": "2024년도 1학기 등록금 납부 일정 및 방법 안내입니다.",
+        "userId": "admin",
+        "userName": "재무팀",
+        "createdAt": "2024-01-20T09:00:00Z",
+        "category": "장학금",
+        "isOfficial": true,
+        "viewCount": 445,
+        "answerCount": 1,
+        "tags": ["등록금", "납부", "일정"]
+      }
+    ]
+  }
+}
+```
+
+#### 답변받지 못한 질문 - GET /api/questions/unanswered
+```json
+{
+  "route": "/questions/unanswered",
+  "method": "GET", 
+  "status": 200,
+  "response": {
+    "questions": [
+      {
+        "id": "q006",
+        "title": "캠퍼스 내 자전거 주차장 위치가 궁금해요",
+        "content": "천안캠퍼스에서 자전거를 세울 수 있는 곳이 어디인지 알고 싶습니다.",
+        "userId": "student003",
+        "userName": "박학생",
+        "createdAt": "2024-01-21T13:45:00Z",
+        "category": "기타",
+        "isOfficial": false,
+        "viewCount": 23,
+        "answerCount": 0,
+        "tags": ["자전거", "주차장", "캠퍼스"]
+      },
+      {
+        "id": "q007",
+        "title": "졸업논문 제출 마감일이 언제인가요?",
+        "content": "2024년도 전기 졸업예정자 논문 제출 마감일을 알고 싶습니다.",
+        "userId": "student004", 
+        "userName": "이학생",
+        "createdAt": "2024-01-21T16:20:00Z",
+        "category": "학사",
+        "isOfficial": false,
+        "viewCount": 34,
+        "answerCount": 0,
+        "tags": ["졸업논문", "마감일", "제출"]
+      }
+    ]
+  }
+}
+```
+
+#### 질문 검색 - GET /api/questions/search
+```json
+{
+  "route": "/questions/search",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "questions": [
+      {
+        "id": "q001",
+        "title": "2024년 1학기 수강신청 일정이 언제인가요?",
+        "content": "수강신청 일정을 알고 싶습니다.",
+        "userId": "admin",
+        "userName": "학사팀",
+        "createdAt": "2024-01-15T09:00:00Z",
+        "category": "학사",
+        "isOfficial": true,
+        "viewCount": 150,
+        "answerCount": 1,
+        "tags": ["수강신청", "일정", "학사"]
+      }
+    ]
+  }
+}
+```
+**쿼리 파라미터**: `q` (검색어)
 
 ### 3.3 답변 관련 API
 
@@ -413,6 +579,65 @@ npm install -g @mockoon/cli
 }
 ```
 
+### 3.6 사용자 관련 API
+
+#### 사용자 질문 통계 - GET /api/users/{userId}/question-stats
+```json
+{
+  "route": "/users/:userId/question-stats",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "total": 8,
+    "answered": 5,
+    "unanswered": 3
+  }
+}
+```
+**인증**: JWT 토큰 필요  
+**설명**: 특정 사용자가 작성한 질문들의 통계 정보
+
+#### 사용자 질문 목록 - GET /api/users/{userId}/questions
+```json
+{
+  "route": "/users/:userId/questions",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "questions": [
+      {
+        "id": "q008",
+        "title": "사용자가 작성한 질문 1",
+        "content": "사용자가 작성한 첫 번째 질문 내용",
+        "userId": "user_001",
+        "userName": "김학생",
+        "createdAt": "2024-01-20T10:00:00Z",
+        "category": "학사",
+        "isOfficial": false,
+        "viewCount": 15,
+        "answerCount": 1,
+        "tags": ["질문", "학사"]
+      },
+      {
+        "id": "q009",
+        "title": "사용자가 작성한 질문 2", 
+        "content": "사용자가 작성한 두 번째 질문 내용",
+        "userId": "user_001",
+        "userName": "김학생",
+        "createdAt": "2024-01-19T14:30:00Z",
+        "category": "기타",
+        "isOfficial": false,
+        "viewCount": 8,
+        "answerCount": 0,
+        "tags": ["질문", "기타"]
+      }
+    ]
+  }
+}
+```
+**인증**: JWT 토큰 필요  
+**쿼리 파라미터**: `filter` (선택사항: 'answered', 'unanswered', 'all')
+
 ## 4. 실행 및 테스트
 
 ### 4.1 Mockoon 서버 실행
@@ -420,14 +645,54 @@ npm install -g @mockoon/cli
 2. "Start" 버튼 클릭
 3. `http://localhost:3001` 서버 실행 확인
 
-### 4.2 Flutter 앱 테스트
+### 4.2 필수 API 엔드포인트 체크리스트
+
+다음 **24개의 API 엔드포인트**를 모두 Mockoon에 설정해야 합니다:
+
+#### 인증 관련 (5개)
+- [ ] POST `/api/auth/login` - 로그인
+- [ ] POST `/api/auth/logout` - 로그아웃  
+- [ ] POST `/api/auth/register` - 회원가입
+- [ ] POST `/api/auth/send-verification` - 이메일 인증 코드 전송
+- [ ] POST `/api/auth/verify-email` - 이메일 인증
+
+#### 질문 관련 (9개)
+- [ ] GET `/api/questions` - 질문 목록 조회
+- [ ] GET `/api/questions/{id}` - 특정 질문 조회  
+- [ ] POST `/api/questions` - 새 질문 작성
+- [ ] GET `/api/questions/popular` - 인기 질문 목록
+- [ ] GET `/api/questions/frequent` - 자주 받은 질문 목록
+- [ ] GET `/api/questions/official` - 공식 질문 목록
+- [ ] GET `/api/questions/unanswered` - 답변받지 못한 질문 목록
+- [ ] GET `/api/questions/search` - 질문 검색
+- [ ] POST `/api/questions/from-chat` - 채팅에서 질문 생성
+
+#### 답변 관련 (4개)
+- [ ] GET `/api/questions/{id}/answers` - 특정 질문의 답변 목록
+- [ ] POST `/api/answers` - 새 답변 작성
+- [ ] PUT `/api/answers/{id}/accept` - 답변 채택
+- [ ] PUT `/api/answers/{id}/like` - 답변 좋아요/좋아요 취소
+
+#### 통계 관련 (4개)
+- [ ] GET `/api/statistics/today/questions` - 오늘의 질문 수
+- [ ] GET `/api/statistics/today/answers` - 오늘의 답변 수
+- [ ] GET `/api/statistics/total/answers` - 전체 답변 수
+- [ ] GET `/api/statistics/top-answerers` - 우수 답변자 목록
+
+#### 사용자 관련 (2개)
+- [ ] GET `/api/users/{userId}/question-stats` - 사용자 질문 통계
+- [ ] GET `/api/users/{userId}/questions` - 사용자 질문 목록
+
+**총 24개 엔드포인트 ✅**
+
+### 4.3 Flutter 앱 테스트
 1. Flutter 앱 실행
 2. 로그인 화면에서 테스트 계정 사용:
    - **이메일**: test@dankook.ac.kr
    - **비밀번호**: password123
 3. 각 기능별 API 호출 테스트
 
-### 4.3 API 테스트 도구
+### 4.4 API 테스트 도구
 #### Postman/Insomnia로 직접 테스트
 ```bash
 # 로그인 테스트

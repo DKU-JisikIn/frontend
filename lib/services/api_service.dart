@@ -3,10 +3,14 @@ import 'package:http/http.dart' as http;
 import '../models/question.dart';
 import '../models/answer.dart';
 import '../models/chat_message.dart';
+import '../services/auth_service.dart';
 
 class ApiService {
   // Mockoon 로컬 서버 URL (기본 포트 3001)
   static const String baseUrl = 'http://localhost:3001/api';
+  
+  // AuthService 인스턴스
+  final AuthService _authService = AuthService();
   
   // HTTP 헤더 설정
   Map<String, String> get headers => {
@@ -15,10 +19,10 @@ class ApiService {
   };
 
   // 인증이 필요한 요청용 헤더 (JWT 토큰 포함)
-  Map<String, String> getAuthHeaders(String? token) => {
+  Map<String, String> get authHeaders => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    if (token != null) 'Authorization': 'Bearer $token',
+    if (_authService.authToken != null) 'Authorization': 'Bearer ${_authService.authToken}',
   };
 
   // 질문 목록 조회
@@ -33,7 +37,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          return [];
+        }
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('질문 목록 조회 실패: ${response.statusCode}');
@@ -53,12 +61,30 @@ class ApiService {
         'period': period,
       });
 
+      print('Popular questions API 호출: $uri'); // 디버그 로그 추가
+
       final response = await http.get(uri, headers: headers);
+
+      print('Popular questions 응답 상태: ${response.statusCode}'); // 디버그 로그 추가
+      print('Popular questions 응답 본문: ${response.body}'); // 디버그 로그 추가
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
-        return questionsJson.map((json) => Question.fromJson(json)).toList();
+        print('Popular questions 파싱된 데이터: $data'); // 디버그 로그 추가
+        
+        // Mockoon 응답 구조에 맞게 수정: data['response']['questions'] 또는 data['questions']
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          print('Popular questions: questionsJson이 null입니다'); // 디버그 로그 추가
+          return [];
+        }
+        
+        print('Popular questions 개수: ${questionsJson.length}'); // 디버그 로그 추가
+        
+        final questions = questionsJson.map((json) => Question.fromJson(json)).toList();
+        print('Popular questions 변환 완료: ${questions.length}개'); // 디버그 로그 추가
+        
+        return questions;
       } else {
         throw Exception('인기 질문 조회 실패: ${response.statusCode}');
       }
@@ -80,7 +106,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          return [];
+        }
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('자주 받은 질문 조회 실패: ${response.statusCode}');
@@ -102,7 +132,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          return [];
+        }
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('공식 질문 조회 실패: ${response.statusCode}');
@@ -124,7 +158,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          return [];
+        }
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('답변받지 못한 질문 조회 실패: ${response.statusCode}');
@@ -146,7 +184,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          return [];
+        }
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('질문 검색 실패: ${response.statusCode}');
@@ -182,7 +224,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/questions'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
         body: json.encode(question.toJson()),
       );
 
@@ -208,7 +250,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final answersJson = data['answers'] as List;
+        // null safety 체크 추가 및 Mockoon 응답 구조에 맞게 수정
+        final answersJson = (data['response']?['answers'] ?? data['answers']) as List?;
+        if (answersJson == null) {
+          return []; // null인 경우 빈 리스트 반환
+        }
         return answersJson.map((json) => Answer.fromJson(json)).toList();
       } else {
         throw Exception('답변 목록 조회 실패: ${response.statusCode}');
@@ -224,7 +270,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/answers'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
         body: json.encode(answer.toJson()),
       );
 
@@ -245,7 +291,7 @@ class ApiService {
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/answers/$answerId/accept'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
       );
 
       if (response.statusCode == 200) {
@@ -265,7 +311,7 @@ class ApiService {
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/answers/$answerId/like'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
       );
 
       if (response.statusCode == 200) {
@@ -285,7 +331,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/chat/process'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
         body: json.encode({
           'message': message,
         }),
@@ -336,7 +382,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/questions/from-chat'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
         body: json.encode({
           'title': title,
           'content': content,
@@ -380,7 +426,9 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['count'] ?? 0;
+        // Mockoon 응답 구조에 맞게 수정
+        final responseData = data['response'] ?? data;
+        return responseData['count'] ?? 0;
       } else {
         throw Exception('오늘의 질문 수 조회 실패: ${response.statusCode}');
       }
@@ -400,7 +448,9 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['count'] ?? 0;
+        // Mockoon 응답 구조에 맞게 수정
+        final responseData = data['response'] ?? data;
+        return responseData['count'] ?? 0;
       } else {
         throw Exception('오늘의 답변 수 조회 실패: ${response.statusCode}');
       }
@@ -420,7 +470,9 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['count'] ?? 0;
+        // Mockoon 응답 구조에 맞게 수정
+        final responseData = data['response'] ?? data;
+        return responseData['count'] ?? 0;
       } else {
         throw Exception('전체 답변 수 조회 실패: ${response.statusCode}');
       }
@@ -441,7 +493,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final topAnswerersJson = data['topAnswerers'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final topAnswerersJson = (data['response']?['topAnswerers'] ?? data['topAnswerers']) as List?;
+        if (topAnswerersJson == null) {
+          return [];
+        }
         return topAnswerersJson.map((json) => TopAnswerer(
           id: json['id'],
           userName: json['userName'],
@@ -465,15 +521,17 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/users/$userId/question-stats'),
-        headers: getAuthHeaders(null), // TODO: 실제 토큰 전달
+        headers: authHeaders, // 인증 토큰 포함
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        // Mockoon 응답 구조에 맞게 수정
+        final responseData = data['response'] ?? data;
         return {
-          'total': data['total'] ?? 0,
-          'answered': data['answered'] ?? 0,
-          'unanswered': data['unanswered'] ?? 0,
+          'total': responseData['total'] ?? 0,
+          'answered': responseData['answered'] ?? 0,
+          'unanswered': responseData['unanswered'] ?? 0,
         };
       } else {
         throw Exception('사용자 질문 통계 조회 실패: ${response.statusCode}');
@@ -495,11 +553,15 @@ class ApiService {
         if (filter != null) 'filter': filter,
       });
 
-      final response = await http.get(uri, headers: getAuthHeaders(null)); // TODO: 실제 토큰 전달
+      final response = await http.get(uri, headers: authHeaders); // 인증 토큰 포함
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final questionsJson = data['questions'] as List;
+        // Mockoon 응답 구조에 맞게 수정
+        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
+        if (questionsJson == null) {
+          return [];
+        }
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('사용자 질문 목록 조회 실패: ${response.statusCode}');
@@ -515,35 +577,55 @@ class ApiService {
   
   === API 엔드포인트 가이드 ===
   
-  1. 질문 관련 API:
+  1. 인증 관련 API:
+     POST /api/auth/login                   - 로그인
+     POST /api/auth/logout                  - 로그아웃
+     POST /api/auth/register                - 회원가입
+     POST /api/auth/send-verification       - 이메일 인증 코드 전송
+     POST /api/auth/verify-email            - 이메일 인증
+  
+  2. 질문 관련 API:
      GET  /api/questions                    - 질문 목록 조회
      GET  /api/questions/{id}               - 특정 질문 조회
      POST /api/questions                    - 새 질문 작성
      GET  /api/questions/popular            - 인기 질문 목록
      GET  /api/questions/frequent           - 자주 받은 질문 목록
      GET  /api/questions/official           - 공식 질문 목록
+     GET  /api/questions/unanswered         - 답변받지 못한 질문 목록
      GET  /api/questions/search?q={query}   - 질문 검색
+     POST /api/questions/from-chat          - 채팅에서 질문 생성
   
-  2. 답변 관련 API:
+  3. 답변 관련 API:
      GET  /api/questions/{id}/answers       - 특정 질문의 답변 목록
      POST /api/answers                      - 새 답변 작성
      PUT  /api/answers/{id}/accept          - 답변 채택
-     PUT  /api/answers/{id}/like            - 답변 좋아요
+     PUT  /api/answers/{id}/like            - 답변 좋아요/좋아요 취소
   
-  3. 채팅 관련 API:
+  4. 채팅 관련 API:
      POST /api/chat/process                 - 채팅 메시지 처리 (AI 응답)
   
-  4. 카테고리:
+  5. 통계 관련 API:
+     GET  /api/statistics/today/questions   - 오늘의 질문 수
+     GET  /api/statistics/today/answers     - 오늘의 답변 수
+     GET  /api/statistics/total/answers     - 전체 답변 수
+     GET  /api/statistics/top-answerers     - 우수 답변자 목록
+  
+  6. 사용자 관련 API:
+     GET  /api/users/{userId}/question-stats - 사용자 질문 통계
+     GET  /api/users/{userId}/questions      - 사용자 질문 목록
+  
+  7. 카테고리:
      - 학사
      - 장학금
      - 교내프로그램
      - 취업
      - 기타
   
-  5. 요청/응답 형식:
+  8. 요청/응답 형식:
      - Content-Type: application/json
      - 모든 날짜는 ISO 8601 형식 (2024-01-01T00:00:00Z)
      - 페이지네이션: ?page=1&limit=10
+     - JWT 인증: Authorization: Bearer {token}
   
   */
 }

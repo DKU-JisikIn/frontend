@@ -419,25 +419,25 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     ),
                   ),
                 
-                // AI 태그 (있는 경우)
-                if (answer.isAIGenerated) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.secondaryColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'AI',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+                // AI 태그 (있는 경우) - 현재 Answer 모델에서 주석 처리됨
+                // if (answer.isAIGenerated) ...[
+                //   const SizedBox(width: 6),
+                //   Container(
+                //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                //     decoration: BoxDecoration(
+                //       color: AppTheme.secondaryColor,
+                //       borderRadius: BorderRadius.circular(12),
+                //     ),
+                //     child: const Text(
+                //       'AI',
+                //       style: TextStyle(
+                //         color: Colors.white,
+                //         fontSize: 11,
+                //         fontWeight: FontWeight.bold,
+                //       ),
+                //     ),
+                //   ),
+                // ],
                 
                 const Spacer(),
                 

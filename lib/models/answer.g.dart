@@ -15,10 +15,8 @@ Answer _$AnswerFromJson(Map<String, dynamic> json) => Answer(
       createdAt: DateTime.parse(json['createdAt'] as String),
       likeCount: (json['likeCount'] as num?)?.toInt() ?? 0,
       isAccepted: json['isAccepted'] as bool? ?? false,
-      isAIGenerated: json['isAIGenerated'] as bool? ?? false,
       isLiked: json['isLiked'] as bool? ?? false,
       department: json['department'] as String?,
-      studentId: json['studentId'] as String?,
       isVerified: json['isVerified'] as bool? ?? false,
       userLevel: (json['userLevel'] as num?)?.toInt() ?? 1,
     );
@@ -32,10 +30,8 @@ Map<String, dynamic> _$AnswerToJson(Answer instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'likeCount': instance.likeCount,
       'isAccepted': instance.isAccepted,
-      'isAIGenerated': instance.isAIGenerated,
       'isLiked': instance.isLiked,
       'department': instance.department,
-      'studentId': instance.studentId,
       'isVerified': instance.isVerified,
       'userLevel': instance.userLevel,
     };
