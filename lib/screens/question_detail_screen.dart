@@ -139,10 +139,25 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   // 답변 좋아요 처리
   Future<void> _toggleAnswerLike(Answer answer) async {
     try {
+      // 즉시 UI 상태 업데이트 (낙관적 업데이트)
+      setState(() {
+        final answerIndex = _answers.indexWhere((a) => a.id == answer.id);
+        if (answerIndex != -1) {
+          final currentAnswer = _answers[answerIndex];
+          // 좋아요 상태와 카운트를 즉시 토글
+          _answers[answerIndex] = currentAnswer.copyWith(
+            isLiked: !currentAnswer.isLiked,
+            likeCount: currentAnswer.isLiked 
+              ? currentAnswer.likeCount - 1 
+              : currentAnswer.likeCount + 1,
+          );
+        }
+      });
+
       // API 호출
       final updatedAnswer = await _apiService.toggleAnswerLike(answer.id);
       
-      // 답변 목록 업데이트
+      // API 응답으로 최종 상태 동기화
       setState(() {
         final answerIndex = _answers.indexWhere((a) => a.id == answer.id);
         if (answerIndex != -1) {
@@ -156,6 +171,15 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
         // HapticFeedback.lightImpact(); // 필요 시 import 'package:flutter/services.dart';
       }
     } catch (e) {
+      // API 호출 실패 시 원래 상태로 롤백
+      setState(() {
+        final answerIndex = _answers.indexWhere((a) => a.id == answer.id);
+        if (answerIndex != -1) {
+          // 원래 상태로 복원
+          _answers[answerIndex] = answer;
+        }
+      });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('좋아요 처리 중 오류가 발생했습니다: $e')),

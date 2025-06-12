@@ -1,0 +1,296 @@
+{
+  "uuid": "like-toggle-test",
+  "lastMigration": 29,
+  "name": "Like Toggle Test API",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "questions-answers",
+      "type": "http",
+      "documentation": "질문의 답변 목록 조회",
+      "method": "get",
+      "endpoint": "api/questions/:id/answers",
+      "responses": [
+        {
+          "uuid": "answers-list",
+          "body": "{\n  \"answers\": [\n    {\n      \"id\": \"a001\",\n      \"questionId\": \"q001\",\n      \"content\": \"2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\\n자세한 일정은 학사공지를 확인해주세요.\",\n      \"userId\": \"admin\",\n      \"userName\": \"학사팀\",\n      \"createdAt\": \"2024-01-16T10:00:00Z\",\n      \"isAccepted\": true,\n      \"isLiked\": false,\n      \"likeCount\": 25,\n      \"department\": \"학사처\",\n      \"isVerified\": true,\n      \"userLevel\": 5\n    },\n    {\n      \"id\": \"a002\",\n      \"questionId\": \"q001\",\n      \"content\": \"추가로 수강신청 관련해서 궁금한 점이 있으시면 학사팀으로 문의해주세요.\",\n      \"userId\": \"student001\",\n      \"userName\": \"김학생\",\n      \"createdAt\": \"2024-01-17T14:30:00Z\",\n      \"isAccepted\": false,\n      \"isLiked\": true,\n      \"likeCount\": 12,\n      \"department\": \"컴퓨터공학과\",\n      \"isVerified\": false,\n      \"userLevel\": 2\n    },\n    {\n      \"id\": \"a003\",\n      \"questionId\": \"q001\",\n      \"content\": \"수강신청 시스템 접속이 안 될 때는 캐시를 삭제하고 다시 시도해보세요.\",\n      \"userId\": \"student002\",\n      \"userName\": \"박학생\",\n      \"createdAt\": \"2024-01-18T09:15:00Z\",\n      \"isAccepted\": false,\n      \"isLiked\": false,\n      \"likeCount\": 8,\n      \"department\": \"소프트웨어학과\",\n      \"isVerified\": false,\n      \"userLevel\": 3\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "답변 목록",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "answer-like-toggle",
+      "type": "http",
+      "documentation": "답변 좋아요 토글 - SEQUENTIAL 모드로 좋아요/취소 교대로 동작",
+      "method": "put",
+      "endpoint": "api/answers/:id/like",
+      "responses": [
+        {
+          "uuid": "like-added",
+          "body": "{\n  \"id\": \"a001\",\n  \"questionId\": \"q001\",\n  \"content\": \"2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\\n자세한 일정은 학사공지를 확인해주세요.\",\n  \"userId\": \"admin\",\n  \"userName\": \"학사팀\",\n  \"createdAt\": \"2024-01-16T10:00:00Z\",\n  \"isAccepted\": true,\n  \"isLiked\": true,\n  \"likeCount\": 26,\n  \"department\": \"학사처\",\n  \"isVerified\": true,\n  \"userLevel\": 5,\n  \"action\": \"liked\",\n  \"message\": \"좋아요를 추가했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "좋아요 추가",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        },
+        {
+          "uuid": "like-removed",
+          "body": "{\n  \"id\": \"a001\",\n  \"questionId\": \"q001\",\n  \"content\": \"2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\\n자세한 일정은 학사공지를 확인해주세요.\",\n  \"userId\": \"admin\",\n  \"userName\": \"학사팀\",\n  \"createdAt\": \"2024-01-16T10:00:00Z\",\n  \"isAccepted\": true,\n  \"isLiked\": false,\n  \"likeCount\": 25,\n  \"department\": \"학사처\",\n  \"isVerified\": true,\n  \"userLevel\": 5,\n  \"action\": \"unliked\",\n  \"message\": \"좋아요를 취소했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "좋아요 취소",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": "SEQUENTIAL"
+    },
+    {
+      "uuid": "answer-like-a002",
+      "type": "http",
+      "documentation": "a002 답변 좋아요 토글",
+      "method": "put",
+      "endpoint": "api/answers/a002/like",
+      "responses": [
+        {
+          "uuid": "a002-like-added",
+          "body": "{\n  \"id\": \"a002\",\n  \"questionId\": \"q001\",\n  \"content\": \"추가로 수강신청 관련해서 궁금한 점이 있으시면 학사팀으로 문의해주세요.\",\n  \"userId\": \"student001\",\n  \"userName\": \"김학생\",\n  \"createdAt\": \"2024-01-17T14:30:00Z\",\n  \"isAccepted\": false,\n  \"isLiked\": true,\n  \"likeCount\": 13,\n  \"department\": \"컴퓨터공학과\",\n  \"isVerified\": false,\n  \"userLevel\": 2,\n  \"action\": \"liked\",\n  \"message\": \"좋아요를 추가했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "a002 좋아요 추가",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        },
+        {
+          "uuid": "a002-like-removed",
+          "body": "{\n  \"id\": \"a002\",\n  \"questionId\": \"q001\",\n  \"content\": \"추가로 수강신청 관련해서 궁금한 점이 있으시면 학사팀으로 문의해주세요.\",\n  \"userId\": \"student001\",\n  \"userName\": \"김학생\",\n  \"createdAt\": \"2024-01-17T14:30:00Z\",\n  \"isAccepted\": false,\n  \"isLiked\": false,\n  \"likeCount\": 12,\n  \"department\": \"컴퓨터공학과\",\n  \"isVerified\": false,\n  \"userLevel\": 2,\n  \"action\": \"unliked\",\n  \"message\": \"좋아요를 취소했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "a002 좋아요 취소",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": "SEQUENTIAL"
+    },
+    {
+      "uuid": "answer-like-a003",
+      "type": "http",
+      "documentation": "a003 답변 좋아요 토글",
+      "method": "put",
+      "endpoint": "api/answers/a003/like",
+      "responses": [
+        {
+          "uuid": "a003-like-added",
+          "body": "{\n  \"id\": \"a003\",\n  \"questionId\": \"q001\",\n  \"content\": \"수강신청 시스템 접속이 안 될 때는 캐시를 삭제하고 다시 시도해보세요.\",\n  \"userId\": \"student002\",\n  \"userName\": \"박학생\",\n  \"createdAt\": \"2024-01-18T09:15:00Z\",\n  \"isAccepted\": false,\n  \"isLiked\": true,\n  \"likeCount\": 9,\n  \"department\": \"소프트웨어학과\",\n  \"isVerified\": false,\n  \"userLevel\": 3,\n  \"action\": \"liked\",\n  \"message\": \"좋아요를 추가했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "a003 좋아요 추가",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        },
+        {
+          "uuid": "a003-like-removed",
+          "body": "{\n  \"id\": \"a003\",\n  \"questionId\": \"q001\",\n  \"content\": \"수강신청 시스템 접속이 안 될 때는 캐시를 삭제하고 다시 시도해보세요.\",\n  \"userId\": \"student002\",\n  \"userName\": \"박학생\",\n  \"createdAt\": \"2024-01-18T09:15:00Z\",\n  \"isAccepted\": false,\n  \"isLiked\": false,\n  \"likeCount\": 8,\n  \"department\": \"소프트웨어학과\",\n  \"isVerified\": false,\n  \"userLevel\": 3,\n  \"action\": \"unliked\",\n  \"message\": \"좋아요를 취소했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "a003 좋아요 취소",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": "SEQUENTIAL"
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "questions-answers"
+    },
+    {
+      "type": "route",
+      "uuid": "answer-like-toggle"
+    },
+    {
+      "type": "route",
+      "uuid": "answer-like-a002"
+    },
+    {
+      "type": "route",
+      "uuid": "answer-like-a003"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {},
+  "cors": true,
+  "headers": [
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type,Origin,Accept,Authorization,Content-Length,X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+} 

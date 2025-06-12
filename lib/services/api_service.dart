@@ -309,14 +309,44 @@ class ApiService {
   // 답변 좋아요/좋아요 취소
   Future<Answer> toggleAnswerLike(String answerId) async {
     try {
+      print('좋아요 API 호출: PUT $baseUrl/answers/$answerId/like'); // 디버깅 로그
+      
       final response = await http.put(
         Uri.parse('$baseUrl/answers/$answerId/like'),
         headers: authHeaders, // 인증 토큰 포함
       );
 
+      print('좋아요 API 응답 상태: ${response.statusCode}'); // 디버깅 로그
+      print('좋아요 API 응답 본문: ${response.body}'); // 디버깅 로그
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return Answer.fromJson(data);
+        print('좋아요 API 파싱된 데이터: $data'); // 디버깅 로그
+        
+        // Mockoon 응답이 래핑되어 있는지 확인
+        final answerData = data['response'] ?? data;
+        
+        // 필수 필드들이 null인지 확인하고 안전하게 처리
+        if (answerData['id'] == null) {
+          throw Exception('응답에서 id 필드가 null입니다');
+        }
+        if (answerData['questionId'] == null) {
+          throw Exception('응답에서 questionId 필드가 null입니다');
+        }
+        if (answerData['content'] == null) {
+          throw Exception('응답에서 content 필드가 null입니다');
+        }
+        if (answerData['userId'] == null) {
+          throw Exception('응답에서 userId 필드가 null입니다');
+        }
+        if (answerData['userName'] == null) {
+          throw Exception('응답에서 userName 필드가 null입니다');
+        }
+        if (answerData['createdAt'] == null) {
+          throw Exception('응답에서 createdAt 필드가 null입니다');
+        }
+        
+        return Answer.fromJson(answerData);
       } else {
         throw Exception('좋아요 처리 실패: ${response.statusCode}');
       }
