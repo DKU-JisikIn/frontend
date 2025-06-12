@@ -378,6 +378,37 @@ npm install -g @mockoon/cli
 ```
 **쿼리 파라미터**: `q` (검색어)
 
+#### 채팅에서 질문 생성 - POST /api/questions/from-chat
+```json
+{
+  "route": "/questions/from-chat",
+  "method": "POST",
+  "status": 201,
+  "response": {
+    "id": "q_chat_001",
+    "title": "채팅에서 생성된 질문",
+    "content": "채팅 대화를 기반으로 생성된 질문 내용",
+    "userId": "user_001",
+    "userName": "학생",
+    "createdAt": "2024-01-20T16:30:00Z",
+    "category": "기타",
+    "isOfficial": false,
+    "viewCount": 0,
+    "answerCount": 0,
+    "tags": []
+  }
+}
+```
+
+**Request Body 예시:**
+```json
+{
+  "title": "채팅에서 생성된 질문 제목",
+  "content": "채팅에서 생성된 질문 내용",
+  "category": "학사"
+}
+```
+
 ### 3.3 답변 관련 API
 
 #### 특정 질문의 답변 목록 - GET /api/questions/{id}/answers
@@ -449,7 +480,7 @@ npm install -g @mockoon/cli
 }
 ```
 
-#### 답변 좋아요 - PUT /api/answers/{id}/like
+#### 답변 좋아요 - PUT /api/answers/:id/like
 ```json
 {
   "route": "/answers/:id/like",
@@ -542,39 +573,184 @@ npm install -g @mockoon/cli
 ### 3.5 채팅 관련 API
 
 #### 채팅 메시지 처리 - POST /api/chat/process
+
+**시나리오 1: 수강신청 관련 질문**
 ```json
 {
   "route": "/chat/process",
   "method": "POST",
   "status": 200,
   "response": {
-    "response": "안녕하세요! 무엇을 도와드릴까요?",
+    "response": {
+      "answer": "2024년 1학기 수강신청은 2월 15일 오전 9시부터 시작됩니다. 수강신청 시스템은 단국대학교 포털사이트(portal.dankook.ac.kr)에서 접속 가능합니다.",
+      "confidence": 0.95,
+      "source": "official_document",
+      "category": "학사"
+    },
+    "relatedQuestions": [
+      {
+        "id": "q001",
+        "title": "수강신청 시스템 사용법",
+        "similarity": 0.87
+      },
+      {
+        "id": "q003",
+        "title": "수강신청 변경 및 취소 방법",
+        "similarity": 0.75
+      }
+    ],
+    "suggestions": [
+      "수강신청 절차가 궁금하시나요?",
+      "수강신청 시스템 접속 방법을 알려드릴까요?",
+      "수강신청 관련 문의처를 안내해드릴까요?"
+    ],
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    },
     "metadata": {
-      "type": "general_response",
-      "timestamp": "2024-01-20T16:00:00Z"
+      "type": "direct_answer",
+      "timestamp": "2024-01-20T16:00:05Z",
+      "processingTime": 234,
+      "aiModel": "university_qa_v1.0"
     }
   }
 }
 ```
 
-#### 채팅에서 질문 생성 - POST /api/questions/from-chat
+**시나리오 2: 새로운 질문 (기존 답변 없음)**
 ```json
 {
-  "route": "/questions/from-chat",
-  "method": "POST",
-  "status": 201,
+  "route": "/chat/process",
+  "method": "POST", 
+  "status": 200,
   "response": {
-    "id": "q_chat_001",
-    "title": "채팅에서 생성된 질문",
-    "content": "채팅 대화를 기반으로 생성된 질문 내용",
+    "response": {
+      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
+      "confidence": 0.3,
+      "source": "no_match",
+      "category": "기타"
+    },
+    "relatedQuestions": [],
+    "suggestions": [
+      "질문을 게시판에 등록해보세요",
+      "비슷한 다른 질문들을 확인해보세요"
+    ],
+    "actions": {
+      "canCreateQuestion": true,
+      "suggestedTitle": "사용자의 질문 제목 자동 생성",
+      "suggestedCategory": "기타",
+      "suggestedContent": "사용자 메시지를 기반으로 한 질문 내용"
+    },
+    "metadata": {
+      "type": "no_answer",
+      "timestamp": "2024-01-20T16:00:05Z",
+      "processingTime": 156,
+      "aiModel": "university_qa_v1.0"
+    }
+  }
+}
+```
+
+**시나리오 3: 장학금 관련 질문**
+```json
+{
+  "route": "/chat/process",
+  "method": "POST",
+  "status": 200,
+  "response": {
+    "response": {
+      "answer": "2024년 1학기 장학금 신청은 1월 15일부터 2월 10일까지입니다. 성적장학금, 생활장학금, 봉사장학금 등 다양한 종류가 있으며, 단국대학교 장학팀(031-8005-2000)으로 문의하시면 자세한 안내를 받으실 수 있습니다.",
+      "confidence": 0.92,
+      "source": "official_document",
+      "category": "장학금"
+    },
+    "relatedQuestions": [
+      {
+        "id": "q010",
+        "title": "성적장학금 신청 자격",
+        "similarity": 0.89
+      },
+      {
+        "id": "q015",
+        "title": "생활장학금 신청 방법",
+        "similarity": 0.82
+      }
+    ],
+    "suggestions": [
+      "장학금 종류별 자격요건이 궁금하시나요?",
+      "장학금 신청 절차를 안내해드릴까요?",
+      "장학금 관련 서류가 궁금하시나요?"
+    ],
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    },
+    "metadata": {
+      "type": "direct_answer",
+      "timestamp": "2024-01-20T16:00:05Z",
+      "processingTime": 198,
+      "aiModel": "university_qa_v1.0"
+    }
+  }
+}
+```
+
+**시나리오 4: 일반적인 인사 또는 모호한 질문**
+```json
+{
+  "route": "/chat/process", 
+  "method": "POST",
+  "status": 200,
+  "response": {
+    "response": {
+      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
+      "confidence": 0.99,
+      "source": "system_response",
+      "category": "일반"
+    },
+    "relatedQuestions": [],
+    "suggestions": [
+      "수강신청 관련 질문하기",
+      "장학금 정보 문의하기", 
+      "교내 프로그램 알아보기",
+      "취업 지원 서비스 문의하기"
+    ],
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    },
+    "metadata": {
+      "type": "general_response",
+      "timestamp": "2024-01-20T16:00:05Z",
+      "processingTime": 45,
+      "aiModel": "university_qa_v1.0"
+    }
+  }
+}
+```
+
+**Request Body 예시:**
+```json
+{
+  "message": "수강신청은 언제 시작하나요?",
+  "context": {
     "userId": "user_001",
-    "userName": "학생",
-    "createdAt": "2024-01-20T16:30:00Z",
-    "category": "기타",
-    "isOfficial": false,
-    "viewCount": 0,
-    "answerCount": 0,
-    "tags": []
+    "sessionId": "chat_session_123",
+    "previousMessages": [
+      {
+        "role": "user",
+        "content": "안녕하세요"
+      },
+      {
+        "role": "assistant",
+        "content": "안녕하세요! 무엇을 도와드릴까요?"
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2024-01-20T16:00:00Z",
+    "userAgent": "flutter_app"
   }
 }
 ```

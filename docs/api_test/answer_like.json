@@ -1,0 +1,17 @@
+{
+    "route": "/answers/:id/like",
+    "method": "PUT",
+    "status": 200,
+    "response": {
+      "id": "a001",
+      "questionId": "q001",
+      "content": "답변 내용",
+      "userId": "user_001",
+      "userName": "학생",
+      "createdAt": "2024-01-16T10:00:00Z",
+      "isAccepted": false,
+      "isLiked": true,
+      "likeCount": 26,
+      "userLevel": 3
+    }
+  }

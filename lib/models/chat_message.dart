@@ -35,6 +35,9 @@ class ChatMessage {
   factory ChatMessage.fromJson(Map<String, dynamic> json) => _$ChatMessageFromJson(json);
   Map<String, dynamic> toJson() => _$ChatMessageToJson(this);
 
+  // 사용자 메시지인지 확인하는 getter
+  bool get isUser => type == MessageType.user;
+
   ChatMessage copyWith({
     String? id,
     String? content,

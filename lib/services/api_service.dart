@@ -339,10 +339,41 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('채팅 API 응답: $data'); // 디버깅용 로그
+        
+        // Mockoon 응답 구조에 맞게 파싱
+        final responseData = data['response'];
+        if (responseData == null) {
+          throw Exception('응답 데이터가 없습니다.');
+        }
+        
+        final answerData = responseData['response'];
+        final answer = answerData?['answer'] ?? '응답을 받지 못했습니다.';
+        final relatedQuestions = responseData['relatedQuestions'] as List?;
+        final actions = responseData['actions'] as Map<String, dynamic>?;
+        final metadata = responseData['metadata'] as Map<String, dynamic>?;
+        
+        // 메타데이터 구성
+        final messageMetadata = <String, dynamic>{
+          'type': 'chat_response',
+        };
+        
+        if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
+          messageMetadata['relatedQuestions'] = relatedQuestions;
+        }
+        
+        if (actions != null) {
+          messageMetadata.addAll(actions);
+        }
+        
+        if (metadata != null) {
+          messageMetadata.addAll(metadata);
+        }
+        
         return [
           ChatMessage.assistant(
-            data['response'] ?? '응답을 받지 못했습니다.',
-            metadata: data['metadata'],
+            answer,
+            metadata: messageMetadata,
           )
         ];
       } else {

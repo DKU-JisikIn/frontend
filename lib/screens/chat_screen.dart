@@ -3,10 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
-import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input.dart';
-import 'question_detail_screen.dart';
-import 'new_question_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialQuery;
@@ -143,18 +140,103 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _handleViewQuestion(ChatMessage message) {
+  void _handleViewRelatedQuestions(ChatMessage message) {
     final metadata = message.metadata;
     if (metadata == null) return;
 
-    final questionId = metadata['questionId'] as String?;
-    if (questionId != null) {
-      // 질문 상세 페이지로 이동하는 로직
-      // 실제 구현에서는 Question 객체를 가져와서 전달해야 함
+    final relatedQuestions = metadata['relatedQuestions'] as List?;
+    if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
+      // 관련 질문 목록 페이지로 이동
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('질문 ID: $questionId 상세 페이지로 이동')),
+        const SnackBar(content: Text('관련 질문 목록으로 이동')),
       );
     }
+  }
+
+  Widget _buildMessageWidget(ChatMessage message, int index) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: _buildMessageBubble(message),
+    );
+  }
+
+  Widget _buildMessageBubble(ChatMessage message) {
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8,
+        ),
+        decoration: message.isUser 
+          ? AppTheme.userMessageDecoration 
+          : AppTheme.assistantMessageDecoration,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message.content,
+              style: TextStyle(
+                color: message.isUser ? Colors.white : AppTheme.primaryTextColor,
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+            if (!message.isUser) ..._buildAIResponseInfo(message),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildAIResponseInfo(ChatMessage message) {
+    final metadata = message.metadata;
+    if (metadata == null) return [];
+
+    final widgets = <Widget>[];
+
+    // 액션 버튼들
+    widgets.addAll(_buildActionButtons(message));
+
+    return widgets;
+  }
+
+  List<Widget> _buildActionButtons(ChatMessage message) {
+    final metadata = message.metadata;
+    if (metadata == null) return [];
+
+    final widgets = <Widget>[];
+    final relatedQuestions = metadata['relatedQuestions'] as List?;
+
+    // 관련 질문이 있는 경우 버튼 표시
+    if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
+      widgets.add(const SizedBox(height: 12));
+      widgets.add(
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => _handleViewRelatedQuestions(message),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              '답변달린 질문글 보기',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
   }
 
   @override
@@ -201,11 +283,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
-                  return ChatMessageWidget(
-                    message: message,
-                    onQuestionCreate: () => _handleQuestionCreate(message),
-                    onViewQuestion: () => _handleViewQuestion(message),
-                  );
+                  return _buildMessageWidget(message, index);
                 },
               ),
             ),

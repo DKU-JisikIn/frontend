@@ -1,0 +1,312 @@
+{
+  "uuid": "complete-test-env",
+  "lastMigration": 29,
+  "name": "Complete Test API",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "chat-process",
+      "type": "http",
+      "documentation": "채팅 프로세스 API",
+      "method": "post",
+      "endpoint": "api/chat/process",
+      "responses": [
+        {
+          "uuid": "no-answer-response",
+          "body": "{\n  \"response\": {\n    \"response\": {\n      \"answer\": \"죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.\"\n    },\n    \"relatedQuestions\": [],\n    \"actions\": {\n      \"canCreateQuestion\": true,\n      \"suggestedTitle\": \"새로운 질문\",\n      \"suggestedCategory\": \"기타\",\n      \"suggestedContent\": \"답변이 필요한 새로운 질문입니다.\"\n    }\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "기존 답변 없음",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "message",
+              "value": "알 수 없는",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id"
+        },
+        {
+          "uuid": "course-response",
+          "body": "{\n  \"response\": {\n    \"response\": {\n      \"answer\": \"2024년 1학기 수강신청은 2월 13일(화) 오전 9시부터 시작됩니다.\\n\\n📋 주요 일정:\\n• 1차 수강신청: 2/13~2/15\\n• 2차 수강신청: 2/19~2/21\\n• 수강변경: 3/4~3/8\\n\\n자세한 안내는 웹정보시스템에서 확인하실 수 있습니다.\"\n    },\n    \"relatedQuestions\": [\n      {\n        \"id\": \"q001\",\n        \"title\": \"수강변경 기간과 방법은 어떻게 되나요?\",\n        \"similarity\": 0.92,\n        \"answerCount\": 3,\n        \"viewCount\": 245,\n        \"category\": \"학사\",\n        \"createdAt\": \"2024-01-15T10:30:00Z\"\n      },\n      {\n        \"id\": \"q005\",\n        \"title\": \"수강신청 시 주의사항이 있나요?\",\n        \"similarity\": 0.88,\n        \"answerCount\": 2,\n        \"viewCount\": 189,\n        \"category\": \"학사\",\n        \"createdAt\": \"2024-01-18T14:20:00Z\"\n      }\n    ],\n    \"actions\": {\n      \"canCreateQuestion\": false\n    },\n    \"metadata\": {\n      \"searchQuery\": \"수강신청\"\n    }\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "수강신청 답변",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "message", 
+              "value": "수강신청",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id"
+        },
+        {
+          "uuid": "default-response",
+          "body": "{\n  \"response\": {\n    \"response\": {\n      \"answer\": \"안녕하세요! 단국대학교 학생 질문 도우미입니다. 🎓\\n\\n학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.\"\n    },\n    \"relatedQuestions\": [],\n    \"actions\": {\n      \"canCreateQuestion\": false\n    }\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "기본 응답",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "questions-answers",
+      "type": "http",
+      "documentation": "질문의 답변 목록 조회",
+      "method": "get",
+      "endpoint": "api/questions/:id/answers",
+      "responses": [
+        {
+          "uuid": "answers-list",
+          "body": "{\n  \"answers\": [\n    {\n      \"id\": \"a001\",\n      \"questionId\": \"q001\",\n      \"content\": \"2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\\n자세한 일정은 학사공지를 확인해주세요.\",\n      \"userId\": \"admin\",\n      \"userName\": \"학사팀\",\n      \"createdAt\": \"2024-01-16T10:00:00Z\",\n      \"isAccepted\": true,\n      \"isLiked\": false,\n      \"likeCount\": 25,\n      \"department\": \"학사처\",\n      \"isVerified\": true,\n      \"userLevel\": 5\n    },\n    {\n      \"id\": \"a002\",\n      \"questionId\": \"q001\",\n      \"content\": \"추가로 수강신청 관련해서 궁금한 점이 있으시면 학사팀으로 문의해주세요.\",\n      \"userId\": \"student001\",\n      \"userName\": \"김학생\",\n      \"createdAt\": \"2024-01-17T14:30:00Z\",\n      \"isAccepted\": false,\n      \"isLiked\": true,\n      \"likeCount\": 12,\n      \"department\": \"컴퓨터공학과\",\n      \"isVerified\": false,\n      \"userLevel\": 2\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "답변 목록",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "answer-like-toggle",
+      "type": "http",
+      "documentation": "답변 좋아요 토글",
+      "method": "put",
+      "endpoint": "api/answers/:id/like",
+      "responses": [
+        {
+          "uuid": "like-added",
+          "body": "{\n  \"id\": \"a001\",\n  \"questionId\": \"q001\",\n  \"content\": \"2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\\n자세한 일정은 학사공지를 확인해주세요.\",\n  \"userId\": \"admin\",\n  \"userName\": \"학사팀\",\n  \"createdAt\": \"2024-01-16T10:00:00Z\",\n  \"isAccepted\": true,\n  \"isLiked\": true,\n  \"likeCount\": 26,\n  \"department\": \"학사처\",\n  \"isVerified\": true,\n  \"userLevel\": 5,\n  \"action\": \"liked\",\n  \"message\": \"좋아요를 추가했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "좋아요 추가",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id"
+        },
+        {
+          "uuid": "like-removed",
+          "body": "{\n  \"id\": \"a001\",\n  \"questionId\": \"q001\",\n  \"content\": \"2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\\n자세한 일정은 학사공지를 확인해주세요.\",\n  \"userId\": \"admin\",\n  \"userName\": \"학사팀\",\n  \"createdAt\": \"2024-01-16T10:00:00Z\",\n  \"isAccepted\": true,\n  \"isLiked\": false,\n  \"likeCount\": 25,\n  \"department\": \"학사처\",\n  \"isVerified\": true,\n  \"userLevel\": 5,\n  \"action\": \"unliked\",\n  \"message\": \"좋아요를 취소했습니다.\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "좋아요 취소",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": "SEQUENTIAL"
+    },
+    {
+      "uuid": "questions-from-chat",
+      "type": "http",
+      "documentation": "채팅에서 질문 생성",
+      "method": "post",
+      "endpoint": "api/questions/from-chat",
+      "responses": [
+        {
+          "uuid": "question-created",
+          "body": "{\n  \"id\": \"q_new_001\",\n  \"title\": \"새로운 질문\",\n  \"content\": \"채팅에서 생성된 질문입니다.\",\n  \"userId\": \"user_001\",\n  \"userName\": \"김학생\",\n  \"createdAt\": \"2024-01-20T10:00:00Z\",\n  \"category\": \"기타\",\n  \"isOfficial\": false,\n  \"viewCount\": 0,\n  \"answerCount\": 0,\n  \"tags\": []\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "질문 생성 성공",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id"
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "chat-process"
+    },
+    {
+      "type": "route",
+      "uuid": "questions-answers"
+    },
+    {
+      "type": "route",
+      "uuid": "answer-like-toggle"
+    },
+    {
+      "type": "route",
+      "uuid": "questions-from-chat"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {},
+  "cors": true,
+  "headers": [
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type,Origin,Accept,Authorization,Content-Length,X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+} 

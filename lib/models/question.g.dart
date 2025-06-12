@@ -15,7 +15,6 @@ Question _$QuestionFromJson(Map<String, dynamic> json) {
       'content',
       'userId',
       'userName',
-      'createdAt',
       'category'
     ],
     disallowNullValues: const [
@@ -33,13 +32,13 @@ Question _$QuestionFromJson(Map<String, dynamic> json) {
     content: json['content'] as String,
     userId: json['userId'] as String,
     userName: json['userName'] as String,
-    createdAt: Question._dateTimeFromJson(json['createdAt']),
+    createdAt: DateTime.parse(json['createdAt'] as String),
     viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
     answerCount: (json['answerCount'] as num?)?.toInt() ?? 0,
     isOfficial: json['isOfficial'] as bool? ?? false,
     category: json['category'] as String,
     tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-        [],
+        const [],
   );
 }
 

@@ -1,0 +1,23 @@
+{
+    "route": "/questions/:id/answers",
+    "method": "GET",
+    "status": 200,
+    "response": {
+      "answers": [
+        {
+          "id": "a001",
+          "questionId": "q001",
+          "content": "2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\n자세한 일정은 학사공지를 확인해주세요.",
+          "userId": "admin",
+          "userName": "학사팀",
+          "createdAt": "2024-01-16T10:00:00Z",
+          "isAccepted": true,
+          "isLiked": false,
+          "likeCount": 25,
+          "department": "학사처",
+          "isVerified": true,
+          "userLevel": 5
+        }
+      ]
+    }
+  }
