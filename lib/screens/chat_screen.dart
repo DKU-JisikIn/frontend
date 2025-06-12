@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../widgets/chat_input.dart';
+import 'related_questions_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialQuery;
@@ -145,18 +146,33 @@ class _ChatScreenState extends State<ChatScreen> {
     if (metadata == null) return;
 
     final relatedQuestions = metadata['relatedQuestions'] as List?;
+    final searchQuery = metadata['searchQuery'] as String? ?? '';
+    
     if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
       // 관련 질문 목록 페이지로 이동
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('관련 질문 목록으로 이동')),
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RelatedQuestionsScreen(
+            relatedQuestions: relatedQuestions.cast<Map<String, dynamic>>(),
+            searchQuery: searchQuery,
+          ),
+        ),
       );
     }
   }
 
   Widget _buildMessageWidget(ChatMessage message, int index) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: _buildMessageBubble(message),
+    return Column(
+      children: [
+        // 메시지 말풍선
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: _buildMessageBubble(message),
+        ),
+        // 관련 질문 버튼 (말풍선 아래에 위치)
+        if (!message.isUser) ..._buildActionButtons(message),
+      ],
     );
   }
 
@@ -171,34 +187,21 @@ class _ChatScreenState extends State<ChatScreen> {
           ? AppTheme.userMessageDecoration 
           : AppTheme.assistantMessageDecoration,
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              message.content,
-              style: TextStyle(
-                color: message.isUser ? Colors.white : AppTheme.primaryTextColor,
-                fontSize: 16,
-                height: 1.4,
-              ),
-            ),
-            if (!message.isUser) ..._buildAIResponseInfo(message),
-          ],
+        child: Text(
+          message.content,
+          style: TextStyle(
+            color: message.isUser ? Colors.white : AppTheme.primaryTextColor,
+            fontSize: 16,
+            height: 1.4,
+          ),
         ),
       ),
     );
   }
 
   List<Widget> _buildAIResponseInfo(ChatMessage message) {
-    final metadata = message.metadata;
-    if (metadata == null) return [];
-
-    final widgets = <Widget>[];
-
-    // 액션 버튼들
-    widgets.addAll(_buildActionButtons(message));
-
-    return widgets;
+    // 이 메서드는 더 이상 사용하지 않음 (버튼이 말풍선 밖으로 이동)
+    return [];
   }
 
   List<Widget> _buildActionButtons(ChatMessage message) {
@@ -208,27 +211,45 @@ class _ChatScreenState extends State<ChatScreen> {
     final widgets = <Widget>[];
     final relatedQuestions = metadata['relatedQuestions'] as List?;
 
-    // 관련 질문이 있는 경우 버튼 표시
+    // 관련 질문이 있는 경우 버튼 표시 (말풍선 아래에 위치)
     if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
-      widgets.add(const SizedBox(height: 12));
       widgets.add(
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => _handleViewRelatedQuestions(message),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
               ),
-            ),
-            child: const Text(
-              '답변달린 질문글 보기',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              child: ElevatedButton.icon(
+                onPressed: () => _handleViewRelatedQuestions(message),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppTheme.primaryColor,
+                  elevation: 2,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(
+                      color: AppTheme.primaryColor.withOpacity(0.2),
+                    ),
+                  ),
+                ),
+                icon: Icon(
+                  CupertinoIcons.arrow_right_circle,
+                  size: 18,
+                  color: AppTheme.primaryColor,
+                ),
+                label: Text(
+                  '관련질문 보러가기',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
               ),
             ),
           ),
