@@ -1,156 +1,113 @@
-# Mockoon 설정 가이드
-
-## 1. Mockoon 설치
-
-### 1.1 Desktop 앱 설치
-- [Mockoon 공식 사이트](https://mockoon.com/download/)에서 다운로드
-- Windows/macOS/Linux 지원
-
-### 1.2 CLI 설치 (선택사항)
-```bash
-npm install -g @mockoon/cli
-```
-
-## 2. 기본 설정
-
-### 2.1 새 환경 생성
-1. Mockoon 앱 실행
-2. "New environment" 클릭
-3. 환경 이름: `단비 API`
-4. 포트: `3001`
-5. Base URL: `http://localhost:3001`
-
-### 2.2 기본 설정
-- **Environment name**: 단비 API
-- **Port**: 3001
-- **Prefix**: `/api`
-- **CORS**: 활성화 (모든 origin 허용)
-
-## 3. API 엔드포인트 설정
-
-### 3.1 인증 관련 API
+### 인증
 
 #### 로그인 - POST /api/auth/login
 
-**요청 본문 예제:**
 ```json
 {
-  "email": "student@dankook.ac.kr",
+  "email": "example@dankook.ac.kr",
   "password": "password123"
 }
 ```
 
-**응답 예제:**
 ```json
 {
   "route": "/auth/login",
   "method": "POST",
   "status": 200,
   "response": {
-    "success": true,
-    "message": "로그인 성공",
     "token": "jwt_token_example_123456",
     "user": {
-      "id": "user_001",
-      "email": "student@dankook.ac.kr",
-      "name": "김단국",
-      "nickname": "단국이",
-      "profileImageUrl": "",
+      "id": 1,
+      "email": "example@dankook.ac.kr",
+      "password" : "password123", // 새로 추가
+      "nickname": "example",
+      "profileImageUrl": "", // 프로필 사진
       "department": "컴퓨터공학과",
-      "studentId": "2020****",
-      "isVerified": true,
-      "userLevel": 3
+      "isVerified": true // 소속 인증
     }
   }
 }
 ```
 
-**필수 필드:**
-- `email`: 단국대학교 이메일 주소 (전체 이메일 주소)
-- `password`: 계정 비밀번호
-
 #### 로그아웃 - POST /api/auth/logout
+
 ```json
 {
   "route": "/auth/logout",
   "method": "POST",
   "status": 200,
   "response": {
-    "success": true,
-    "message": "로그아웃 완료"
+    "refreshToken": "abc123" // 토큰 삭제
   }
 }
 ```
 
 #### 이메일 인증 코드 전송 - POST /api/auth/send-verification
+
 ```json
 {
   "route": "/auth/send-verification",
   "method": "POST",
   "status": 200,
   "response": {
-    "success": true,
-    "message": "인증번호가 이메일로 전송되었습니다."
+    "email" : "example@dankook.ac.kr",
+    "code" : "1234"
   }
 }
 ```
 
 #### 이메일 인증 - POST /api/auth/verify-email
+
 ```json
 {
   "route": "/auth/verify-email",
   "method": "POST",
   "status": 200,
   "response": {
-    "success": true,
-    "message": "이메일 인증이 완료되었습니다."
+    "requestId" : 1, // 중복 방지
+    "email" : "example@dankook.ac.kr",
+    "code" : "1234"
   }
 }
 ```
 
 #### 회원가입 - POST /api/auth/register
 
-**요청 본문 예제:**
 ```json
 {
-  "email": "newuser@dankook.ac.kr",
+  "email": "example@dankook.ac.kr",
   "password": "password123",
-  "nickname": "신입생닉네임"
+  "nickname": "example"
 }
 ```
 
-**응답 예제:**
 ```json
 {
   "route": "/auth/register",
   "method": "POST",
   "status": 201,
   "response": {
-    "success": true,
-    "message": "회원가입이 완료되었습니다.",
     "user": {
-      "id": "user_new_001",
+      "id" : 1, // id 추가 | userId
       "email": "newuser@dankook.ac.kr",
-      "name": "새사용자",
       "nickname": "신입생닉네임",
       "profileImageUrl": "",
       "department": "",
-      "studentId": "",
       "isVerified": false,
-      "userLevel": 1
+      "userLevel": 1,
+      "userEXP" : 0
     }
   }
 }
 ```
 
-**필수 필드:**
+**조건**
 - `email`: 단국대학교 이메일 주소 (아이디@dankook.ac.kr)
 - `password`: 비밀번호 (8자 이상, 영문+숫자 포함)
 - `nickname`: 사용자 닉네임 (2-10자, 한글/영문/숫자)
 
-### 3.2 질문 관련 API
-
-#### 질문 목록 조회 - GET /api/questions
+### 질문 조회
+#### 질문 목록 조회(전체 질문 페이지) - GET /api/questions
 ```json
 {
   "route": "/questions",
@@ -159,64 +116,54 @@ npm install -g @mockoon/cli
   "response": {
     "questions": [
       {
-        "id": "q001",
+        "id": 1,
+        "userId" : 1, // 새로 추가
         "title": "2024년 1학기 수강신청 일정이 언제인가요?",
         "content": "수강신청 일정을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "학사팀",
         "createdAt": "2024-01-15T09:00:00Z",
         "category": "학사",
-        "isOfficial": true,
         "viewCount": 150,
-        "answerCount": 1,
-        "tags": ["수강신청", "일정", "학사"]
+        "answerCount": 1
       }
     ]
   }
 }
 ```
 
-#### 특정 질문 조회 - GET /api/questions/{id}
+#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /api/questions/:id
 ```json
 {
   "route": "/questions/:id",
   "method": "GET",
   "status": 200,
   "response": {
-    "id": "q001",
+    "id": 1,
+    "userId" : 1, // 새로 추가
     "title": "2024년 1학기 수강신청 일정이 언제인가요?",
     "content": "수강신청 일정을 알고 싶습니다.",
-    "userId": "admin",
-    "userName": "학사팀",
     "createdAt": "2024-01-15T09:00:00Z",
-    "updatedAt": "2024-01-15T09:00:00Z",
     "category": "학사",
-    "isOfficial": true,
     "viewCount": 150,
-    "answerCount": 1,
-    "tags": ["수강신청", "일정", "학사"]
+    "answerCount": 1
   }
 }
 ```
 
-#### 새 질문 작성 - POST /api/questions
+#### 채팅에서 새 질문 작성 (해당 질문 자체가 없을 때) - POST /api/questions
 ```json
 {
   "route": "/questions",
   "method": "POST",
   "status": 201,
   "response": {
-    "id": "q_new_001",
-    "title": "새로운 질문 제목",
-    "content": "새로운 질문 내용",
-    "userId": "user_001",
-    "userName": "학생",
+    "id": 1,
+    "userId" : 1, // 새로 추가
+    "title": "새로운 질문 제목", // content 요약으로 생성
+    "content": "새로운 질문 내용", // 질문 채팅
     "createdAt": "2024-01-20T10:00:00Z",
-    "category": "기타",
-    "isOfficial": false,
+    "category": "학사", // 질문 내용으로 자동 판단
     "viewCount": 0,
-    "answerCount": 0,
-    "tags": []
+    "answerCount": 0
   }
 }
 ```
@@ -230,89 +177,28 @@ npm install -g @mockoon/cli
   "response": {
     "questions": [
       {
-        "id": "q002",
+        "id": 1,
+        "userId" : 1,
         "title": "도서관 이용시간이 어떻게 되나요?",
         "content": "중앙도서관 평일/주말 이용시간을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "도서관",
         "createdAt": "2024-01-19T14:00:00Z",
         "category": "기타",
-        "isOfficial": true,
         "viewCount": 234,
-        "answerCount": 1,
-        "tags": ["도서관", "이용시간"]
+        "answerCount": 1
       }
     ]
   }
 }
 ```
 
-#### 자주 받은 질문 - GET /api/questions/frequent
-```json
-{
-  "route": "/questions/frequent",
-  "method": "GET",
-  "status": 200,
-  "response": {
-    "questions": [
-      {
-        "id": "q003",
-        "title": "기숙사 신청은 언제부터인가요?",
-        "content": "2024년도 기숙사 신청 일정을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "생활관팀",
-        "createdAt": "2024-01-18T11:00:00Z",
-        "category": "기타",
-        "isOfficial": true,
-        "viewCount": 189,
-        "answerCount": 1,
-        "tags": ["기숙사", "신청", "일정"]
-      },
-      {
-        "id": "q004", 
-        "title": "학생증 재발급은 어떻게 하나요?",
-        "content": "학생증을 분실해서 재발급 받고 싶습니다.",
-        "userId": "student002",
-        "userName": "김학생",
-        "createdAt": "2024-01-17T15:30:00Z",
-        "category": "기타",
-        "isOfficial": false,
-        "viewCount": 156,
-        "answerCount": 2,
-        "tags": ["학생증", "재발급"]
-      }
-    ]
-  }
-}
-```
+//
+// 공식 질문 , 자주 받은 질문 제외
+//
 
-#### 공식 질문 - GET /api/questions/official
-```json
-{
-  "route": "/questions/official",
-  "method": "GET",
-  "status": 200,
-  "response": {
-    "questions": [
-      {
-        "id": "q005",
-        "title": "2024년도 등록금 납부 안내",
-        "content": "2024년도 1학기 등록금 납부 일정 및 방법 안내입니다.",
-        "userId": "admin",
-        "userName": "재무팀",
-        "createdAt": "2024-01-20T09:00:00Z",
-        "category": "장학금",
-        "isOfficial": true,
-        "viewCount": 445,
-        "answerCount": 1,
-        "tags": ["등록금", "납부", "일정"]
-      }
-    ]
-  }
-}
-```
+#### 답변받지 못한 질문 (answerCount = 0) - GET /api/questions/unanswered
 
-#### 답변받지 못한 질문 - GET /api/questions/unanswered
+// 전체 질문에서 answerCount가 0인 것만 가져올 수 있는가?
+
 ```json
 {
   "route": "/questions/unanswered",
@@ -321,66 +207,31 @@ npm install -g @mockoon/cli
   "response": {
     "questions": [
       {
-        "id": "q006",
+        "id": 1,
+        "userId" : 1,
         "title": "캠퍼스 내 자전거 주차장 위치가 궁금해요",
-        "content": "천안캠퍼스에서 자전거를 세울 수 있는 곳이 어디인지 알고 싶습니다.",
-        "userId": "student003",
-        "userName": "박학생",
+        "content": "자전거를 세울 수 있는 곳이 어디인지 알고 싶습니다.",
         "createdAt": "2024-01-21T13:45:00Z",
-        "category": "기타",
-        "isOfficial": false,
         "viewCount": 23,
         "answerCount": 0,
-        "tags": ["자전거", "주차장", "캠퍼스"]
       },
       {
-        "id": "q007",
+        "id": 2,
+        "userId" : 3,
         "title": "졸업논문 제출 마감일이 언제인가요?",
         "content": "2024년도 전기 졸업예정자 논문 제출 마감일을 알고 싶습니다.",
-        "userId": "student004", 
-        "userName": "이학생",
         "createdAt": "2024-01-21T16:20:00Z",
         "category": "학사",
-        "isOfficial": false,
         "viewCount": 34,
         "answerCount": 0,
-        "tags": ["졸업논문", "마감일", "제출"]
       }
     ]
   }
 }
 ```
 
-#### 질문 검색 - GET /api/questions/search
-```json
-{
-  "route": "/questions/search",
-  "method": "GET",
-  "status": 200,
-  "response": {
-    "questions": [
-      {
-        "id": "q001",
-        "title": "2024년 1학기 수강신청 일정이 언제인가요?",
-        "content": "수강신청 일정을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "학사팀",
-        "createdAt": "2024-01-15T09:00:00Z",
-        "category": "학사",
-        "isOfficial": true,
-        "viewCount": 150,
-        "answerCount": 1,
-        "tags": ["수강신청", "일정", "학사"]
-      }
-    ]
-  }
-}
-```
-**쿼리 파라미터**: `q` (검색어)
-
-### 3.3 답변 관련 API
-
-#### 특정 질문의 답변 목록 - GET /api/questions/{id}/answers
+### 답변
+#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /api/questions/:id/answers
 ```json
 {
   "route": "/questions/:id/answers",
@@ -389,88 +240,60 @@ npm install -g @mockoon/cli
   "response": {
     "answers": [
       {
-        "id": "a001",
-        "questionId": "q001",
+        "id": 1,
+        "questionId": 1,
+        "userId" : 1,
         "content": "2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\n자세한 일정은 학사공지를 확인해주세요.",
-        "userId": "admin",
-        "userName": "학사팀",
+        "nickname": "학사팀",
         "createdAt": "2024-01-16T10:00:00Z",
         "isAccepted": true,
-        "isLiked": false,
-        "likeCount": 25,
         "department": "학사처",
-        "isVerified": true,
-        "userLevel": 5
+        "isVerified": true
       }
     ]
   }
 }
 ```
 
-#### 새 답변 작성 - POST /api/answers
+#### 새 답변 작성 - POST /api/questions/:id/answers
 ```json
 {
-  "route": "/answers",
+  "route": "/questions/:id/answers",
   "method": "POST",
   "status": 201,
   "response": {
-    "id": "a_new_001",
-    "questionId": "q001",
+    "id": 1,
+    "questionId": 1,
+    "userId" : 1,
     "content": "새로운 답변 내용",
-    "userId": "user_001",
-    "userName": "학생",
+    "nickname": "학생",
     "createdAt": "2024-01-20T15:00:00Z",
+    "department": "학사처",
     "isAccepted": false,
-    "isLiked": false,
-    "likeCount": 0,
-    "userLevel": 2
   }
 }
 ```
 
-#### 답변 채택 - PUT /api/answers/{id}/accept
+#### 답변 채택 - PUT /api/answers/:id/accept
 ```json
 {
   "route": "/answers/:id/accept",
   "method": "PUT",
   "status": 200,
   "response": {
-    "id": "a001",
-    "questionId": "q001",
+    "id": 1,
+    "questionId": 1,
     "content": "답변 내용",
-    "userId": "user_001",
-    "userName": "학생",
+    "nickname": "학생",
     "createdAt": "2024-01-16T10:00:00Z",
     "isAccepted": true,
-    "isLiked": false,
-    "likeCount": 25,
+    "department": "학사처",
     "userLevel": 3
   }
 }
 ```
 
-#### 답변 좋아요 - PUT /api/answers/{id}/like
-```json
-{
-  "route": "/answers/:id/like",
-  "method": "PUT",
-  "status": 200,
-  "response": {
-    "id": "a001",
-    "questionId": "q001",
-    "content": "답변 내용",
-    "userId": "user_001",
-    "userName": "학생",
-    "createdAt": "2024-01-16T10:00:00Z",
-    "isAccepted": false,
-    "isLiked": true,
-    "likeCount": 26,
-    "userLevel": 3
-  }
-}
-```
-
-### 3.4 통계 관련 API
+### 통계
 
 #### 오늘의 질문 수 - GET /api/statistics/today/questions
 ```json
@@ -508,266 +331,131 @@ npm install -g @mockoon/cli
 }
 ```
 
-#### 우수 답변자 - GET /api/statistics/top-answerers
+// 우수 답변자 보류
+
+### 채팅
+
+#### 채팅 메시지 처리 (답변) - GET /api/chat/process
+
+**시나리오 1: 수강신청 관련 답변 (답변 존재 질문)**
 ```json
 {
-  "route": "/statistics/top-answerers",
+  "route": "/chat/process",
   "method": "GET",
   "status": 200,
   "response": {
-    "topAnswerers": [
+    "response": {
+      "answers": [
+        {
+            "answer" : "답변1"
+        },
+        {
+            "answer" : "답변2"
+        }
+      ]
+    },
+    "relatedQuestions": [
       {
-        "id": "user_top1",
-        "userName": "김단국",
-        "profileImageUrl": "",
-        "score": 128,
-        "rank": 1,
-        "answerCount": 42,
-        "likeCount": 85
+        "id": 1,
+        "title": "수강신청 시스템 사용법",
+        "content" : "내용1"
       },
       {
-        "id": "user_top2",
-        "userName": "박대학",
-        "profileImageUrl": "",
-        "score": 105,
-        "rank": 2,
-        "answerCount": 35,
-        "likeCount": 70
+        "id": 2,
+        "title": "수강신청 변경 및 취소 방법",
+        "content" : "내용2"
       }
-    ]
+    ],
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    },
   }
 }
 ```
 
-### 3.5 채팅 관련 API
-
-#### 채팅 메시지 처리 - POST /api/chat/process
+**시나리오 2: 새로운 질문 (기존 답변 없음)**
 ```json
 {
   "route": "/chat/process",
-  "method": "POST",
+  "method": "POST", 
   "status": 200,
   "response": {
-    "response": "안녕하세요! 무엇을 도와드릴까요?",
-    "metadata": {
-      "type": "general_response",
-      "timestamp": "2024-01-20T16:00:00Z"
+    "response": {
+      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
+    },
+    "actions": {
+      "canCreateQuestion": true,
+      "hasDirectAnswer": false
     }
   }
 }
 ```
 
-#### 채팅에서 질문 생성 - POST /api/questions/from-chat
+**시나리오 3: 일반적인 인사 또는 모호한 질문**
 ```json
 {
-  "route": "/questions/from-chat",
+  "route": "/chat/process", 
   "method": "POST",
-  "status": 201,
+  "status": 200,
   "response": {
-    "id": "q_chat_001",
-    "title": "채팅에서 생성된 질문",
-    "content": "채팅 대화를 기반으로 생성된 질문 내용",
-    "userId": "user_001",
-    "userName": "학생",
-    "createdAt": "2024-01-20T16:30:00Z",
-    "category": "기타",
-    "isOfficial": false,
-    "viewCount": 0,
-    "answerCount": 0,
-    "tags": []
+    "response": {
+      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
+    },
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    }
   }
 }
 ```
 
-### 3.6 사용자 관련 API
-
-#### 사용자 질문 통계 - GET /api/users/{userId}/question-stats
+**요청**
 ```json
 {
-  "route": "/users/:userId/question-stats",
-  "method": "GET",
-  "status": 200,
-  "response": {
-    "total": 8,
-    "answered": 5,
-    "unanswered": 3
-  }
-}
-```
-**인증**: JWT 토큰 필요  
-**설명**: 특정 사용자가 작성한 질문들의 통계 정보
-
-#### 사용자 질문 목록 - GET /api/users/{userId}/questions
-```json
-{
-  "route": "/users/:userId/questions",
-  "method": "GET",
-  "status": 200,
-  "response": {
-    "questions": [
+  "message": "수강신청은 언제 시작하나요?",
+  "context": {
+    "userId": 1,
+    "sessionId": 1,
+    "previousMessages": [
       {
-        "id": "q008",
-        "title": "사용자가 작성한 질문 1",
-        "content": "사용자가 작성한 첫 번째 질문 내용",
-        "userId": "user_001",
-        "userName": "김학생",
-        "createdAt": "2024-01-20T10:00:00Z",
-        "category": "학사",
-        "isOfficial": false,
-        "viewCount": 15,
-        "answerCount": 1,
-        "tags": ["질문", "학사"]
+        "role": "user",
+        "content": "안녕하세요"
       },
       {
-        "id": "q009",
-        "title": "사용자가 작성한 질문 2", 
-        "content": "사용자가 작성한 두 번째 질문 내용",
-        "userId": "user_001",
-        "userName": "김학생",
-        "createdAt": "2024-01-19T14:30:00Z",
-        "category": "기타",
-        "isOfficial": false,
-        "viewCount": 8,
-        "answerCount": 0,
-        "tags": ["질문", "기타"]
+        "role": "assistant",
+        "content": "안녕하세요! 무엇을 도와드릴까요?"
       }
     ]
   }
 }
 ```
-**인증**: JWT 토큰 필요  
-**쿼리 파라미터**: `filter` (선택사항: 'answered', 'unanswered', 'all')
 
-## 4. 실행 및 테스트
+### 내 정보
 
-### 4.1 Mockoon 서버 실행
-1. Mockoon 앱에서 환경 선택
-2. "Start" 버튼 클릭
-3. `http://localhost:3001` 서버 실행 확인
-
-### 4.2 필수 API 엔드포인트 체크리스트
-
-다음 **24개의 API 엔드포인트**를 모두 Mockoon에 설정해야 합니다:
-
-#### 인증 관련 (5개)
-- [ ] POST `/api/auth/login` - 로그인
-- [ ] POST `/api/auth/logout` - 로그아웃  
-- [ ] POST `/api/auth/register` - 회원가입
-- [ ] POST `/api/auth/send-verification` - 이메일 인증 코드 전송
-- [ ] POST `/api/auth/verify-email` - 이메일 인증
-
-#### 질문 관련 (9개)
-- [ ] GET `/api/questions` - 질문 목록 조회
-- [ ] GET `/api/questions/{id}` - 특정 질문 조회  
-- [ ] POST `/api/questions` - 새 질문 작성
-- [ ] GET `/api/questions/popular` - 인기 질문 목록
-- [ ] GET `/api/questions/frequent` - 자주 받은 질문 목록
-- [ ] GET `/api/questions/official` - 공식 질문 목록
-- [ ] GET `/api/questions/unanswered` - 답변받지 못한 질문 목록
-- [ ] GET `/api/questions/search` - 질문 검색
-- [ ] POST `/api/questions/from-chat` - 채팅에서 질문 생성
-
-#### 답변 관련 (4개)
-- [ ] GET `/api/questions/{id}/answers` - 특정 질문의 답변 목록
-- [ ] POST `/api/answers` - 새 답변 작성
-- [ ] PUT `/api/answers/{id}/accept` - 답변 채택
-- [ ] PUT `/api/answers/{id}/like` - 답변 좋아요/좋아요 취소
-
-#### 통계 관련 (4개)
-- [ ] GET `/api/statistics/today/questions` - 오늘의 질문 수
-- [ ] GET `/api/statistics/today/answers` - 오늘의 답변 수
-- [ ] GET `/api/statistics/total/answers` - 전체 답변 수
-- [ ] GET `/api/statistics/top-answerers` - 우수 답변자 목록
-
-#### 사용자 관련 (2개)
-- [ ] GET `/api/users/{userId}/question-stats` - 사용자 질문 통계
-- [ ] GET `/api/users/{userId}/questions` - 사용자 질문 목록
-
-**총 24개 엔드포인트 ✅**
-
-### 4.3 Flutter 앱 테스트
-1. Flutter 앱 실행
-2. 로그인 화면에서 테스트 계정 사용:
-   - **이메일**: test@dankook.ac.kr
-   - **비밀번호**: password123
-3. 각 기능별 API 호출 테스트
-
-### 4.4 API 테스트 도구
-#### Postman/Insomnia로 직접 테스트
-```bash
-# 로그인 테스트
-POST http://localhost:3001/api/auth/login
-Content-Type: application/json
-
+#### 프로필 수정 - PATCH /api/auth/register
+```json
 {
-  "email": "test@dankook.ac.kr",
-  "password": "password123"
+    "nickname" : "new_nickname",
+    "profileImageUrl" : ""
 }
 ```
 
-#### cURL로 테스트
-```bash
-# 질문 목록 조회
-curl -X GET http://localhost:3001/api/questions \
-  -H "Content-Type: application/json"
+**비밀번호 변경 제외**
 
-# 새 질문 작성
-curl -X POST http://localhost:3001/api/questions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your_token_here" \
-  -d '{
-    "title": "테스트 질문",
-    "content": "테스트 질문 내용",
-    "category": "기타"
-  }'
+#### 소속 인증하기 - PATCH /api/auth/register
+```json
+{
+    // 서비스 측에서 확인 후 PATCH
+    "department": "",
+    "isVerified": true
+}
 ```
 
-## 5. 주의사항
-
-### 5.1 CORS 설정
-- Mockoon에서 CORS 활성화 필수
-- Headers에 다음 추가:
-  ```
-  Access-Control-Allow-Origin: *
-  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
-  Access-Control-Allow-Headers: Content-Type, Authorization
-  ```
-
-### 5.2 데이터 형식
-- 모든 날짜는 ISO 8601 형식 (`2024-01-01T00:00:00Z`)
-- JSON 응답 형식 일관성 유지
-- 에러 응답도 동일한 구조로 설정
-
-### 5.3 테스트 계정
-- **test@dankook.ac.kr**: 프론트엔드에서 로컬 처리
-- **다른 계정**: Mockoon API 호출
-- **인증번호**: `1234` (테스트용)
-
-## 6. 트러블슈팅
-
-### 6.1 연결 오류
-- Mockoon 서버 실행 상태 확인
-- 포트 3001 사용 가능 여부 확인
-- 방화벽 설정 확인
-
-### 6.2 CORS 오류
-- Mockoon에서 CORS 설정 확인
-- 프록시 설정 필요 시 flutter 개발 서버 설정
-
-### 6.3 API 응답 오류
-- JSON 형식 검증
-- 필수 필드 누락 확인
-- 상태 코드 일치 확인
-
-## 7. 다음 단계
-
-1. **기본 API 테스트** 완료 후
-2. **실제 백엔드 개발** 시작
-3. **데이터베이스 연동**
-4. **JWT 토큰 인증** 구현
-5. **파일 업로드** 기능 추가
-6. **실시간 기능** (WebSocket) 추가
-
----
-
-이 가이드를 따라 설정하면 Flutter 앱의 모든 API 기능을 Mockoon으로 테스트할 수 있습니다! 🚀 
+#### 회원탈퇴 - DELETE /api/auth/register
+```json
+{
+    "email" : "example@dankook.ac.kr",
+    "password" : "password",
+    "reasonCode" : "LOW_USAGE"
+}
