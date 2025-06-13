@@ -19,6 +19,7 @@
     "user": {
       "id": 1,
       "email": "example@dankook.ac.kr",
+      "password" : "password123", // 새로 추가
       "nickname": "example",
       "profileImageUrl": "", // 프로필 사진
       "department": "컴퓨터공학과",
@@ -87,6 +88,7 @@
   "status": 201,
   "response": {
     "user": {
+      "id" : 1, // id 추가 | userId
       "email": "newuser@dankook.ac.kr",
       "nickname": "신입생닉네임",
       "profileImageUrl": "",
@@ -115,6 +117,7 @@
     "questions": [
       {
         "id": 1,
+        "userId" : 1, // 새로 추가
         "title": "2024년 1학기 수강신청 일정이 언제인가요?",
         "content": "수강신청 일정을 알고 싶습니다.",
         "createdAt": "2024-01-15T09:00:00Z",
@@ -127,7 +130,7 @@
 }
 ```
 
-#### 특정 질문 조회(상세 페이지) - GET /api/questions/:id
+#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /api/questions/:id
 ```json
 {
   "route": "/questions/:id",
@@ -135,6 +138,7 @@
   "status": 200,
   "response": {
     "id": 1,
+    "userId" : 1, // 새로 추가
     "title": "2024년 1학기 수강신청 일정이 언제인가요?",
     "content": "수강신청 일정을 알고 싶습니다.",
     "createdAt": "2024-01-15T09:00:00Z",
@@ -153,6 +157,7 @@
   "status": 201,
   "response": {
     "id": 1,
+    "userId" : 1, // 새로 추가
     "title": "새로운 질문 제목", // content 요약으로 생성
     "content": "새로운 질문 내용", // 질문 채팅
     "createdAt": "2024-01-20T10:00:00Z",
@@ -173,6 +178,7 @@
     "questions": [
       {
         "id": 1,
+        "userId" : 1,
         "title": "도서관 이용시간이 어떻게 되나요?",
         "content": "중앙도서관 평일/주말 이용시간을 알고 싶습니다.",
         "createdAt": "2024-01-19T14:00:00Z",
@@ -202,6 +208,7 @@
     "questions": [
       {
         "id": 1,
+        "userId" : 1,
         "title": "캠퍼스 내 자전거 주차장 위치가 궁금해요",
         "content": "자전거를 세울 수 있는 곳이 어디인지 알고 싶습니다.",
         "createdAt": "2024-01-21T13:45:00Z",
@@ -210,6 +217,7 @@
       },
       {
         "id": 2,
+        "userId" : 3,
         "title": "졸업논문 제출 마감일이 언제인가요?",
         "content": "2024년도 전기 졸업예정자 논문 제출 마감일을 알고 싶습니다.",
         "createdAt": "2024-01-21T16:20:00Z",
@@ -221,3 +229,233 @@
   }
 }
 ```
+
+### 답변
+#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /api/questions/:id/answers
+```json
+{
+  "route": "/questions/:id/answers",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "answers": [
+      {
+        "id": 1,
+        "questionId": 1,
+        "userId" : 1,
+        "content": "2024년 1학기 수강신청은 2월 5일부터 시작됩니다.\n자세한 일정은 학사공지를 확인해주세요.",
+        "nickname": "학사팀",
+        "createdAt": "2024-01-16T10:00:00Z",
+        "isAccepted": true,
+        "department": "학사처",
+        "isVerified": true
+      }
+    ]
+  }
+}
+```
+
+#### 새 답변 작성 - POST /api/questions/:id/answers
+```json
+{
+  "route": "/questions/:id/answers",
+  "method": "POST",
+  "status": 201,
+  "response": {
+    "id": 1,
+    "questionId": 1,
+    "userId" : 1,
+    "content": "새로운 답변 내용",
+    "nickname": "학생",
+    "createdAt": "2024-01-20T15:00:00Z",
+    "department": "학사처",
+    "isAccepted": false,
+  }
+}
+```
+
+#### 답변 채택 - PUT /api/answers/:id/accept
+```json
+{
+  "route": "/answers/:id/accept",
+  "method": "PUT",
+  "status": 200,
+  "response": {
+    "id": 1,
+    "questionId": 1,
+    "content": "답변 내용",
+    "nickname": "학생",
+    "createdAt": "2024-01-16T10:00:00Z",
+    "isAccepted": true,
+    "department": "학사처",
+    "userLevel": 3
+  }
+}
+```
+
+### 통계
+
+#### 오늘의 질문 수 - GET /api/statistics/today/questions
+```json
+{
+  "route": "/statistics/today/questions",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "count": 5
+  }
+}
+```
+
+#### 오늘의 답변 수 - GET /api/statistics/today/answers
+```json
+{
+  "route": "/statistics/today/answers",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "count": 12
+  }
+}
+```
+
+#### 전체 답변 수 - GET /api/statistics/total/answers
+```json
+{
+  "route": "/statistics/total/answers",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "count": 1547
+  }
+}
+```
+
+// 우수 답변자 보류
+
+### 채팅
+
+#### 채팅 메시지 처리 (답변) - GET /api/chat/process
+
+**시나리오 1: 수강신청 관련 답변 (답변 존재 질문)**
+```json
+{
+  "route": "/chat/process",
+  "method": "GET",
+  "status": 200,
+  "response": {
+    "response": {
+      "answers": [
+        {
+            "answer" : "답변1"
+        },
+        {
+            "answer" : "답변2"
+        }
+      ]
+    },
+    "relatedQuestions": [
+      {
+        "id": 1,
+        "title": "수강신청 시스템 사용법",
+        "content" : "내용1"
+      },
+      {
+        "id": 2,
+        "title": "수강신청 변경 및 취소 방법",
+        "content" : "내용2"
+      }
+    ],
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    },
+  }
+}
+```
+
+**시나리오 2: 새로운 질문 (기존 답변 없음)**
+```json
+{
+  "route": "/chat/process",
+  "method": "POST", 
+  "status": 200,
+  "response": {
+    "response": {
+      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
+    },
+    "actions": {
+      "canCreateQuestion": true,
+      "hasDirectAnswer": false
+    }
+  }
+}
+```
+
+**시나리오 3: 일반적인 인사 또는 모호한 질문**
+```json
+{
+  "route": "/chat/process", 
+  "method": "POST",
+  "status": 200,
+  "response": {
+    "response": {
+      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
+    },
+    "actions": {
+      "canCreateQuestion": false,
+      "hasDirectAnswer": true
+    }
+  }
+}
+```
+
+**요청**
+```json
+{
+  "message": "수강신청은 언제 시작하나요?",
+  "context": {
+    "userId": 1,
+    "sessionId": 1,
+    "previousMessages": [
+      {
+        "role": "user",
+        "content": "안녕하세요"
+      },
+      {
+        "role": "assistant",
+        "content": "안녕하세요! 무엇을 도와드릴까요?"
+      }
+    ]
+  }
+}
+```
+
+### 내 정보
+
+#### 프로필 수정 - PATCH /api/auth/register
+```json
+{
+    "nickname" : "new_nickname",
+    "profileImageUrl" : ""
+}
+```
+
+**비밀번호 변경 제외**
+
+#### 소속 인증하기 - PATCH /api/auth/register
+```json
+{
+    // 서비스 측에서 확인 후 PATCH
+    "department": "",
+    "isVerified": true
+}
+```
+
+#### 회원탈퇴 - DELETE /api/auth/register
+```json
+{
+    "email" : "example@dankook.ac.kr",
+    "password" : "password",
+    "reasonCode" : "LOW_USAGE"
+}
