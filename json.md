@@ -19,11 +19,12 @@
     "user": {
       "id": 1,
       "email": "example@dankook.ac.kr",
-      "password" : "password123", // 새로 추가
       "nickname": "example",
       "profileImageUrl": "", // 프로필 사진
       "department": "컴퓨터공학과",
-      "isVerified": true // 소속 인증
+      "isVerified": true, // 소속 인증
+      "userLevel": 1,
+      "userEXP": 0
     }
   }
 }
