@@ -15,7 +15,10 @@
   "method": "POST",
   "status": 200,
   "response": {
-    "token": "jwt_token_example_123456",
+    "token": {
+      "accessToken": "JWT access token", // user가 API 요청시 사용 (short-lived)
+      "refreshToken": "JWT refresh token", // access token 재발급시 사용 (long-lived)
+    }
     "user": {
       "id": 1,
       "email": "example@dankook.ac.kr",
