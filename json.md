@@ -1,6 +1,6 @@
 ### 인증
 
-#### 로그인 - POST /api/auth/login
+#### 로그인 - POST /auth/login
 
 ```json
 {
@@ -33,7 +33,7 @@
 }
 ```
 
-#### 로그아웃 - POST /api/auth/logout
+#### 로그아웃 - POST /auth/logout
 ```json
 {
   "refreshToken": "JWT refresh token"
@@ -50,7 +50,7 @@
 }
 ```
 
-#### 이메일 인증 코드 전송 - POST /api/auth/send-verification
+#### 이메일 인증 코드 전송 - POST /auth/send-verification
 ```json
 {
   "email": "example@dankook.ac.kr"
@@ -69,7 +69,7 @@
 }
 ```
 
-#### 이메일 인증 - POST /api/auth/verify-email
+#### 이메일 인증 - POST /auth/verify-email
 ```json
 {
   "requestId": 1 // 위에서 추가된 정보
@@ -90,7 +90,7 @@
 }
 ```
 
-#### 회원가입 - POST /api/auth/register
+#### 회원가입 - POST /auth/register
 
 ```json
 {
@@ -341,7 +341,10 @@ No json body - just the Bearer header w/ access token.
 
 ### 통계
 
-#### 오늘의 질문 수 - GET /api/statistics/today/questions
+#### 오늘의 질문 수 - GET /statistics/today/questions
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/statistics/today/questions",
@@ -353,7 +356,10 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 오늘의 답변 수 - GET /api/statistics/today/answers
+#### 오늘의 답변 수 - GET /statistics/today/answers
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/statistics/today/answers",
@@ -365,7 +371,10 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 전체 답변 수 - GET /api/statistics/total/answers
+#### 전체 답변 수 - GET /statistics/total/answers
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/statistics/total/answers",
@@ -379,9 +388,9 @@ No json body - just the Bearer header w/ access token.
 
 // 우수 답변자 보류
 
-### 채팅
+### 채팅 // 아직 구현 X
 
-#### 채팅 메시지 처리 (답변) - GET /api/chat/process
+#### 채팅 메시지 처리 (답변) - GET /chat/process
 
 **시나리오 1: 수강신청 관련 답변 (답변 존재 질문)**
 ```json
@@ -479,29 +488,59 @@ No json body - just the Bearer header w/ access token.
 
 ### 내 정보
 
-#### 프로필 수정 - PATCH /api/auth/register
+#### 프로필 수정 - PATCH /users/edit-profile
 ```json
 {
     "nickname" : "new_nickname",
     "profileImageUrl" : ""
 }
 ```
-
-**비밀번호 변경 제외**
-
-#### 소속 인증하기 - PATCH /api/auth/register
 ```json
 {
     // 서비스 측에서 확인 후 PATCH
-    "department": "",
-    "isVerified": true
+    "route": "/auth/verify-department",
+    "method": "PATCH",
+    "status": 200,
+    "response": {
+      "nickname" : "new_nickname",
+      "profileImageUrl" : ""
+    }
 }
 ```
 
-#### 회원탈퇴 - DELETE /api/auth/register
+**비밀번호 변경 제외**
+
+#### 소속 인증하기 - PATCH /auth/verify-department
 ```json
 {
-    "email" : "example@dankook.ac.kr",
-    "password" : "password",
-    "reasonCode" : "LOW_USAGE"
+    "email": "",
+    "department": ""
+}
+```
+```json
+{
+    // 서비스 측에서 확인 후 PATCH
+    "route": "/auth/verify-department",
+    "method": "PATCH",
+    "status": 200,
+    "response": {
+      "department": "",
+      "isVerified": true
+    }
+}
+```
+
+#### 회원탈퇴 - DELETE /auth/delete-account
+```json
+No json body - just the Bearer header w/ access token.
+```
+```json
+{
+    "route": "/auth/delete-account",
+    "method": "DELETE",
+    "status": 200,
+    "response": {
+      "id": 1,
+      "email": ""
+    }
 }
