@@ -152,13 +152,13 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /questions/id // 수정
+#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /questions/:id
 ```json
 No json body - just the Bearer header w/ access token.
 ```
 ```json
 {
-  "route": "/questions/id", // 수정
+  "route": "/questions/:id", 
   "method": "GET",
   "status": 200,
   "response": {
@@ -230,7 +230,7 @@ No json body - just the Bearer header w/ access token.
 // 공식 질문 , 자주 받은 질문 제외
 //
 
-#### 답변받지 못한 질문 (answerCount = 0) - GET /api/questions/unanswered
+#### 답변받지 못한 질문 (answerCount = 0) - GET /questions/unanswered
 ```json
 No json body - just the Bearer header w/ access token.
 ```
@@ -266,13 +266,13 @@ No json body - just the Bearer header w/ access token.
 ```
 
 ### 답변
-#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /questions/id/answers
+#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /questions/:id/answers
 ```json
 No json body - just the Bearer header w/ access token.
 ```
 ```json
 {
-  "route": "/questions/id/answers",
+  "route": "/questions/:id/answers",
   "method": "GET",
   "status": 200,
   "response": {
@@ -293,7 +293,12 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 새 답변 작성 - POST /api/questions/:id/answers
+#### 새 답변 작성 - POST /questions/:id/answers
+```json
+{
+  "content": "답변 내용"
+}
+```
 ```json
 {
   "route": "/questions/:id/answers",
@@ -312,7 +317,10 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 답변 채택 - PUT /api/answers/:id/accept
+#### 답변 채택 - PUT /questions:id/answers/:id/accept
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/answers/:id/accept",
