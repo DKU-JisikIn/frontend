@@ -152,10 +152,13 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /api/questions/:id
+#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /questions/id // 수정
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
-  "route": "/questions/:id",
+  "route": "/questions/id", // 수정
   "method": "GET",
   "status": 200,
   "response": {
@@ -171,7 +174,14 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 채팅에서 새 질문 작성 (해당 질문 자체가 없을 때) - POST /api/questions
+#### 채팅에서 새 질문 작성 (해당 질문 자체가 없을 때) - POST /questions
+```json
+{
+  "title": "새로운 질문 제목", // 없으면 AI가 자동 생성
+  "content": "새로운 질문 내용",
+  "category": "질문 카테고리" // 없으면 AI가 자동 생성
+}
+```
 ```json
 {
   "route": "/questions",
@@ -190,7 +200,10 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
-#### 인기 질문 - GET /api/questions/popular
+#### 인기 질문 - GET /questions/popular (인기 질문 10개)
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions/popular",
@@ -218,9 +231,9 @@ No json body - just the Bearer header w/ access token.
 //
 
 #### 답변받지 못한 질문 (answerCount = 0) - GET /api/questions/unanswered
-
-// 전체 질문에서 answerCount가 0인 것만 가져올 수 있는가?
-
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions/unanswered",
@@ -253,10 +266,13 @@ No json body - just the Bearer header w/ access token.
 ```
 
 ### 답변
-#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /api/questions/:id/answers
+#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /questions/id/answers
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
-  "route": "/questions/:id/answers",
+  "route": "/questions/id/answers",
   "method": "GET",
   "status": 200,
   "response": {
