@@ -34,7 +34,11 @@
 ```
 
 #### 로그아웃 - POST /api/auth/logout
-
+```json
+{
+  "refreshToken": "JWT refresh token"
+}
+```
 ```json
 {
   "route": "/auth/logout",
@@ -47,21 +51,32 @@
 ```
 
 #### 이메일 인증 코드 전송 - POST /api/auth/send-verification
-
+```json
+{
+  "email": "example@dankook.ac.kr"
+}
+```
 ```json
 {
   "route": "/auth/send-verification",
   "method": "POST",
   "status": 200,
   "response": {
+    "requestId": 1 // 추가
     "email" : "example@dankook.ac.kr",
-    "code" : "1234"
+    "code" : "1234" // 실제 배포 때는 "****" 으로 hide
   }
 }
 ```
 
 #### 이메일 인증 - POST /api/auth/verify-email
-
+```json
+{
+  "requestId": 1 // 위에서 추가된 정보
+  "email" : "example@dankook.ac.kr",
+  "code" : "1234"
+}
+```
 ```json
 {
   "route": "/auth/verify-email",
@@ -111,7 +126,10 @@
 - `nickname`: 사용자 닉네임 (2-10자, 한글/영문/숫자)
 
 ### 질문 조회
-#### 질문 목록 조회(전체 질문 페이지) - GET /api/questions
+#### 질문 목록 조회(전체 질문 페이지) - GET /questions
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions",
