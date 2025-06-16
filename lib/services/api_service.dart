@@ -563,28 +563,23 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/users/$userId/question-stats'),
-        headers: authHeaders, // 인증 토큰 포함
+        headers: _authService.authHeaders,
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
         final responseData = data['response'] ?? data;
         return {
           'total': responseData['total'] ?? 0,
           'answered': responseData['answered'] ?? 0,
           'unanswered': responseData['unanswered'] ?? 0,
         };
-      } else {
-        throw Exception('사용자 질문 통계 조회 실패: ${response.statusCode}');
       }
+      
+      throw Exception('사용자 질문 통계 조회 실패: ${response.statusCode}');
     } catch (e) {
-      print('API 호출 오류: $e');
-      return {
-        'total': 0,
-        'answered': 0,
-        'unanswered': 0,
-      };
+      print('사용자 질문 통계 API 호출 오류: $e');
+      throw Exception('사용자 질문 통계 조회 실패: $e');
     }
   }
 
