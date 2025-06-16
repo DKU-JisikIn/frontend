@@ -47,6 +47,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _todayQuestionCount = 0;
   int _todayAnswerCount = 0;
   int _totalAnswerCount = 0;
+  Map<String, int> _userQuestionStats = {
+    'total': 0,
+    'answered': 0,
+    'unanswered': 0,
+  };
 
   // 애니메이션 컨트롤러들
   late AnimationController _animationController;
@@ -57,9 +62,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // 우수 답변자 데이터
   List<TopAnswerer> _topAnswerers = [];
-
-  // 사용자 질문 통계 데이터
-  Map<String, int> _userQuestionStats = {};
 
   @override
   void initState() {
@@ -143,17 +145,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final todayAnswerCount = await _apiService.getTodayAnswerCount();
       final totalAnswerCount = await _apiService.getTotalAnswerCount();
       
+      // 사용자 질문 통계 로드
+      if (_authService.isLoggedIn) {
+        try {
+          final userStats = await _apiService.getUserQuestionStats(_authService.currentUserId!);
+          setState(() {
+            _userQuestionStats = userStats;
+          });
+        } catch (e) {
+          print('사용자 질문 통계 로드 실패: $e');
+        }
+      }
+      
       // 우수 답변자 데이터 로드
       final topAnswerers = await _apiService.getTopAnswerers(limit: 5);
-      
-      // 사용자 질문 통계 로드 (로그인된 경우에만)
-      Map<String, int> userQuestionStats = {};
-      if (_authService.isLoggedIn) {
-        final userId = _authService.currentUserEmail?.split('@')[0] ?? 'test';
-        print('Loading user question stats for userId: $userId'); // 디버그 로그
-        userQuestionStats = await _apiService.getUserQuestionStats(userId);
-        print('User question stats loaded: $userQuestionStats'); // 디버그 로그
-      }
       
       setState(() {
         _unansweredQuestions = unansweredQuestions;
@@ -161,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _todayAnswerCount = todayAnswerCount;
         _totalAnswerCount = totalAnswerCount;
         _topAnswerers = topAnswerers;
-        _userQuestionStats = userQuestionStats;
         _isLoading = false;
       });
 
@@ -387,25 +391,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 24),
 
-                      // 오늘의 질문과 답변 통계
-                      SlideTransition(
-                        position: _slideAnimations[5],
-                        child: FadeTransition(
-                          opacity: _fadeAnimations[5],
-                          child: TodayStatsWidget(
-                            todayQuestionCount: _todayQuestionCount,
-                            todayAnswerCount: _todayAnswerCount,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // 누적 답변 수
-                      SlideTransition(
-                        position: _slideAnimations[6],
-                        child: FadeTransition(
-                          opacity: _fadeAnimations[6],
-                          child: TotalAnswersWidget(totalAnswerCount: _totalAnswerCount),
+                      // 통계 섹션
+                      Container(
+                        margin: const EdgeInsets.only(top: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 오늘의 질문과 답변 통계
+                            FadeTransition(
+                              opacity: _fadeAnimations[4],
+                              child: SlideTransition(
+                                position: _slideAnimations[4],
+                                child: TodayStatsWidget(
+                                  todayQuestionCount: _todayQuestionCount,
+                                  todayAnswerCount: _todayAnswerCount,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            FadeTransition(
+                              opacity: _fadeAnimations[5],
+                              child: SlideTransition(
+                                position: _slideAnimations[5],
+                                child: TotalAnswersWidget(
+                                  totalAnswerCount: _totalAnswerCount,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 

@@ -374,6 +374,41 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               
+              const SizedBox(height: 16),
+              // 테스트 로그인 버튼
+              TextButton(
+                onPressed: () async {
+                  setState(() => _isLoading = true);
+                  try {
+                    final result = await _authService.login(
+                      'test@dankook.ac.kr',
+                      'test1234',
+                    );
+                    
+                    if (mounted) {
+                      setState(() => _isLoading = false);
+                      if (result['success']) {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      } else {
+                        _showErrorDialog(result['message']);
+                      }
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      setState(() => _isLoading = false);
+                      _showErrorDialog('로그인 중 오류가 발생했습니다.');
+                    }
+                  }
+                },
+                child: Text(
+                  '테스트 계정으로 로그인',
+                  style: TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              
               const SizedBox(height: 40),
             ],
           ),

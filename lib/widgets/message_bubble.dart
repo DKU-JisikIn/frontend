@@ -143,30 +143,6 @@ class MessageBubble extends StatelessWidget {
                   ),
                 ],
               ),
-              
-              // 태그
-              if (question.tags?.isNotEmpty ?? false) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: question.tags?.take(3).map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontSize: 12,
-                        ),
-                      ),
-                    );
-                  }).toList() ?? [],
-                ),
-              ],
             ],
           ),
         ),
