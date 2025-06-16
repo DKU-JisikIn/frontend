@@ -9,7 +9,7 @@ class Question {
   final String title;
   final String content;
 
-  final String userId;
+  final String? userId;
   final String userName;
 
   final DateTime createdAt;
@@ -19,7 +19,7 @@ class Question {
   final bool isAnswered;
   final bool isOfficial; // 공식 자료인지 여부
   final String category; // 학사, 장학금, 교내프로그램 등
-  final List<String> tags;
+  final List<String>? tags;
 
   // 추가 필드
   // 1. 답변 수
@@ -28,19 +28,44 @@ class Question {
     required this.id,
     required this.title,
     required this.content,
-    required this.userId,
-    required this.userName,
+    required this.category,
     required this.createdAt,
+    this.userId,
+    this.tags,
     this.viewCount = 0,
     this.answerCount = 0,
     this.isAnswered = false,
     this.isOfficial = false,
-    required this.category,
-    this.tags = const [],
+    required this.userName,
   });
 
-  factory Question.fromJson(Map<String, dynamic> json) => _$QuestionFromJson(json);
-  Map<String, dynamic> toJson() => _$QuestionToJson(this);
+  factory Question.fromJson(Map<String, dynamic> json) {
+    return Question(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      category: json['category'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      userId: json['user_id'] as String?,
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      viewCount: json['view_count'] as int? ?? 0,
+      answerCount: json['answer_count'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+      'category': category,
+      'created_at': createdAt.toIso8601String(),
+      'user_id': userId,
+      'tags': tags,
+      'view_count': viewCount,
+      'answer_count': answerCount,
+    };
+  }
 
   Question copyWith({
     String? id,

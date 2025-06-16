@@ -434,7 +434,7 @@ class ApiService {
         body: json.encode({
           'title': title,
           'content': content,
-          'category': category,
+          'category': category
         }),
       );
 

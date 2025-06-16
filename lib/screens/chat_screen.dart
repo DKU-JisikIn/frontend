@@ -127,39 +127,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final suggestedTitle = actions['suggestedTitle'] as String? ?? '';
     final suggestedContent = actions['suggestedContent'] as String? ?? '';
-    final category = _apiService.detectCategory(suggestedContent);
 
-    try {
-      // 자동으로 질문 생성
-      final question = await _apiService.createQuestionFromChat(
-        suggestedTitle,
-        suggestedContent,
-        category,
-      );
+    // 질문 미리보기를 채팅 메시지로 표시
+    setState(() {
+      _messages.add(ChatMessage.assistant(
+        '다음과 같이 질문을 작성할까요?',
+        metadata: {
+          'type': 'question_preview',
+          'suggestedTitle': suggestedTitle,
+          'suggestedContent': suggestedContent,
+        },
+      ));
+    });
 
-      // 성공 메시지 추가
-      setState(() {
-        _messages.add(ChatMessage.assistant(
-          '질문이 성공적으로 작성되었습니다! ✅\n\n**제목**: ${question.title}\n**카테고리**: ${question.category}\n\n다른 학생들의 답변을 기다려보세요.',
-          metadata: {
-            'type': 'question_created',
-            'questionId': question.id,
-          },
-        ));
-      });
-
-      await _scrollToBottomSmooth();
-    } catch (e) {
-      // 오류 메시지 추가
-      setState(() {
-        _messages.add(ChatMessage.assistant(
-          '연결 필요',
-          metadata: {'type': 'error'},
-        ));
-      });
-      
-      await _scrollToBottomSmooth();
-    }
+    await _scrollToBottomSmooth();
   }
 
   void _handleRelatedQuestionsTap(List<Map<String, dynamic>> relatedQuestions) {
@@ -250,6 +231,79 @@ class _ChatScreenState extends State<ChatScreen> {
                   height: 1.5,
                 ),
               ),
+              if (message.metadata?['type'] == 'question_preview') ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.primaryColor.withOpacity(0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.title,
+                            size: 16,
+                            color: AppTheme.primaryColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '제목',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        message.metadata?['suggestedTitle'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.primaryTextColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.description,
+                            size: 16,
+                            color: AppTheme.primaryColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '내용',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        message.metadata?['suggestedContent'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppTheme.primaryTextColor,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               if (message.relatedQuestions != null && message.relatedQuestions!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 const Divider(),
@@ -399,6 +453,85 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 label: Text(
                   '질문 작성하기',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 질문 미리보기 메시지인 경우 질문 올리기 버튼 표시
+    if (metadata['type'] == 'question_preview') {
+      widgets.add(
+        Container(
+          margin: const EdgeInsets.only(left: 16, top: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+              ),
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final suggestedTitle = metadata['suggestedTitle'] as String? ?? '';
+                  final suggestedContent = metadata['suggestedContent'] as String? ?? '';
+                  final category = _apiService.detectCategory(suggestedContent);
+                  
+                  try {
+                    // 자동으로 질문 생성
+                    final question = await _apiService.createQuestionFromChat(
+                      suggestedTitle,
+                      suggestedContent,
+                      category,
+                    );
+
+                    // 성공 메시지 추가
+                    setState(() {
+                      _messages.add(ChatMessage.assistant(
+                        '질문이 성공적으로 작성되었습니다! ✅\n\n**제목**: ${question.title}\n**카테고리**: ${question.category}\n\n다른 학생들의 답변을 기다려보세요.',
+                        metadata: {
+                          'type': 'question_created',
+                          'questionId': question.id,
+                        },
+                      ));
+                    });
+
+                    await _scrollToBottomSmooth();
+                  } catch (e) {
+                    // 오류 메시지 추가
+                    setState(() {
+                      _messages.add(ChatMessage.assistant(
+                        '연결 필요',
+                        metadata: {'type': 'error'},
+                      ));
+                    });
+                    
+                    await _scrollToBottomSmooth();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                icon: Icon(
+                  Icons.check,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  '질문 올리기',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
