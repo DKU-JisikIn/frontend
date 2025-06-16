@@ -235,7 +235,7 @@ class AuthService {
   // 프로필 수정
   Future<Map<String, dynamic>> updateProfile(String nickname, String profileImageUrl) async {
     try {
-      final response = await _apiService.updateProfile(nickname, profileImageUrl);
+      final response = await _apiService.updateProfile(nickname, profileImageUrl, token: _accessToken);
       
       // 로컬 상태 업데이트
       _currentUserNickname = response['nickname'];
@@ -259,7 +259,7 @@ class AuthService {
   // 소속 인증
   Future<Map<String, dynamic>> verifyDepartment(String email, String department) async {
     try {
-      final response = await _apiService.verifyDepartment(email, department);
+      final response = await _apiService.verifyDepartment(email, department, token: _accessToken);
       
       // 로컬 상태 업데이트
       _currentUserDepartment = response['department'];
@@ -283,7 +283,7 @@ class AuthService {
   // 회원탈퇴
   Future<Map<String, dynamic>> deleteAccount() async {
     try {
-      final response = await _apiService.deleteAccount();
+      final response = await _apiService.deleteAccount(token: _accessToken);
       
       // 로컬 상태 초기화
       _isLoggedIn = false;

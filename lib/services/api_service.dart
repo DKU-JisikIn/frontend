@@ -3,14 +3,10 @@ import 'package:http/http.dart' as http;
 import '../models/question.dart';
 import '../models/answer.dart';
 import '../models/chat_message.dart';
-import '../services/auth_service.dart';
 
 class ApiService {
   // Mockoon 로컬 서버 URL (기본 포트 3001)
   static const String baseUrl = 'http://localhost:3001/api';
-  
-  // AuthService 인스턴스
-  final AuthService _authService = AuthService();
   
   // HTTP 헤더 설정
   Map<String, String> get headers => {
@@ -19,10 +15,10 @@ class ApiService {
   };
 
   // 인증이 필요한 요청용 헤더 (JWT 토큰 포함)
-  Map<String, String> get authHeaders => {
+  Map<String, String> getAuthHeaders({String? token}) => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    if (_authService.accessToken != null) 'Authorization': 'Bearer ${_authService.accessToken}',
+    if (token != null) 'Authorization': 'Bearer $token',
   };
 
   // 질문 목록 조회
@@ -185,7 +181,7 @@ class ApiService {
   }
 
   // 새 질문 작성
-  Future<Question> createQuestion(Question question) async {
+  Future<Question> createQuestion(Question question, {String? token}) async {
     try {
       if (question.title.trim().isEmpty) {
         throw Exception('질문 제목을 입력해주세요.');
@@ -195,13 +191,9 @@ class ApiService {
         throw Exception('질문 내용을 입력해주세요.');
       }
 
-      if (_authService.currentUserId == null) {
-        throw Exception('로그인이 필요한 서비스입니다.');
-      }
-
       final response = await http.post(
         Uri.parse('$baseUrl/questions'),
-        headers: authHeaders,
+        headers: getAuthHeaders(token: token),
         body: json.encode(question.toJson()),
       );
 
@@ -239,19 +231,15 @@ class ApiService {
   }
 
   // 새 답변 작성
-  Future<Answer> createAnswer(String questionId, String content) async {
+  Future<Answer> createAnswer(String questionId, String content, {String? token}) async {
     try {
       if (content.trim().isEmpty) {
         throw Exception('답변 내용을 입력해주세요.');
       }
 
-      if (_authService.currentUserId == null) {
-        throw Exception('로그인이 필요한 서비스입니다.');
-      }
-
       final response = await http.post(
         Uri.parse('$baseUrl/questions/$questionId/answers'),
-        headers: authHeaders,
+        headers: getAuthHeaders(token: token),
         body: json.encode({'content': content}),
       );
 
@@ -268,15 +256,11 @@ class ApiService {
   }
 
   // 답변 채택
-  Future<Answer> acceptAnswer(String questionId, String answerId) async {
+  Future<Answer> acceptAnswer(String questionId, String answerId, {String? token}) async {
     try {
-      if (_authService.currentUserId == null) {
-        throw Exception('로그인이 필요한 서비스입니다.');
-      }
-
       final response = await http.put(
         Uri.parse('$baseUrl/questions/$questionId/answers/$answerId/accept'),
-        headers: authHeaders,
+        headers: getAuthHeaders(token: token),
       );
 
       if (response.statusCode == 200) {
@@ -292,13 +276,13 @@ class ApiService {
   }
 
   // 답변 좋아요/좋아요 취소
-  Future<Answer> toggleAnswerLike(String answerId) async {
+  Future<Answer> likeAnswer(String answerId, {String? token}) async {
     try {
       print('좋아요 API 호출: PUT $baseUrl/answers/$answerId/like'); // 디버깅 로그
       
       final response = await http.put(
         Uri.parse('$baseUrl/answers/$answerId/like'),
-        headers: authHeaders, // 인증 토큰 포함
+        headers: getAuthHeaders(token: token), // 인증 토큰 포함
       );
 
       print('좋아요 API 응답 상태: ${response.statusCode}'); // 디버깅 로그
@@ -426,11 +410,11 @@ class ApiService {
   }
 
   // 채팅에서 질문 생성
-  Future<Question> createQuestionFromChat(String title, String content, String category) async {
+  Future<Question> createQuestionFromChat(String title, String content, String category, {String? token}) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/questions/from-chat'),
-        headers: authHeaders, // 인증 토큰 포함
+        headers: getAuthHeaders(token: token), // 인증 토큰 포함
         body: json.encode({
           'title': title,
           'content': content,
@@ -559,11 +543,11 @@ class ApiService {
   }
 
   // 사용자 질문 통계 조회
-  Future<Map<String, int>> getUserQuestionStats(String userId) async {
+  Future<Map<String, dynamic>> getUserQuestionStats(String userId, {String? token}) async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/users/$userId/question-stats'),
-        headers: _authService.authHeaders,
+        headers: getAuthHeaders(token: token),
       );
 
       if (response.statusCode == 200) {
@@ -584,13 +568,13 @@ class ApiService {
   }
 
   // 사용자 질문 목록 조회
-  Future<List<Question>> getUserQuestions(String userId, {String? filter}) async {
+  Future<List<Question>> getUserQuestions(String userId, {String? filter, String? token}) async {
     try {
       final uri = Uri.parse('$baseUrl/users/$userId/questions').replace(queryParameters: {
         if (filter != null) 'filter': filter,
       });
 
-      final response = await http.get(uri, headers: authHeaders); // 인증 토큰 포함
+      final response = await http.get(uri, headers: getAuthHeaders(token: token)); // 인증 토큰 포함
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -703,11 +687,11 @@ class ApiService {
   }
 
   // 프로필 수정
-  Future<Map<String, dynamic>> updateProfile(String nickname, String profileImageUrl) async {
+  Future<Map<String, dynamic>> updateProfile(String nickname, String profileImageUrl, {String? token}) async {
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/users/edit-profile'),
-        headers: authHeaders,
+        headers: getAuthHeaders(token: token),
         body: json.encode({
           'nickname': nickname,
           'profileImageUrl': profileImageUrl,
@@ -727,11 +711,11 @@ class ApiService {
   }
 
   // 소속 인증
-  Future<Map<String, dynamic>> verifyDepartment(String email, String department) async {
+  Future<Map<String, dynamic>> verifyDepartment(String email, String department, {String? token}) async {
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/auth/verify-department'),
-        headers: authHeaders,
+        headers: getAuthHeaders(token: token),
         body: json.encode({
           'email': email,
           'department': department,
@@ -751,11 +735,11 @@ class ApiService {
   }
 
   // 회원탈퇴
-  Future<Map<String, dynamic>> deleteAccount() async {
+  Future<Map<String, dynamic>> deleteAccount({String? token}) async {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/auth/delete-account'),
-        headers: authHeaders,
+        headers: getAuthHeaders(token: token),
       );
 
       if (response.statusCode == 200) {
@@ -763,6 +747,29 @@ class ApiService {
         return data['response'];
       } else {
         throw Exception('회원탈퇴 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // AI 질문 작성 도우미
+  Future<Map<String, dynamic>> composeQuestion(String userMessage, {String? token}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/questions/compose'),
+        headers: getAuthHeaders(token: token),
+        body: json.encode({
+          'userMessage': userMessage,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['response']['composedQuestion'];
+      } else {
+        throw Exception('질문 작성 도우미 실패: ${response.statusCode}');
       }
     } catch (e) {
       print('API 호출 오류: $e');

@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _todayQuestionCount = 0;
   int _todayAnswerCount = 0;
   int _totalAnswerCount = 0;
-  Map<String, int> _userQuestionStats = {
+  Map<String, dynamic> _userQuestionStats = {
     'total': 0,
     'answered': 0,
     'unanswered': 0,
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       // 사용자 질문 통계 로드
       if (_authService.isLoggedIn) {
         try {
-          final userStats = await _apiService.getUserQuestionStats(_authService.currentUserId!);
+          final userStats = await _apiService.getUserQuestionStats(_authService.currentUserId!, token: _authService.accessToken);
           setState(() {
             _userQuestionStats = userStats;
           });

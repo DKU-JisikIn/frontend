@@ -122,25 +122,50 @@ class _ChatScreenState extends State<ChatScreen> {
     final metadata = message.metadata;
     if (metadata == null) return;
 
-    final actions = metadata['actions'] as Map<String, dynamic>?;
-    if (actions == null) return;
+    try {
+      // 사용자의 원본 메시지 찾기 (가장 최근 사용자 메시지)
+      String userMessage = '';
+      for (int i = _messages.length - 1; i >= 0; i--) {
+        if (_messages[i].isUser) {
+          userMessage = _messages[i].content;
+          break;
+        }
+      }
 
-    final suggestedTitle = actions['suggestedTitle'] as String? ?? '';
-    final suggestedContent = actions['suggestedContent'] as String? ?? '';
+      if (userMessage.isEmpty) {
+        userMessage = '질문을 작성해주세요'; // 기본값
+      }
 
-    // 질문 미리보기를 채팅 메시지로 표시
-    setState(() {
-      _messages.add(ChatMessage.assistant(
-        '다음과 같이 질문을 작성할까요?',
-        metadata: {
-          'type': 'question_preview',
-          'suggestedTitle': suggestedTitle,
-          'suggestedContent': suggestedContent,
-        },
-      ));
-    });
+      // AI 질문 작성 도우미 API 호출
+      final composedQuestion = await _apiService.composeQuestion(userMessage);
 
-    await _scrollToBottomSmooth();
+      // 질문 미리보기를 채팅 메시지로 표시
+      setState(() {
+        _messages.add(ChatMessage.assistant(
+          '다음과 같이 질문을 작성할까요?',
+          metadata: {
+            'type': 'question_preview',
+            'suggestedTitle': composedQuestion['title'] ?? '',
+            'suggestedContent': composedQuestion['content'] ?? '',
+            'suggestedCategory': composedQuestion['category'] ?? '기타',
+          },
+        ));
+      });
+
+      await _scrollToBottomSmooth();
+    } catch (e) {
+      print('질문 작성 도우미 오류: $e');
+      
+      // 오류 시 기본 메시지 표시
+      setState(() {
+        _messages.add(ChatMessage.assistant(
+          '질문 작성 중 오류가 발생했습니다. 다시 시도해주세요.',
+          metadata: {'type': 'error'},
+        ));
+      });
+      
+      await _scrollToBottomSmooth();
+    }
   }
 
   void _handleRelatedQuestionsTap(List<Map<String, dynamic>> relatedQuestions) {
@@ -481,14 +506,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 onPressed: () async {
                   final suggestedTitle = metadata['suggestedTitle'] as String? ?? '';
                   final suggestedContent = metadata['suggestedContent'] as String? ?? '';
-                  final category = _apiService.detectCategory(suggestedContent);
+                  final suggestedCategory = metadata['suggestedCategory'] as String? ?? '기타';
                   
                   try {
                     // 자동으로 질문 생성
                     final question = await _apiService.createQuestionFromChat(
                       suggestedTitle,
                       suggestedContent,
-                      category,
+                      suggestedCategory,
                     );
 
                     // 성공 메시지 추가

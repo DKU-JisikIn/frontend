@@ -199,6 +199,28 @@ No json body - just the Bearer header w/ access token.
 }
 ```
 
+#### AI 질문 작성 도우미 - POST /questions/compose
+```json
+{
+  "userMessage": "도서관 이용시간이 어떻게 되나요?"
+}
+```
+```json
+{
+  "route": "/questions/compose",
+  "method": "POST",
+  "status": 200,
+  "response": {
+    "composedQuestion": {
+      "title": "중앙도서관 이용시간 문의",
+      "content": "중앙도서관의 평일, 주말 이용시간과 휴관일에 대해 자세히 알고 싶습니다. 또한 시험기간 중 연장 운영 여부도 궁금합니다.",
+      "category": "기타",
+      "basedOn": "도서관 이용시간이 어떻게 되나요?"
+    }
+  }
+}
+```
+
 #### 인기 질문 - GET /questions/popular (인기 질문 10개)
 ```json
 No json body - just the Bearer header w/ access token.
@@ -387,13 +409,13 @@ No json body - just the Bearer header w/ access token.
 
 // 우수 답변자 보류
 
-### 채팅 // 아직 구현 X
+### 채팅
 
-#### 채팅 메시지 처리 (답변) - GET /chat/process
+#### 채팅 메시지 처리 (답변) - POST /chat/process
 **요청**
 ```json
 {
-  "message": "수강신청은 언제 시작하나요?",
+  "message": "수강신청은 언제 시작하나요?"
 }
 ```
 
@@ -401,28 +423,28 @@ No json body - just the Bearer header w/ access token.
 ```json
 {
   "route": "/chat/process",
-  "method": "GET",
+  "method": "POST",
   "status": 200,
   "response": {
-    "answer": "답변1",
+    "answer": "2024년 1학기 수강신청은 2월 5일부터 시작됩니다. 자세한 일정은 학사공지를 확인해주세요.",
     "relatedQuestions": [
       {
         "id": 1,
         "title": "수강신청 시스템 사용법",
-        "content": "내용1",
+        "content": "수강신청 시스템 접속 및 사용방법에 대한 질문입니다.",
         "source": "VOC"
       },
       {
         "id": 2,
         "title": "수강신청 변경 및 취소 방법",
-        "content": "내용2"
-        "source": "VOC" 
+        "content": "수강신청 후 변경이나 취소하는 방법에 대한 질문입니다.",
+        "source": "VOC"
       }
     ],
     "actions": {
       "canCreateQuestion": false,
       "hasDirectAnswer": true
-    },
+    }
   }
 }
 ```
@@ -431,12 +453,11 @@ No json body - just the Bearer header w/ access token.
 ```json
 {
   "route": "/chat/process",
-  "method": "POST", 
+  "method": "POST",
   "status": 200,
   "response": {
-    "response": {
-      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
-    },
+    "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
+    "relatedQuestions": [],
     "actions": {
       "canCreateQuestion": true,
       "hasDirectAnswer": false
@@ -448,13 +469,19 @@ No json body - just the Bearer header w/ access token.
 **시나리오 3: 일반적인 인사 또는 모호한 질문**
 ```json
 {
-  "route": "/chat/process", 
+  "route": "/chat/process",
   "method": "POST",
   "status": 200,
   "response": {
-    "response": {
-      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
-    },
+    "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
+    "relatedQuestions": [
+      {
+        "id": 10,
+        "title": "자주 묻는 질문들",
+        "content": "학생들이 자주 묻는 질문들을 모아놓은 페이지입니다.",
+        "source": "FAQ"
+      }
+    ],
     "actions": {
       "canCreateQuestion": false,
       "hasDirectAnswer": true
@@ -521,3 +548,4 @@ No json body - just the Bearer header w/ access token.
       "email": ""
     }
 }
+```

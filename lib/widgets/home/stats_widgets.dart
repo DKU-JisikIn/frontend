@@ -6,7 +6,7 @@ import '../../services/api_service.dart';
 import '../../screens/my_questions_screen.dart';
 
 class UserStatsWidget extends StatelessWidget {
-  final Map<String, int> userQuestionStats;
+  final Map<String, dynamic> userQuestionStats;
   final VoidCallback onRefresh;
 
   const UserStatsWidget({
@@ -52,7 +52,7 @@ class UserStatsWidget extends StatelessWidget {
                 child: _buildUserStatItem(
                   context,
                   '올린 질문',
-                  userQuestionStats['total'] ?? 0,
+                  (userQuestionStats['total'] as int?) ?? 0,
                   CupertinoIcons.chat_bubble_text,
                   () => _navigateToMyQuestions(context, 'all'),
                 ),
@@ -66,7 +66,7 @@ class UserStatsWidget extends StatelessWidget {
                 child: _buildUserStatItem(
                   context,
                   '답변받은 질문',
-                  userQuestionStats['answered'] ?? 0,
+                  (userQuestionStats['answered'] as int?) ?? 0,
                   CupertinoIcons.checkmark_circle,
                   () => _navigateToMyQuestions(context, 'answered'),
                 ),
@@ -80,7 +80,7 @@ class UserStatsWidget extends StatelessWidget {
                 child: _buildUserStatItem(
                   context,
                   '답변 대기중',
-                  userQuestionStats['unanswered'] ?? 0,
+                  (userQuestionStats['unanswered'] as int?) ?? 0,
                   CupertinoIcons.clock,
                   () => _navigateToMyQuestions(context, 'unanswered'),
                 ),
