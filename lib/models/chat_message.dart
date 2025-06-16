@@ -22,6 +22,7 @@ class ChatMessage {
   final DateTime createdAt;
   final MessageStatus status;
   final Map<String, dynamic>? metadata; // 추가 데이터 (질문 ID, 답변 정보 등)
+  final List<Map<String, dynamic>>? relatedQuestions;
 
   ChatMessage({
     required this.id,
@@ -30,6 +31,7 @@ class ChatMessage {
     required this.createdAt,
     this.status = MessageStatus.sent,
     this.metadata,
+    this.relatedQuestions,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => _$ChatMessageFromJson(json);
@@ -45,6 +47,7 @@ class ChatMessage {
     DateTime? createdAt,
     MessageStatus? status,
     Map<String, dynamic>? metadata,
+    List<Map<String, dynamic>>? relatedQuestions,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -53,6 +56,7 @@ class ChatMessage {
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
       metadata: metadata ?? this.metadata,
+      relatedQuestions: relatedQuestions ?? this.relatedQuestions,
     );
   }
 

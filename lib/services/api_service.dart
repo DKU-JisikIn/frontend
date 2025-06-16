@@ -353,25 +353,11 @@ class ApiService {
         ];
       }
 
-      if (_authService.currentUserId == null) {
-        return [
-          ChatMessage.assistant(
-            '로그인이 필요한 서비스입니다.',
-            metadata: {'type': 'error'},
-          ),
-        ];
-      }
-
       final response = await http.post(
         Uri.parse('$baseUrl/chat/process'),
-        headers: authHeaders,
+        headers: headers,
         body: json.encode({
           'message': message,
-          'context': {
-            'userId': _authService.currentUserId,
-            'sessionId': DateTime.now().millisecondsSinceEpoch,
-            'previousMessages': [],
-          },
         }),
       );
 

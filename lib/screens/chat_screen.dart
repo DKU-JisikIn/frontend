@@ -146,7 +146,6 @@ class _ChatScreenState extends State<ChatScreen> {
     if (metadata == null) return;
 
     final relatedQuestions = metadata['relatedQuestions'] as List?;
-    final searchQuery = metadata['searchQuery'] as String? ?? '';
     
     if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
       // 관련 질문 목록 페이지로 이동
@@ -155,42 +154,61 @@ class _ChatScreenState extends State<ChatScreen> {
         MaterialPageRoute(
           builder: (context) => RelatedQuestionsScreen(
             relatedQuestions: relatedQuestions.cast<Map<String, dynamic>>(),
-            searchQuery: searchQuery,
           ),
         ),
       );
     }
   }
 
-  Widget _buildMessageWidget(ChatMessage message, int index) {
-    return Column(
-      children: [
-        // 메시지 말풍선
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: _buildMessageBubble(message),
+  void _handleRelatedQuestionsTap(List<Map<String, dynamic>> relatedQuestions) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RelatedQuestionsScreen(
+          relatedQuestions: relatedQuestions,
         ),
-        // 관련 질문 버튼 (말풍선 아래에 위치)
-        if (!message.isUser) ..._buildActionButtons(message),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildMessageWidget(ChatMessage message, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        children: [
+          // 메시지 말풍선
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildMessageBubble(message),
+          ),
+          // 관련 질문 버튼 (말풍선 바로 아래에 위치)
+          if (!message.isUser) ..._buildActionButtons(message),
+        ],
+      ),
     );
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
+    if (message.isUser) {
+      return _buildUserMessage(message);
+    } else {
+      return _buildBotMessage(message);
+    }
+  }
+
+  Widget _buildUserMessage(ChatMessage message) {
     return Align(
-      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: Container(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        decoration: message.isUser 
-          ? AppTheme.userMessageDecoration 
-          : AppTheme.assistantMessageDecoration,
+        decoration: AppTheme.userMessageDecoration,
         padding: const EdgeInsets.all(16),
         child: Text(
           message.content,
           style: TextStyle(
-            color: message.isUser ? Colors.white : AppTheme.primaryTextColor,
+            color: Colors.white,
             fontSize: 16,
             height: 1.4,
           ),
@@ -199,9 +217,90 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  List<Widget> _buildAIResponseInfo(ChatMessage message) {
-    // 이 메서드는 더 이상 사용하지 않음 (버튼이 말풍선 밖으로 이동)
-    return [];
+  Widget _buildBotMessage(ChatMessage message) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                message.content,
+                style: TextStyle(
+                  color: AppTheme.primaryTextColor,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
+              ),
+              if (message.relatedQuestions != null && message.relatedQuestions!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
+                  '관련 질문',
+                  style: TextStyle(
+                    color: AppTheme.secondaryTextColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...message.relatedQuestions!.map((question) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: InkWell(
+                    onTap: () => _handleRelatedQuestionsTap(message.relatedQuestions!),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              question['title'] ?? '',
+                              style: TextStyle(
+                                color: AppTheme.primaryColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: AppTheme.primaryColor,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )).toList(),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   List<Widget> _buildActionButtons(ChatMessage message) {
@@ -211,11 +310,11 @@ class _ChatScreenState extends State<ChatScreen> {
     final widgets = <Widget>[];
     final relatedQuestions = metadata['relatedQuestions'] as List?;
 
-    // 관련 질문이 있는 경우 버튼 표시 (말풍선 아래에 위치)
+    // 관련 질문이 있는 경우 버튼 표시 (말풍선 바로 아래에 위치)
     if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
       widgets.add(
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: const EdgeInsets.only(left: 16, top: 8),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Container(

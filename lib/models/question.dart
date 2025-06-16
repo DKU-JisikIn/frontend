@@ -16,6 +16,7 @@ class Question {
   final int viewCount;
   final int answerCount;
 
+  final bool isAnswered;
   final bool isOfficial; // 공식 자료인지 여부
   final String category; // 학사, 장학금, 교내프로그램 등
   final List<String> tags;
@@ -32,6 +33,7 @@ class Question {
     required this.createdAt,
     this.viewCount = 0,
     this.answerCount = 0,
+    this.isAnswered = false,
     this.isOfficial = false,
     required this.category,
     this.tags = const [],
@@ -49,6 +51,7 @@ class Question {
     DateTime? createdAt,
     int? viewCount,
     int? answerCount,
+    bool? isAnswered,
     bool? isOfficial,
     String? category,
     List<String>? tags,
@@ -62,6 +65,7 @@ class Question {
       createdAt: createdAt ?? this.createdAt,
       viewCount: viewCount ?? this.viewCount,
       answerCount: answerCount ?? this.answerCount,
+      isAnswered: isAnswered ?? this.isAnswered,
       isOfficial: isOfficial ?? this.isOfficial,
       category: category ?? this.category,
       tags: tags ?? this.tags,
