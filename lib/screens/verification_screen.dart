@@ -81,88 +81,89 @@ class _VerificationScreenState extends State<VerificationScreen> {
     });
 
     try {
-      // TODO: 인증 신청 API 호출
-      await Future.delayed(const Duration(milliseconds: 2000)); // API 호출 시뮬레이션
+      // 소속 인증 API 호출
+      final result = await _authService.verifyDepartment(
+        _authService.currentUserEmail ?? '',
+        '컴퓨터공학과', // 임시로 고정값 사용
+      );
       
       if (mounted) {
         setState(() => _isLoading = false);
         
-        // 성공 다이얼로그
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppTheme.backgroundColor,
-            title: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.checkmark_circle_fill,
-                  color: AppTheme.primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '인증 신청 완료',
-                  style: TextStyle(color: AppTheme.primaryTextColor),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '인증 신청이 성공적으로 제출되었습니다.',
-                  style: TextStyle(color: AppTheme.secondaryTextColor),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+        if (result['success']) {
+          // 성공 다이얼로그
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              backgroundColor: AppTheme.backgroundColor,
+              title: Row(
+                children: [
+                  Icon(
+                    CupertinoIcons.checkmark_circle_fill,
+                    color: AppTheme.primaryColor,
+                    size: 24,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '신청 정보',
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('업로드된 서류: 인증 서류', 
-                           style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
-                    ],
+                  const SizedBox(width: 8),
+                  Text(
+                    '인증 신청 완료',
+                    style: TextStyle(color: AppTheme.primaryTextColor),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '관리자 검토 후 1-3일 내에 결과를 알려드립니다.',
-                  style: TextStyle(
-                    color: AppTheme.secondaryTextColor,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // 다이얼로그 닫기
-                  Navigator.pop(context); // 인증 화면 닫기
-                },
-                child: Text(
-                  '확인',
-                  style: TextStyle(color: AppTheme.primaryColor),
-                ),
+                ],
               ),
-            ],
-          ),
-        );
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    result['message'],
+                    style: TextStyle(color: AppTheme.secondaryTextColor),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '신청 정보',
+                          style: TextStyle(
+                            color: AppTheme.primaryColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text('소속: ${result['department']}', 
+                             style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
+                        Text('인증 상태: ${result['isVerified'] ? '인증 완료' : '검토 중'}', 
+                             style: TextStyle(color: AppTheme.primaryTextColor, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // 다이얼로그 닫기
+                    Navigator.pop(context); // 인증 화면 닫기
+                  },
+                  child: Text(
+                    '확인',
+                    style: TextStyle(color: AppTheme.primaryColor),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          setState(() => _errorMessage = result['message']);
+        }
       }
     } catch (e) {
       if (mounted) {

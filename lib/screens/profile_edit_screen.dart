@@ -114,20 +114,27 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     });
 
     try {
-      // TODO: 프로필 업데이트 API 호출
-      await Future.delayed(const Duration(milliseconds: 1000)); // API 호출 시뮬레이션
+      // 프로필 업데이트 API 호출
+      final result = await _authService.updateProfile(
+        nickname, 
+        _authService.currentUserProfileImageUrl ?? '',
+      );
       
       if (mounted) {
         setState(() => _isLoading = false);
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('프로필이 성공적으로 업데이트되었습니다!'),
-            backgroundColor: AppTheme.primaryColor,
-          ),
-        );
-        
-        Navigator.pop(context);
+        if (result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message']),
+              backgroundColor: AppTheme.primaryColor,
+            ),
+          );
+          
+          Navigator.pop(context);
+        } else {
+          setState(() => _errorMessage = result['message']);
+        }
       }
     } catch (e) {
       if (mounted) {

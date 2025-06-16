@@ -239,32 +239,25 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
     });
 
     try {
-      // TODO: 실제 계정 삭제 API 호출
-      await Future.delayed(const Duration(milliseconds: 2000)); // API 호출 시뮬레이션
-      
-      // 테스트용 비밀번호 확인
-      if (password != 'password123') {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = '비밀번호가 올바르지 않습니다.';
-        });
-        return;
-      }
+      // 계정 삭제 API 호출
+      final result = await _authService.deleteAccount();
       
       if (mounted) {
         setState(() => _isLoading = false);
         
-        // 탈퇴 완료 후 로그아웃 및 홈으로 이동
-        await _authService.logout();
-        
-        if (mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('회원탈퇴가 완료되었습니다.'),
-              backgroundColor: AppTheme.primaryColor,
-            ),
-          );
+        if (result['success']) {
+          // 탈퇴 완료 후 홈으로 이동
+          if (mounted) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message']),
+                backgroundColor: AppTheme.primaryColor,
+              ),
+            );
+          }
+        } else {
+          setState(() => _errorMessage = result['message']);
         }
       }
     } catch (e) {

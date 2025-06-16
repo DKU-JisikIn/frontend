@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'api_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
   AuthService._internal();
+
+  // ApiService 인스턴스
+  final ApiService _apiService = ApiService();
 
   // Base URL (API 서비스와 동일)
   static const String baseUrl = 'http://localhost:3001/api';
@@ -132,17 +136,11 @@ class AuthService {
     }
   }
 
-  // 로그아웃
+  // 로그아웃 - ApiService 사용
   Future<void> logout() async {
     try {
       if (_refreshToken != null) {
-        await http.post(
-          Uri.parse('$baseUrl/auth/logout'),
-          headers: headers,
-          body: json.encode({
-            'refreshToken': _refreshToken,
-          }),
-        );
+        await _apiService.logout(_refreshToken!);
       }
       
       _isLoggedIn = false;
@@ -178,217 +176,82 @@ class AuthService {
   // 이메일 인증 코드 전송
   Future<Map<String, dynamic>> sendVerificationCode(String email) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/send-verification'),
-        headers: headers,
-        body: json.encode({'email': email}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final responseData = data['response'];
-        
-        return {
-          'success': true,
-          'requestId': responseData['requestId'],
-          'email': responseData['email'],
-          'code': responseData['code'],
-        };
-      }
-      
+      final response = await _apiService.sendVerificationCode(email);
       return {
-        'success': false,
-        'message': '인증번호 전송에 실패했습니다.',
+        'success': true,
+        'message': '인증번호가 발송되었습니다.',
+        'requestId': response['requestId'],
+        'email': response['email'],
+        'code': response['code'],
       };
     } catch (e) {
-      print('인증번호 전송 API 호출 오류: $e');
+      print('인증 코드 전송 오류: $e');
       return {
         'success': false,
-        'message': 'API 연결에 문제가 있습니다.',
+        'message': '인증번호 발송에 실패했습니다.',
       };
     }
   }
 
-  // 이메일 인증 코드 확인
+  // 이메일 인증
   Future<Map<String, dynamic>> verifyEmail(String email, String code) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/verify-email'),
-        headers: headers,
-        body: json.encode({
-          'email': email,
-          'code': code,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final responseData = data['response'];
-        
-        return {
-          'success': true,
-          'email': responseData['email'],
-          'code': responseData['code'],
-        };
-      }
-      
+      // requestId는 임시로 1을 사용 (실제로는 sendVerificationCode에서 받은 값 사용)
+      final response = await _apiService.verifyEmail(1, email, code);
       return {
-        'success': false,
-        'message': '인증번호가 올바르지 않습니다.',
+        'success': true,
+        'message': '이메일 인증이 완료되었습니다.',
+        'requestId': response['requestId'],
+        'email': response['email'],
+        'code': response['code'],
       };
     } catch (e) {
-      print('이메일 인증 API 호출 오류: $e');
+      print('이메일 인증 오류: $e');
       return {
         'success': false,
-        'message': 'API 연결에 문제가 있습니다.',
+        'message': '인증에 실패했습니다. 인증번호를 확인해주세요.',
       };
     }
   }
 
   // 회원가입
-  Future<Map<String, dynamic>> register(
-    String email, 
-    String password,
-    String nickname,
-  ) async {
+  Future<Map<String, dynamic>> register(String email, String password, String nickname) async {
     try {
-      if (email.trim().isEmpty) {
-        return {
-          'success': false,
-          'message': '이메일을 입력해주세요.',
-        };
-      }
-
-      if (password.trim().isEmpty) {
-        return {
-          'success': false,
-          'message': '비밀번호를 입력해주세요.',
-        };
-      }
-
-      if (nickname.trim().isEmpty) {
-        return {
-          'success': false,
-          'message': '닉네임을 입력해주세요.',
-        };
-      }
-
-      if (!email.endsWith('@dankook.ac.kr')) {
-        return {
-          'success': false,
-          'message': '단국대학교 이메일 주소를 사용해주세요.',
-        };
-      }
-
-      if (password.length < 8) {
-        return {
-          'success': false,
-          'message': '비밀번호는 8자 이상이어야 합니다.',
-        };
-      }
-
-      if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$').hasMatch(password)) {
-        return {
-          'success': false,
-          'message': '비밀번호는 영문과 숫자를 포함해야 합니다.',
-        };
-      }
-
-      if (nickname.length < 2 || nickname.length > 10) {
-        return {
-          'success': false,
-          'message': '닉네임은 2-10자 사이여야 합니다.',
-        };
-      }
-
-      if (!RegExp(r'^[가-힣a-zA-Z0-9]{2,10}$').hasMatch(nickname)) {
-        return {
-          'success': false,
-          'message': '닉네임은 한글, 영문, 숫자만 사용 가능합니다.',
-        };
-      }
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/register'),
-        headers: headers,
-        body: json.encode({
-          'email': email,
-          'password': password,
-          'nickname': nickname,
-        }),
-      );
-
-      if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        final responseData = data['response'];
-        final userData = responseData['user'];
-        
-        return {
-          'success': true,
-          'user': {
-            'id': userData['id'],
-            'email': userData['email'],
-            'nickname': userData['nickname'],
-            'profileImageUrl': userData['profileImageUrl'],
-            'department': userData['department'],
-            'isVerified': userData['isVerified'],
-            'userLevel': userData['userLevel'],
-            'userEXP': userData['userEXP'],
-          },
-        };
-      }
-      
+      final response = await _apiService.register(email, password, nickname);
+      return {
+        'success': true,
+        'message': '회원가입이 완료되었습니다.',
+        'user': response['user'],
+      };
+    } catch (e) {
+      print('회원가입 오류: $e');
       return {
         'success': false,
         'message': '회원가입에 실패했습니다.',
-      };
-    } catch (e) {
-      print('회원가입 API 호출 오류: $e');
-      return {
-        'success': false,
-        'message': 'API 연결에 문제가 있습니다.',
       };
     }
   }
 
   // 프로필 수정
-  Future<Map<String, dynamic>> updateProfile({
-    String? nickname,
-    String? profileImageUrl,
-  }) async {
+  Future<Map<String, dynamic>> updateProfile(String nickname, String profileImageUrl) async {
     try {
-      final response = await http.patch(
-        Uri.parse('$baseUrl/users/edit-profile'),
-        headers: authHeaders,
-        body: json.encode({
-          if (nickname != null) 'nickname': nickname,
-          if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final responseData = data['response'];
-        
-        _currentUserNickname = responseData['nickname'];
-        _currentUserProfileImageUrl = responseData['profileImageUrl'];
-        
-        return {
-          'success': true,
-          'nickname': responseData['nickname'],
-          'profileImageUrl': responseData['profileImageUrl'],
-        };
-      }
+      final response = await _apiService.updateProfile(nickname, profileImageUrl);
       
+      // 로컬 상태 업데이트
+      _currentUserNickname = response['nickname'];
+      _currentUserProfileImageUrl = response['profileImageUrl'];
+      
+      return {
+        'success': true,
+        'message': '프로필이 성공적으로 업데이트되었습니다.',
+        'nickname': response['nickname'],
+        'profileImageUrl': response['profileImageUrl'],
+      };
+    } catch (e) {
+      print('프로필 수정 오류: $e');
       return {
         'success': false,
         'message': '프로필 수정에 실패했습니다.',
-      };
-    } catch (e) {
-      print('프로필 수정 API 호출 오류: $e');
-      return {
-        'success': false,
-        'message': 'API 연결에 문제가 있습니다.',
       };
     }
   }
@@ -396,38 +259,23 @@ class AuthService {
   // 소속 인증
   Future<Map<String, dynamic>> verifyDepartment(String email, String department) async {
     try {
-      final response = await http.patch(
-        Uri.parse('$baseUrl/auth/verify-department'),
-        headers: authHeaders,
-        body: json.encode({
-          'email': email,
-          'department': department,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final responseData = data['response'];
-        
-        _currentUserDepartment = responseData['department'];
-        _isVerified = responseData['isVerified'];
-        
-        return {
-          'success': true,
-          'department': responseData['department'],
-          'isVerified': responseData['isVerified'],
-        };
-      }
+      final response = await _apiService.verifyDepartment(email, department);
       
+      // 로컬 상태 업데이트
+      _currentUserDepartment = response['department'];
+      _isVerified = response['isVerified'];
+      
+      return {
+        'success': true,
+        'message': '소속 인증이 완료되었습니다.',
+        'department': response['department'],
+        'isVerified': response['isVerified'],
+      };
+    } catch (e) {
+      print('소속 인증 오류: $e');
       return {
         'success': false,
         'message': '소속 인증에 실패했습니다.',
-      };
-    } catch (e) {
-      print('소속 인증 API 호출 오류: $e');
-      return {
-        'success': false,
-        'message': 'API 연결에 문제가 있습니다.',
       };
     }
   }
@@ -435,33 +283,33 @@ class AuthService {
   // 회원탈퇴
   Future<Map<String, dynamic>> deleteAccount() async {
     try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/auth/delete-account'),
-        headers: authHeaders,
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final responseData = data['response'];
-        
-        await logout(); // 로컬 상태 초기화
-        
-        return {
-          'success': true,
-          'id': responseData['id'],
-          'email': responseData['email'],
-        };
-      }
+      final response = await _apiService.deleteAccount();
       
+      // 로컬 상태 초기화
+      _isLoggedIn = false;
+      _currentUserId = null;
+      _currentUserEmail = null;
+      _currentUserNickname = null;
+      _currentUserProfileImageUrl = null;
+      _currentUserDepartment = null;
+      _isVerified = false;
+      _userLevel = 1;
+      _userEXP = 0;
+      _accessToken = null;
+      _refreshToken = null;
+      _authStateController.add(false);
+      
+      return {
+        'success': true,
+        'message': '회원탈퇴가 완료되었습니다.',
+        'id': response['id'],
+        'email': response['email'],
+      };
+    } catch (e) {
+      print('회원탈퇴 오류: $e');
       return {
         'success': false,
         'message': '회원탈퇴에 실패했습니다.',
-      };
-    } catch (e) {
-      print('회원탈퇴 API 호출 오류: $e');
-      return {
-        'success': false,
-        'message': 'API 연결에 문제가 있습니다.',
       };
     }
   }
