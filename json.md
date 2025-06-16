@@ -391,6 +391,12 @@ No json body - just the Bearer header w/ access token.
 ### 채팅 // 아직 구현 X
 
 #### 채팅 메시지 처리 (답변) - GET /chat/process
+**요청**
+```json
+{
+  "message": "수강신청은 언제 시작하나요?",
+}
+```
 
 **시나리오 1: 수강신청 관련 답변 (답변 존재 질문)**
 ```json
@@ -461,27 +467,6 @@ No json body - just the Bearer header w/ access token.
       "canCreateQuestion": false,
       "hasDirectAnswer": true
     }
-  }
-}
-```
-
-**요청**
-```json
-{
-  "message": "수강신청은 언제 시작하나요?",
-  "context": {
-    "userId": 1,
-    "sessionId": 1,
-    "previousMessages": [
-      {
-        "role": "user",
-        "content": "안녕하세요"
-      },
-      {
-        "role": "assistant",
-        "content": "안녕하세요! 무엇을 도와드릴까요?"
-      }
-    ]
   }
 }
 ```
