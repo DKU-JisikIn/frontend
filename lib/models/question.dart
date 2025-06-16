@@ -31,25 +31,32 @@ class Question {
     required this.category,
     required this.createdAt,
     this.userId,
+    required this.userName,
     this.tags,
     this.viewCount = 0,
     this.answerCount = 0,
     this.isAnswered = false,
     this.isOfficial = false,
-    required this.userName,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      content: json['content'] as String,
-      category: json['category'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      userId: json['user_id'] as String?,
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      viewCount: json['view_count'] as int? ?? 0,
-      answerCount: json['answer_count'] as int? ?? 0,
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at'].toString())
+          : DateTime.now(),
+      userId: json['user_id']?.toString(),
+      userName: json['userName']?.toString() ?? 
+               json['user']?['nickname']?.toString() ?? 
+               '알 수 없음',
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      viewCount: json['view_count'] is int ? json['view_count'] : 0,
+      answerCount: json['answer_count'] is int ? json['answer_count'] : 0,
+      isAnswered: json['is_answered'] is bool ? json['is_answered'] : false,
+      isOfficial: json['is_official'] is bool ? json['is_official'] : false,
     );
   }
 
@@ -61,6 +68,7 @@ class Question {
       'category': category,
       'created_at': createdAt.toIso8601String(),
       'user_id': userId,
+      'userName': userName,
       'tags': tags,
       'view_count': viewCount,
       'answer_count': answerCount,
