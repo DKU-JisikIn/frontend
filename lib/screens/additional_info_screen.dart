@@ -99,7 +99,7 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     try {
       // 회원가입 API 호출
       final result = await _authService.register(
-        widget.email,
+        widget.email, 
         widget.password,
         widget.nickname,
       );

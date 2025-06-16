@@ -177,9 +177,8 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
     }
   }
 
-  Future<void> _submitAnswer() async {
-    final answerText = _answerController.text.trim();
-    if (answerText.isEmpty) {
+  Future<void> _submitAnswer(String text) async {
+    if (text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('답변 내용을 입력해주세요.')),
       );
@@ -193,7 +192,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
     try {
       final answer = await _apiService.createAnswer(
         widget.question.id,
-        answerText,
+        text.trim(),
       );
       
       setState(() {
@@ -329,7 +328,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           // 답변 입력 영역
           ChatInput(
             controller: _answerController,
-            onSubmitted: (String text) => _submitAnswer(),
+            onSubmitted: (text) => _submitAnswer(text),
             hintText: '답변을 입력하세요...',
           ),
         ],
