@@ -1,4 +1,4 @@
-### 인증
+,### 인증
 
 #### 로그인 - POST /auth/login
 
@@ -179,7 +179,6 @@ No json body - just the Bearer header w/ access token.
 {
   "title": "새로운 질문 제목", // 없으면 AI가 자동 생성
   "content": "새로운 질문 내용",
-  "category": "질문 카테고리" // 없으면 AI가 자동 생성
 }
 ```
 ```json
@@ -391,6 +390,12 @@ No json body - just the Bearer header w/ access token.
 ### 채팅 // 아직 구현 X
 
 #### 채팅 메시지 처리 (답변) - GET /chat/process
+**요청**
+```json
+{
+  "message": "수강신청은 언제 시작하나요?",
+}
+```
 
 **시나리오 1: 수강신청 관련 답변 (답변 존재 질문)**
 ```json
@@ -399,26 +404,19 @@ No json body - just the Bearer header w/ access token.
   "method": "GET",
   "status": 200,
   "response": {
-    "response": {
-      "answers": [
-        {
-            "answer" : "답변1"
-        },
-        {
-            "answer" : "답변2"
-        }
-      ]
-    },
+    "answer": "답변1",
     "relatedQuestions": [
       {
         "id": 1,
         "title": "수강신청 시스템 사용법",
-        "content" : "내용1"
+        "content": "내용1",
+        "source": "VOC"
       },
       {
         "id": 2,
         "title": "수강신청 변경 및 취소 방법",
-        "content" : "내용2"
+        "content": "내용2"
+        "source": "VOC" 
       }
     ],
     "actions": {
@@ -461,27 +459,6 @@ No json body - just the Bearer header w/ access token.
       "canCreateQuestion": false,
       "hasDirectAnswer": true
     }
-  }
-}
-```
-
-**요청**
-```json
-{
-  "message": "수강신청은 언제 시작하나요?",
-  "context": {
-    "userId": 1,
-    "sessionId": 1,
-    "previousMessages": [
-      {
-        "role": "user",
-        "content": "안녕하세요"
-      },
-      {
-        "role": "assistant",
-        "content": "안녕하세요! 무엇을 도와드릴까요?"
-      }
-    ]
   }
 }
 ```

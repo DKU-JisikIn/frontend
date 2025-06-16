@@ -158,15 +158,15 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       child: Column(
-        children: [
-          // 메시지 말풍선
-          Container(
+      children: [
+        // 메시지 말풍선
+        Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildMessageBubble(message),
-          ),
+          child: _buildMessageBubble(message),
+        ),
           // 관련 질문 버튼 (말풍선 바로 아래에 위치)
-          if (!message.isUser) ..._buildActionButtons(message),
-        ],
+        if (!message.isUser) ..._buildActionButtons(message),
+      ],
       ),
     );
   }

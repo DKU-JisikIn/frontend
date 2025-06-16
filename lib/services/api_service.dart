@@ -609,6 +609,167 @@ class ApiService {
     }
   }
 
+  // 이메일 인증 코드 전송
+  Future<Map<String, dynamic>> sendVerificationCode(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/send-verification'),
+        headers: headers,
+        body: json.encode({
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['response'];
+      } else {
+        throw Exception('인증 코드 전송 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // 이메일 인증
+  Future<Map<String, dynamic>> verifyEmail(int requestId, String email, String code) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/verify-email'),
+        headers: headers,
+        body: json.encode({
+          'requestId': requestId,
+          'email': email,
+          'code': code,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['response'];
+      } else {
+        throw Exception('이메일 인증 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // 회원가입
+  Future<Map<String, dynamic>> register(String email, String password, String nickname) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/register'),
+        headers: headers,
+        body: json.encode({
+          'email': email,
+          'password': password,
+          'nickname': nickname,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data['response'];
+      } else {
+        throw Exception('회원가입 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // 로그아웃
+  Future<void> logout(String refreshToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/logout'),
+        headers: headers,
+        body: json.encode({
+          'refreshToken': refreshToken,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('로그아웃 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // 프로필 수정
+  Future<Map<String, dynamic>> updateProfile(String nickname, String profileImageUrl) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/users/edit-profile'),
+        headers: authHeaders,
+        body: json.encode({
+          'nickname': nickname,
+          'profileImageUrl': profileImageUrl,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['response'];
+      } else {
+        throw Exception('프로필 수정 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // 소속 인증
+  Future<Map<String, dynamic>> verifyDepartment(String email, String department) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/auth/verify-department'),
+        headers: authHeaders,
+        body: json.encode({
+          'email': email,
+          'department': department,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['response'];
+      } else {
+        throw Exception('소속 인증 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
+  // 회원탈퇴
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/auth/delete-account'),
+        headers: authHeaders,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['response'];
+      } else {
+        throw Exception('회원탈퇴 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API 호출 오류: $e');
+      rethrow;
+    }
+  }
+
   // 백엔드 개발자를 위한 API 엔드포인트 가이드
   /*
   
@@ -620,6 +781,8 @@ class ApiService {
      POST /api/auth/register                - 회원가입
      POST /api/auth/send-verification       - 이메일 인증 코드 전송
      POST /api/auth/verify-email            - 이메일 인증
+     PATCH /api/auth/verify-department      - 소속 인증
+     DELETE /api/auth/delete-account        - 회원탈퇴
   
   2. 질문 관련 API:
      GET  /api/questions                    - 질문 목록 조회
@@ -634,8 +797,8 @@ class ApiService {
   
   3. 답변 관련 API:
      GET  /api/questions/{id}/answers       - 특정 질문의 답변 목록
-     POST /api/answers                      - 새 답변 작성
-     PUT  /api/answers/{id}/accept          - 답변 채택
+     POST /api/questions/{id}/answers       - 새 답변 작성
+     PUT  /api/questions/{id}/answers/{id}/accept - 답변 채택
      PUT  /api/answers/{id}/like            - 답변 좋아요/좋아요 취소
   
   4. 채팅 관련 API:
@@ -650,6 +813,7 @@ class ApiService {
   6. 사용자 관련 API:
      GET  /api/users/{userId}/question-stats - 사용자 질문 통계
      GET  /api/users/{userId}/questions      - 사용자 질문 목록
+     PATCH /api/users/edit-profile          - 프로필 수정
   
   7. 카테고리:
      - 학사

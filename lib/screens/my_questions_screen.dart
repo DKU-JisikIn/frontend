@@ -26,6 +26,11 @@ class _MyQuestionsScreenState extends State<MyQuestionsScreen> {
   List<Question> _questions = [];
   bool _isLoading = false;
   String _currentFilter = 'all';
+  Map<String, int> _filterCounts = {
+    'all': 0,
+    'answered': 0,
+    'unanswered': 0,
+  };
 
   @override
   void initState() {
@@ -41,13 +46,25 @@ class _MyQuestionsScreenState extends State<MyQuestionsScreen> {
     
     try {
       final userId = _authService.currentUserEmail?.split('@')[0] ?? 'test';
+      
+      // Load questions for current filter
       final questions = await _apiService.getUserQuestions(
         userId,
-        filter: _currentFilter == 'all' ? null : _currentFilter,
+        filter: _currentFilter,
       );
+      
+      // Load counts for all filters
+      final allQuestions = await _apiService.getUserQuestions(userId, filter: 'all');
+      final answeredQuestions = await _apiService.getUserQuestions(userId, filter: 'answered');
+      final unansweredQuestions = await _apiService.getUserQuestions(userId, filter: 'unanswered');
       
       setState(() {
         _questions = questions;
+        _filterCounts = {
+          'all': allQuestions.length,
+          'answered': answeredQuestions.length,
+          'unanswered': unansweredQuestions.length,
+        };
         _isLoading = false;
       });
     } catch (e) {
@@ -103,14 +120,14 @@ class _MyQuestionsScreenState extends State<MyQuestionsScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildFilterTab('all', '전체', _questions.length),
+                  child: _buildFilterTab('all', '전체', _filterCounts['all'] ?? 0),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildFilterTab(
                     'answered', 
                     '답변받은 질문', 
-                    _questions.where((q) => q.answerCount > 0).length,
+                    _filterCounts['answered'] ?? 0,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -118,7 +135,7 @@ class _MyQuestionsScreenState extends State<MyQuestionsScreen> {
                   child: _buildFilterTab(
                     'unanswered', 
                     '답변받지 못한 질문', 
-                    _questions.where((q) => q.answerCount == 0).length,
+                    _filterCounts['unanswered'] ?? 0,
                   ),
                 ),
               ],
