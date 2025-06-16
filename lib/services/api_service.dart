@@ -364,35 +364,26 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final responseData = data['response'];
-        
-        // 응답 데이터를 ChatMessage 객체로 변환
         final List<ChatMessage> messages = [];
-        
+
         if (responseData['response'] != null) {
           if (responseData['response']['answers'] != null) {
             // 여러 답변이 있는 경우
             for (var answer in responseData['response']['answers']) {
               messages.add(ChatMessage.assistant(
                 answer['answer'] ?? '응답을 받지 못했습니다.',
-                metadata: {
-                  'type': 'chat_response',
-                  'relatedQuestions': responseData['relatedQuestions'] ?? [],
-                  'actions': responseData['actions'] ?? {},
-                },
+                metadata: responseData,
               ));
             }
           } else if (responseData['response']['answer'] != null) {
             // 단일 답변이 있는 경우
             messages.add(ChatMessage.assistant(
               responseData['response']['answer'],
-              metadata: {
-                'type': 'chat_response',
-                'actions': responseData['actions'] ?? {},
-              },
+              metadata: responseData,
             ));
           }
         }
-        
+
         if (messages.isEmpty) {
           return [
             ChatMessage.assistant(
@@ -401,7 +392,7 @@ class ApiService {
             ),
           ];
         }
-        
+
         return messages;
       } else {
         throw Exception('채팅 메시지 처리 실패: ${response.statusCode}');

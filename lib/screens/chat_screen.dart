@@ -5,6 +5,7 @@ import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../widgets/chat_input.dart';
 import 'related_questions_screen.dart';
+import 'new_question_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialQuery;
@@ -56,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final aiMessages = await _apiService.processChatMessage(text.trim());
       
       setState(() {
-        _messages.addAll(aiMessages);
+        _messages.addAll(aiMessages); // addAll 사용
         _isProcessing = false;
       });
 
@@ -65,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       setState(() {
         _messages.add(ChatMessage.assistant(
-          '죄송합니다. 오류가 발생했습니다. 다시 시도해주세요.',
+          '연결 필요',
           metadata: {'type': 'error'},
         ));
         _isProcessing = false;
@@ -100,12 +101,32 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _handleViewRelatedQuestions(ChatMessage message) {
+    final metadata = message.metadata;
+    if (metadata == null) return;
+
+    final relatedQuestions = metadata['relatedQuestions'] as List?;
+    if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RelatedQuestionsScreen(
+            relatedQuestions: relatedQuestions.cast<Map<String, dynamic>>(),
+          ),
+        ),
+      );
+    }
+  }
+
   void _handleQuestionCreate(ChatMessage message) async {
     final metadata = message.metadata;
     if (metadata == null) return;
 
-    final suggestedTitle = metadata['suggestedTitle'] as String? ?? '';
-    final suggestedContent = metadata['suggestedContent'] as String? ?? '';
+    final actions = metadata['actions'] as Map<String, dynamic>?;
+    if (actions == null) return;
+
+    final suggestedTitle = actions['suggestedTitle'] as String? ?? '';
+    final suggestedContent = actions['suggestedContent'] as String? ?? '';
     final category = _apiService.detectCategory(suggestedContent);
 
     try {
@@ -132,31 +153,12 @@ class _ChatScreenState extends State<ChatScreen> {
       // 오류 메시지 추가
       setState(() {
         _messages.add(ChatMessage.assistant(
-          '질문 작성 중 오류가 발생했습니다. 직접 질문 작성 페이지에서 시도해주세요.',
+          '연결 필요',
           metadata: {'type': 'error'},
         ));
       });
       
       await _scrollToBottomSmooth();
-    }
-  }
-
-  void _handleViewRelatedQuestions(ChatMessage message) {
-    final metadata = message.metadata;
-    if (metadata == null) return;
-
-    final relatedQuestions = metadata['relatedQuestions'] as List?;
-    
-    if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
-      // 관련 질문 목록 페이지로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RelatedQuestionsScreen(
-            relatedQuestions: relatedQuestions.cast<Map<String, dynamic>>(),
-          ),
-        ),
-      );
     }
   }
 
@@ -305,13 +307,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   List<Widget> _buildActionButtons(ChatMessage message) {
     final metadata = message.metadata;
-    if (metadata == null) return [];
+    if (metadata == null) {
+      print('DEBUG: metadata is null');
+      return [];
+    }
 
+    print('DEBUG: metadata = $metadata');
     final widgets = <Widget>[];
-    final relatedQuestions = metadata['relatedQuestions'] as List?;
+    final actions = metadata['actions'] as Map<String, dynamic>?;
+    print('DEBUG: actions = $actions');
+    
+    final canCreateQuestion = actions != null && (actions['canCreateQuestion'] == true || actions['canCreateQuestion'] == 'true');
+    final hasDirectAnswer = actions != null && (actions['hasDirectAnswer'] == true || actions['hasDirectAnswer'] == 'true');
+    print('DEBUG: canCreateQuestion = $canCreateQuestion, hasDirectAnswer = $hasDirectAnswer');
 
-    // 관련 질문이 있는 경우 버튼 표시 (말풍선 바로 아래에 위치)
-    if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
+    // hasDirectAnswer가 true인 경우 버튼 표시
+    if (hasDirectAnswer) {
+      print('DEBUG: Adding related questions button');
       widgets.add(
         Container(
           margin: const EdgeInsets.only(left: 16, top: 8),
@@ -347,6 +359,50 @@ class _ChatScreenState extends State<ChatScreen> {
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.primaryColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // canCreateQuestion이 true일 때만 질문 작성하기 버튼 표시
+    if (canCreateQuestion) {
+      print('DEBUG: Adding create question button');
+      widgets.add(
+        Container(
+          margin: const EdgeInsets.only(left: 16, top: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+              ),
+              child: ElevatedButton.icon(
+                onPressed: () => _handleQuestionCreate(message),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                icon: Icon(
+                  Icons.edit,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  '질문 작성하기',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
               ),
