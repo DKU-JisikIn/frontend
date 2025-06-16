@@ -177,41 +177,46 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
     }
   }
 
-  Future<void> _submitAnswer(String content) async {
-    if (content.trim().isEmpty || _isSubmitting) return;
+  Future<void> _submitAnswer() async {
+    final answerText = _answerController.text.trim();
+    if (answerText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('답변 내용을 입력해주세요.')),
+      );
+      return;
+    }
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+    });
 
     try {
-      final answer = Answer(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        questionId: widget.question.id,
-        content: content.trim(),
-        userId: 'user_001', // TODO: 실제 사용자 ID로 대체
-        userName: '익명',
-        createdAt: DateTime.now(),
+      final answer = await _apiService.createAnswer(
+        widget.question.id,
+        answerText,
       );
-
-      await _apiService.createAnswer(answer);
       
       setState(() {
         _answers.add(answer);
-        _isSubmitting = false;
+        _answerController.clear();
       });
 
-      _answerController.clear();
-      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('답변이 등록되었습니다!')),
+          const SnackBar(content: Text('답변이 등록되었습니다.')),
         );
       }
     } catch (e) {
-      setState(() => _isSubmitting = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('답변 등록 중 오류가 발생했습니다: $e')),
+          SnackBar(content: Text('답변 등록에 실패했습니다: ${e.toString()}')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
       }
     }
   }
@@ -324,7 +329,7 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
           // 답변 입력 영역
           ChatInput(
             controller: _answerController,
-            onSubmitted: _submitAnswer,
+            onSubmitted: (String text) => _submitAnswer(),
             hintText: '답변을 입력하세요...',
           ),
         ],

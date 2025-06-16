@@ -97,13 +97,11 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: 추가 정보와 함께 회원가입 완료 API 호출
+      // 회원가입 API 호출
       final result = await _authService.register(
-        widget.email, 
+        widget.email,
         widget.password,
-        nickname: widget.nickname,
-        profileImage: _profileImage,
-        verificationDocument: _verificationDocument,
+        widget.nickname,
       );
 
       if (mounted) {

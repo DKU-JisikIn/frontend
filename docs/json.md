@@ -1,6 +1,6 @@
 ### 인증
 
-#### 로그인 - POST /api/auth/login
+#### 로그인 - POST /auth/login
 
 ```json
 {
@@ -15,7 +15,10 @@
   "method": "POST",
   "status": 200,
   "response": {
-    "token": "jwt_token_example_123456",
+    "token": {
+      "accessToken": "JWT access token", // user가 API 요청시 사용 (short-lived)
+      "refreshToken": "JWT refresh token", // access token 재발급시 사용 (long-lived)
+    }
     "user": {
       "id": 1,
       "email": "example@dankook.ac.kr",
@@ -30,8 +33,12 @@
 }
 ```
 
-#### 로그아웃 - POST /api/auth/logout
-
+#### 로그아웃 - POST /auth/logout
+```json
+{
+  "refreshToken": "JWT refresh token"
+}
+```
 ```json
 {
   "route": "/auth/logout",
@@ -43,22 +50,33 @@
 }
 ```
 
-#### 이메일 인증 코드 전송 - POST /api/auth/send-verification
-
+#### 이메일 인증 코드 전송 - POST /auth/send-verification
+```json
+{
+  "email": "example@dankook.ac.kr"
+}
+```
 ```json
 {
   "route": "/auth/send-verification",
   "method": "POST",
   "status": 200,
   "response": {
+    "requestId": 1 // 추가
     "email" : "example@dankook.ac.kr",
-    "code" : "1234"
+    "code" : "1234" // 실제 배포 때는 "****" 으로 hide
   }
 }
 ```
 
-#### 이메일 인증 - POST /api/auth/verify-email
-
+#### 이메일 인증 - POST /auth/verify-email
+```json
+{
+  "requestId": 1 // 위에서 추가된 정보
+  "email" : "example@dankook.ac.kr",
+  "code" : "1234"
+}
+```
 ```json
 {
   "route": "/auth/verify-email",
@@ -72,7 +90,7 @@
 }
 ```
 
-#### 회원가입 - POST /api/auth/register
+#### 회원가입 - POST /auth/register
 
 ```json
 {
@@ -108,7 +126,10 @@
 - `nickname`: 사용자 닉네임 (2-10자, 한글/영문/숫자)
 
 ### 질문 조회
-#### 질문 목록 조회(전체 질문 페이지) - GET /api/questions
+#### 질문 목록 조회(전체 질문 페이지) - GET /questions
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions",
@@ -131,10 +152,13 @@
 }
 ```
 
-#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /api/questions/:id
+#### 특정 질문 조회(상세 페이지 | 질문 카드) - GET /questions/:id
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
-  "route": "/questions/:id",
+  "route": "/questions/:id", 
   "method": "GET",
   "status": 200,
   "response": {
@@ -150,7 +174,14 @@
 }
 ```
 
-#### 채팅에서 새 질문 작성 (해당 질문 자체가 없을 때) - POST /api/questions
+#### 채팅에서 새 질문 작성 (해당 질문 자체가 없을 때) - POST /questions
+```json
+{
+  "title": "새로운 질문 제목", // 없으면 AI가 자동 생성
+  "content": "새로운 질문 내용",
+  "category": "질문 카테고리" // 없으면 AI가 자동 생성
+}
+```
 ```json
 {
   "route": "/questions",
@@ -169,7 +200,10 @@
 }
 ```
 
-#### 인기 질문 - GET /api/questions/popular
+#### 인기 질문 - GET /questions/popular (인기 질문 10개)
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions/popular",
@@ -192,8 +226,14 @@
 }
 ```
 
-#### 답변받지 못한 질문 (answerCount = 0) - GET /api/questions/unanswered
+//
+// 공식 질문 , 자주 받은 질문 제외
+//
 
+#### 답변받지 못한 질문 (answerCount = 0) - GET /questions/unanswered
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions/unanswered",
@@ -207,9 +247,8 @@
         "title": "캠퍼스 내 자전거 주차장 위치가 궁금해요",
         "content": "자전거를 세울 수 있는 곳이 어디인지 알고 싶습니다.",
         "createdAt": "2024-01-21T13:45:00Z",
-        "category": "기타",
         "viewCount": 23,
-        "answerCount": 0
+        "answerCount": 0,
       },
       {
         "id": 2,
@@ -219,7 +258,7 @@
         "createdAt": "2024-01-21T16:20:00Z",
         "category": "학사",
         "viewCount": 34,
-        "answerCount": 0
+        "answerCount": 0,
       }
     ]
   }
@@ -227,7 +266,10 @@
 ```
 
 ### 답변
-#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /api/questions/:id/answers
+#### 특정 질문의 답변 목록 (질문 상세 페이지 답변 목록) - GET /questions/:id/answers
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/questions/:id/answers",
@@ -251,7 +293,12 @@
 }
 ```
 
-#### 새 답변 작성 - POST /api/questions/:id/answers
+#### 새 답변 작성 - POST /questions/:id/answers
+```json
+{
+  "content": "답변 내용"
+}
+```
 ```json
 {
   "route": "/questions/:id/answers",
@@ -265,12 +312,15 @@
     "nickname": "학생",
     "createdAt": "2024-01-20T15:00:00Z",
     "department": "학사처",
-    "isAccepted": false
+    "isAccepted": false,
   }
 }
 ```
 
-#### 답변 채택 - PUT /api/answers/:id/accept
+#### 답변 채택 - PUT /questions:id/answers/:id/accept
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/answers/:id/accept",
@@ -291,7 +341,10 @@
 
 ### 통계
 
-#### 오늘의 질문 수 - GET /api/statistics/today/questions
+#### 오늘의 질문 수 - GET /statistics/today/questions
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/statistics/today/questions",
@@ -303,7 +356,10 @@
 }
 ```
 
-#### 오늘의 답변 수 - GET /api/statistics/today/answers
+#### 오늘의 답변 수 - GET /statistics/today/answers
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/statistics/today/answers",
@@ -315,7 +371,10 @@
 }
 ```
 
-#### 전체 답변 수 - GET /api/statistics/total/answers
+#### 전체 답변 수 - GET /statistics/total/answers
+```json
+No json body - just the Bearer header w/ access token.
+```
 ```json
 {
   "route": "/statistics/total/answers",
@@ -327,36 +386,17 @@
 }
 ```
 
-### 채팅
+// 우수 답변자 보류
 
-#### 채팅 메시지 처리 - POST /api/chat/process
+### 채팅 // 아직 구현 X
 
-**요청**
-```json
-{
-  "message": "수강신청은 언제 시작하나요?",
-  "context": {
-    "userId": 1,
-    "sessionId": 1,
-    "previousMessages": [
-      {
-        "role": "user",
-        "content": "안녕하세요"
-      },
-      {
-        "role": "assistant",
-        "content": "안녕하세요! 무엇을 도와드릴까요?"
-      }
-    ]
-  }
-}
-```
+#### 채팅 메시지 처리 (답변) - GET /chat/process
 
 **시나리오 1: 수강신청 관련 답변 (답변 존재 질문)**
 ```json
 {
   "route": "/chat/process",
-  "method": "POST",
+  "method": "GET",
   "status": 200,
   "response": {
     "response": {
@@ -384,7 +424,7 @@
     "actions": {
       "canCreateQuestion": false,
       "hasDirectAnswer": true
-    }
+    },
   }
 }
 ```
@@ -397,7 +437,7 @@
   "status": 200,
   "response": {
     "response": {
-      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다."
+      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
     },
     "actions": {
       "canCreateQuestion": true,
@@ -415,7 +455,7 @@
   "status": 200,
   "response": {
     "response": {
-      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요."
+      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
     },
     "actions": {
       "canCreateQuestion": false,
@@ -425,30 +465,82 @@
 }
 ```
 
+**요청**
+```json
+{
+  "message": "수강신청은 언제 시작하나요?",
+  "context": {
+    "userId": 1,
+    "sessionId": 1,
+    "previousMessages": [
+      {
+        "role": "user",
+        "content": "안녕하세요"
+      },
+      {
+        "role": "assistant",
+        "content": "안녕하세요! 무엇을 도와드릴까요?"
+      }
+    ]
+  }
+}
+```
+
 ### 내 정보
 
-#### 프로필 수정 - PATCH /api/auth/register
+#### 프로필 수정 - PATCH /users/edit-profile
 ```json
 {
     "nickname" : "new_nickname",
     "profileImageUrl" : ""
 }
 ```
-
-#### 소속 인증하기 - PATCH /api/auth/register
 ```json
 {
     // 서비스 측에서 확인 후 PATCH
-    "department": "",
-    "isVerified": true
+    "route": "/auth/verify-department",
+    "method": "PATCH",
+    "status": 200,
+    "response": {
+      "nickname" : "new_nickname",
+      "profileImageUrl" : ""
+    }
 }
 ```
 
-#### 회원탈퇴 - DELETE /api/auth/register
+**비밀번호 변경 제외**
+
+#### 소속 인증하기 - PATCH /auth/verify-department
 ```json
 {
-    "email" : "example@dankook.ac.kr",
-    "password" : "password",
-    "reasonCode" : "LOW_USAGE"
+    "email": "",
+    "department": ""
 }
 ```
+```json
+{
+    // 서비스 측에서 확인 후 PATCH
+    "route": "/auth/verify-department",
+    "method": "PATCH",
+    "status": 200,
+    "response": {
+      "department": "",
+      "isVerified": true
+    }
+}
+```
+
+#### 회원탈퇴 - DELETE /auth/delete-account
+```json
+No json body - just the Bearer header w/ access token.
+```
+```json
+{
+    "route": "/auth/delete-account",
+    "method": "DELETE",
+    "status": 200,
+    "response": {
+      "id": 1,
+      "email": ""
+    }
+}

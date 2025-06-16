@@ -47,19 +47,20 @@ npm install -g @mockoon/cli
   "method": "POST",
   "status": 200,
   "response": {
-    "success": true,
+    "success": true,//
     "message": "로그인 성공",
     "token": "jwt_token_example_123456",
     "user": {
-      "id": "user_001",
+      "id": "user_001",//
       "email": "student@dankook.ac.kr",
-      "name": "김단국",
+      "name": "김단국",//
       "nickname": "단국이",
       "profileImageUrl": "",
       "department": "컴퓨터공학과",
-      "studentId": "2020****",
+      "studentId": "2020****",//
       "isVerified": true,
-      "userLevel": 3
+      "userLevel": 1,
+      "userEXP" : 0,
     }
   }
 }
@@ -76,7 +77,7 @@ npm install -g @mockoon/cli
   "method": "POST",
   "status": 200,
   "response": {
-    "success": true,
+    "success": true,//
     "message": "로그아웃 완료"
   }
 }
@@ -129,15 +130,16 @@ npm install -g @mockoon/cli
     "success": true,
     "message": "회원가입이 완료되었습니다.",
     "user": {
-      "id": "user_new_001",
+      "id": "user_new_001",//
       "email": "newuser@dankook.ac.kr",
-      "name": "새사용자",
+      "name": "새사용자",//
       "nickname": "신입생닉네임",
       "profileImageUrl": "",
       "department": "",
       "studentId": "",
       "isVerified": false,
-      "userLevel": 1
+      "userLevel": 1,
+      "userEXP" : 0,
     }
   }
 }
@@ -162,8 +164,8 @@ npm install -g @mockoon/cli
         "id": "q001",
         "title": "2024년 1학기 수강신청 일정이 언제인가요?",
         "content": "수강신청 일정을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "학사팀",
+        "userEmail": "example@dankook.ac.kr",//
+        "userNickName": "학사팀",//
         "createdAt": "2024-01-15T09:00:00Z",
         "category": "학사",
         "isOfficial": true,
@@ -176,7 +178,7 @@ npm install -g @mockoon/cli
 }
 ```
 
-#### 특정 질문 조회 - GET /api/questions/{id}
+#### 특정 질문 조회(상세 페이지) - GET /api/questions/{id}
 ```json
 {
   "route": "/questions/:id",
@@ -186,10 +188,10 @@ npm install -g @mockoon/cli
     "id": "q001",
     "title": "2024년 1학기 수강신청 일정이 언제인가요?",
     "content": "수강신청 일정을 알고 싶습니다.",
-    "userId": "admin",
-    "userName": "학사팀",
+    "userEmail": "example@dankook.ac.kr",
+    "userNickName": "example",
     "createdAt": "2024-01-15T09:00:00Z",
-    "updatedAt": "2024-01-15T09:00:00Z",
+    "updatedAt": "2024-01-15T09:00:00Z",//
     "category": "학사",
     "isOfficial": true,
     "viewCount": 150,
@@ -206,13 +208,13 @@ npm install -g @mockoon/cli
   "method": "POST",
   "status": 201,
   "response": {
-    "id": "q_new_001",
+    "id": "q001",
     "title": "새로운 질문 제목",
     "content": "새로운 질문 내용",
-    "userId": "user_001",
-    "userName": "학생",
+    "userEmail": "",
+    "userNickName": "",//
     "createdAt": "2024-01-20T10:00:00Z",
-    "category": "기타",
+    "category": "",
     "isOfficial": false,
     "viewCount": 0,
     "answerCount": 0,
@@ -233,8 +235,8 @@ npm install -g @mockoon/cli
         "id": "q002",
         "title": "도서관 이용시간이 어떻게 되나요?",
         "content": "중앙도서관 평일/주말 이용시간을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "도서관",
+        "userEmail": "",//
+        "userNickName": "",//
         "createdAt": "2024-01-19T14:00:00Z",
         "category": "기타",
         "isOfficial": true,
@@ -247,7 +249,7 @@ npm install -g @mockoon/cli
 }
 ```
 
-#### 자주 받은 질문 - GET /api/questions/frequent
+//#### 자주 받은 질문 - GET /api/questions/frequent
 ```json
 {
   "route": "/questions/frequent",
@@ -259,8 +261,8 @@ npm install -g @mockoon/cli
         "id": "q003",
         "title": "기숙사 신청은 언제부터인가요?",
         "content": "2024년도 기숙사 신청 일정을 알고 싶습니다.",
-        "userId": "admin",
-        "userName": "생활관팀",
+        "userEmail": "admin",//
+        "userNickName": "생활관팀",//
         "createdAt": "2024-01-18T11:00:00Z",
         "category": "기타",
         "isOfficial": true,
@@ -268,25 +270,12 @@ npm install -g @mockoon/cli
         "answerCount": 1,
         "tags": ["기숙사", "신청", "일정"]
       },
-      {
-        "id": "q004", 
-        "title": "학생증 재발급은 어떻게 하나요?",
-        "content": "학생증을 분실해서 재발급 받고 싶습니다.",
-        "userId": "student002",
-        "userName": "김학생",
-        "createdAt": "2024-01-17T15:30:00Z",
-        "category": "기타",
-        "isOfficial": false,
-        "viewCount": 156,
-        "answerCount": 2,
-        "tags": ["학생증", "재발급"]
-      }
     ]
   }
 }
 ```
 
-#### 공식 질문 - GET /api/questions/official
+//#### 공식 질문 - GET /api/questions/official
 ```json
 {
   "route": "/questions/official",
@@ -298,8 +287,8 @@ npm install -g @mockoon/cli
         "id": "q005",
         "title": "2024년도 등록금 납부 안내",
         "content": "2024년도 1학기 등록금 납부 일정 및 방법 안내입니다.",
-        "userId": "admin",
-        "userName": "재무팀",
+        "userId": "admin",//
+        "userName": "재무팀",//
         "createdAt": "2024-01-20T09:00:00Z",
         "category": "장학금",
         "isOfficial": true,
@@ -324,8 +313,8 @@ npm install -g @mockoon/cli
         "id": "q006",
         "title": "캠퍼스 내 자전거 주차장 위치가 궁금해요",
         "content": "천안캠퍼스에서 자전거를 세울 수 있는 곳이 어디인지 알고 싶습니다.",
-        "userId": "student003",
-        "userName": "박학생",
+        "userId": "student003",//
+        "userName": "박학생",//
         "createdAt": "2024-01-21T13:45:00Z",
         "category": "기타",
         "isOfficial": false,
@@ -337,8 +326,8 @@ npm install -g @mockoon/cli
         "id": "q007",
         "title": "졸업논문 제출 마감일이 언제인가요?",
         "content": "2024년도 전기 졸업예정자 논문 제출 마감일을 알고 싶습니다.",
-        "userId": "student004", 
-        "userName": "이학생",
+        "userId": "student004",//
+        "userName": "이학생",//
         "createdAt": "2024-01-21T16:20:00Z",
         "category": "학사",
         "isOfficial": false,
@@ -351,7 +340,7 @@ npm install -g @mockoon/cli
 }
 ```
 
-#### 질문 검색 - GET /api/questions/search
+// #### 질문 검색 - GET /api/questions/search
 ```json
 {
   "route": "/questions/search",
@@ -427,8 +416,6 @@ npm install -g @mockoon/cli
         "userName": "학사팀",
         "createdAt": "2024-01-16T10:00:00Z",
         "isAccepted": true,
-        "isLiked": false,
-        "likeCount": 25,
         "department": "학사처",
         "isVerified": true,
         "userLevel": 5
@@ -452,8 +439,6 @@ npm install -g @mockoon/cli
     "userName": "학생",
     "createdAt": "2024-01-20T15:00:00Z",
     "isAccepted": false,
-    "isLiked": false,
-    "likeCount": 0,
     "userLevel": 2
   }
 }
@@ -473,29 +458,6 @@ npm install -g @mockoon/cli
     "userName": "학생",
     "createdAt": "2024-01-16T10:00:00Z",
     "isAccepted": true,
-    "isLiked": false,
-    "likeCount": 25,
-    "userLevel": 3
-  }
-}
-```
-
-#### 답변 좋아요 - PUT /api/answers/:id/like
-```json
-{
-  "route": "/answers/:id/like",
-  "method": "PUT",
-  "status": 200,
-  "response": {
-    "id": "a001",
-    "questionId": "q001",
-    "content": "답변 내용",
-    "userId": "user_001",
-    "userName": "학생",
-    "createdAt": "2024-01-16T10:00:00Z",
-    "isAccepted": false,
-    "isLiked": true,
-    "likeCount": 26,
     "userLevel": 3
   }
 }
@@ -553,8 +515,7 @@ npm install -g @mockoon/cli
         "profileImageUrl": "",
         "score": 128,
         "rank": 1,
-        "answerCount": 42,
-        "likeCount": 85
+        "answerCount": 42
       },
       {
         "id": "user_top2",
@@ -562,8 +523,7 @@ npm install -g @mockoon/cli
         "profileImageUrl": "",
         "score": 105,
         "rank": 2,
-        "answerCount": 35,
-        "likeCount": 70
+        "answerCount": 35
       }
     ]
   }
@@ -847,7 +807,6 @@ npm install -g @mockoon/cli
 - [ ] GET `/api/questions/{id}/answers` - 특정 질문의 답변 목록
 - [ ] POST `/api/answers` - 새 답변 작성
 - [ ] PUT `/api/answers/{id}/accept` - 답변 채택
-- [ ] PUT `/api/answers/{id}/like` - 답변 좋아요/좋아요 취소
 
 #### 통계 관련 (4개)
 - [ ] GET `/api/statistics/today/questions` - 오늘의 질문 수

@@ -228,10 +228,8 @@ Response:
       "userId": "user_002",
       "userName": "답변자",
       "createdAt": "2024-01-01T00:00:00Z",
-      "likeCount": 5,
       "isAccepted": false,
       "isAIGenerated": false,
-      "isLiked": false,
       "department": "컴퓨터공학과",
       "studentId": "2020****",
       "isVerified": true,
@@ -263,20 +261,6 @@ Response:
 {
   "id": "answer_1",
   "isAccepted": true,
-  // ... 기타 답변 정보
-}
-```
-
-### 4.4 답변 좋아요/취소
-```
-PUT /api/answers/{answerId}/like
-Headers: Authorization: Bearer {token}
-
-Response:
-{
-  "id": "answer_1",
-  "likeCount": 6,
-  "isLiked": true,
   // ... 기타 답변 정보
 }
 ```
@@ -364,8 +348,7 @@ Response:
       "profileImageUrl": "https://...",
       "score": 128,
       "rank": 1,
-      "answerCount": 42,
-      "likeCount": 85
+      "answerCount": 42
     }
   ]
 }

@@ -22,7 +22,7 @@ class ApiService {
   Map<String, String> get authHeaders => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    if (_authService.authToken != null) 'Authorization': 'Bearer ${_authService.authToken}',
+    if (_authService.accessToken != null) 'Authorization': 'Bearer ${_authService.accessToken}',
   };
 
   // 질문 목록 조회
@@ -37,54 +37,31 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
-        if (questionsJson == null) {
-          return [];
-        }
+        final questionsJson = data['response']['questions'] as List;
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('질문 목록 조회 실패: ${response.statusCode}');
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      // 오류 시 빈 목록 반환
       return [];
     }
   }
 
   // 인기 질문 목록 조회
-  Future<List<Question>> getPopularQuestions({int limit = 10, String period = '전체기간'}) async {
+  Future<List<Question>> getPopularQuestions({int limit = 10, String? period}) async {
     try {
       final uri = Uri.parse('$baseUrl/questions/popular').replace(queryParameters: {
         'limit': limit.toString(),
-        'period': period,
+        if (period != null) 'period': period,
       });
-
-      print('Popular questions API 호출: $uri'); // 디버그 로그 추가
 
       final response = await http.get(uri, headers: headers);
 
-      print('Popular questions 응답 상태: ${response.statusCode}'); // 디버그 로그 추가
-      print('Popular questions 응답 본문: ${response.body}'); // 디버그 로그 추가
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Popular questions 파싱된 데이터: $data'); // 디버그 로그 추가
-        
-        // Mockoon 응답 구조에 맞게 수정: data['response']['questions'] 또는 data['questions']
-        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
-        if (questionsJson == null) {
-          print('Popular questions: questionsJson이 null입니다'); // 디버그 로그 추가
-          return [];
-        }
-        
-        print('Popular questions 개수: ${questionsJson.length}'); // 디버그 로그 추가
-        
-        final questions = questionsJson.map((json) => Question.fromJson(json)).toList();
-        print('Popular questions 변환 완료: ${questions.length}개'); // 디버그 로그 추가
-        
-        return questions;
+        final questionsJson = data['response']['questions'] as List;
+        return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('인기 질문 조회 실패: ${response.statusCode}');
       }
@@ -95,22 +72,18 @@ class ApiService {
   }
 
   // 자주 받은 질문 목록 조회
-  Future<List<Question>> getFrequentlyAskedQuestions({int limit = 10, String period = '전체기간'}) async {
+  Future<List<Question>> getFrequentlyAskedQuestions({int limit = 10, String? period}) async {
     try {
       final uri = Uri.parse('$baseUrl/questions/frequent').replace(queryParameters: {
         'limit': limit.toString(),
-        'period': period,
+        if (period != null) 'period': period,
       });
 
       final response = await http.get(uri, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
-        if (questionsJson == null) {
-          return [];
-        }
+        final questionsJson = data['response']['questions'] as List;
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('자주 받은 질문 조회 실패: ${response.statusCode}');
@@ -132,11 +105,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
-        if (questionsJson == null) {
-          return [];
-        }
+        final questionsJson = data['response']['questions'] as List;
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('공식 질문 조회 실패: ${response.statusCode}');
@@ -158,11 +127,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final questionsJson = (data['response']?['questions'] ?? data['questions']) as List?;
-        if (questionsJson == null) {
-          return [];
-        }
+        final questionsJson = data['response']['questions'] as List;
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
         throw Exception('답변받지 못한 질문 조회 실패: ${response.statusCode}');
@@ -209,7 +174,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return Question.fromJson(data);
+        return Question.fromJson(data['response']);
       } else {
         throw Exception('질문 조회 실패: ${response.statusCode}');
       }
@@ -222,15 +187,27 @@ class ApiService {
   // 새 질문 작성
   Future<Question> createQuestion(Question question) async {
     try {
+      if (question.title.trim().isEmpty) {
+        throw Exception('질문 제목을 입력해주세요.');
+      }
+
+      if (question.content.trim().isEmpty) {
+        throw Exception('질문 내용을 입력해주세요.');
+      }
+
+      if (_authService.currentUserId == null) {
+        throw Exception('로그인이 필요한 서비스입니다.');
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/questions'),
-        headers: authHeaders, // 인증 토큰 포함
+        headers: authHeaders,
         body: json.encode(question.toJson()),
       );
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        return Question.fromJson(data);
+        return Question.fromJson(data['response']);
       } else {
         throw Exception('질문 작성 실패: ${response.statusCode}');
       }
@@ -250,11 +227,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // null safety 체크 추가 및 Mockoon 응답 구조에 맞게 수정
-        final answersJson = (data['response']?['answers'] ?? data['answers']) as List?;
-        if (answersJson == null) {
-          return []; // null인 경우 빈 리스트 반환
-        }
+        final answersJson = data['response']['answers'] as List;
         return answersJson.map((json) => Answer.fromJson(json)).toList();
       } else {
         throw Exception('답변 목록 조회 실패: ${response.statusCode}');
@@ -266,17 +239,25 @@ class ApiService {
   }
 
   // 새 답변 작성
-  Future<Answer> createAnswer(Answer answer) async {
+  Future<Answer> createAnswer(String questionId, String content) async {
     try {
+      if (content.trim().isEmpty) {
+        throw Exception('답변 내용을 입력해주세요.');
+      }
+
+      if (_authService.currentUserId == null) {
+        throw Exception('로그인이 필요한 서비스입니다.');
+      }
+
       final response = await http.post(
-        Uri.parse('$baseUrl/answers'),
-        headers: authHeaders, // 인증 토큰 포함
-        body: json.encode(answer.toJson()),
+        Uri.parse('$baseUrl/questions/$questionId/answers'),
+        headers: authHeaders,
+        body: json.encode({'content': content}),
       );
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        return Answer.fromJson(data);
+        return Answer.fromJson(data['response']);
       } else {
         throw Exception('답변 작성 실패: ${response.statusCode}');
       }
@@ -287,16 +268,20 @@ class ApiService {
   }
 
   // 답변 채택
-  Future<Answer> acceptAnswer(String answerId, String questionId) async {
+  Future<Answer> acceptAnswer(String questionId, String answerId) async {
     try {
+      if (_authService.currentUserId == null) {
+        throw Exception('로그인이 필요한 서비스입니다.');
+      }
+
       final response = await http.put(
-        Uri.parse('$baseUrl/answers/$answerId/accept'),
-        headers: authHeaders, // 인증 토큰 포함
+        Uri.parse('$baseUrl/questions/$questionId/answers/$answerId/accept'),
+        headers: authHeaders,
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return Answer.fromJson(data);
+        return Answer.fromJson(data['response']);
       } else {
         throw Exception('답변 채택 실패: ${response.statusCode}');
       }
@@ -359,62 +344,87 @@ class ApiService {
   // 채팅 메시지 처리
   Future<List<ChatMessage>> processChatMessage(String message) async {
     try {
+      if (message.trim().isEmpty) {
+        return [
+          ChatMessage.assistant(
+            '메시지를 입력해주세요.',
+            metadata: {'type': 'error'},
+          ),
+        ];
+      }
+
+      if (_authService.currentUserId == null) {
+        return [
+          ChatMessage.assistant(
+            '로그인이 필요한 서비스입니다.',
+            metadata: {'type': 'error'},
+          ),
+        ];
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/chat/process'),
-        headers: authHeaders, // 인증 토큰 포함
+        headers: authHeaders,
         body: json.encode({
           'message': message,
+          'context': {
+            'userId': _authService.currentUserId,
+            'sessionId': DateTime.now().millisecondsSinceEpoch,
+            'previousMessages': [],
+          },
         }),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('채팅 API 응답: $data'); // 디버깅용 로그
-        
-        // Mockoon 응답 구조에 맞게 파싱
         final responseData = data['response'];
-        if (responseData == null) {
-          throw Exception('응답 데이터가 없습니다.');
+        
+        // 응답 데이터를 ChatMessage 객체로 변환
+        final List<ChatMessage> messages = [];
+        
+        if (responseData['response'] != null) {
+          if (responseData['response']['answers'] != null) {
+            // 여러 답변이 있는 경우
+            for (var answer in responseData['response']['answers']) {
+              messages.add(ChatMessage.assistant(
+                answer['answer'] ?? '응답을 받지 못했습니다.',
+                metadata: {
+                  'type': 'chat_response',
+                  'relatedQuestions': responseData['relatedQuestions'] ?? [],
+                  'actions': responseData['actions'] ?? {},
+                },
+              ));
+            }
+          } else if (responseData['response']['answer'] != null) {
+            // 단일 답변이 있는 경우
+            messages.add(ChatMessage.assistant(
+              responseData['response']['answer'],
+              metadata: {
+                'type': 'chat_response',
+                'actions': responseData['actions'] ?? {},
+              },
+            ));
+          }
         }
         
-        final answerData = responseData['response'];
-        final answer = answerData?['answer'] ?? '응답을 받지 못했습니다.';
-        final relatedQuestions = responseData['relatedQuestions'] as List?;
-        final actions = responseData['actions'] as Map<String, dynamic>?;
-        final metadata = responseData['metadata'] as Map<String, dynamic>?;
-        
-        // 메타데이터 구성
-        final messageMetadata = <String, dynamic>{
-          'type': 'chat_response',
-        };
-        
-        if (relatedQuestions != null && relatedQuestions.isNotEmpty) {
-          messageMetadata['relatedQuestions'] = relatedQuestions;
+        if (messages.isEmpty) {
+          return [
+            ChatMessage.assistant(
+              '응답을 생성하지 못했습니다.',
+              metadata: {'type': 'error'},
+            ),
+          ];
         }
         
-        if (actions != null) {
-          messageMetadata.addAll(actions);
-        }
-        
-        if (metadata != null) {
-          messageMetadata.addAll(metadata);
-        }
-        
-        return [
-          ChatMessage.assistant(
-            answer,
-            metadata: messageMetadata,
-          )
-        ];
+        return messages;
       } else {
-        throw Exception('채팅 처리 실패: ${response.statusCode}');
+        throw Exception('채팅 메시지 처리 실패: ${response.statusCode}');
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      // 오류 시 기본 응답 반환
       return [
         ChatMessage.assistant(
-          'API 연결에 문제가 있습니다. Mockoon 서버가 실행 중인지 확인해주세요.',
+          '죄송합니다. 응답을 생성하는 중에 오류가 발생했습니다.',
           metadata: {'type': 'error'},
         ),
       ];
@@ -487,15 +497,13 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final responseData = data['response'] ?? data;
-        return responseData['count'] ?? 0;
+        return data['response']['count'];
       } else {
         throw Exception('오늘의 질문 수 조회 실패: ${response.statusCode}');
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      return 0; // 오류 시 0 반환
+      return 0;
     }
   }
 
@@ -509,9 +517,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final responseData = data['response'] ?? data;
-        return responseData['count'] ?? 0;
+        return data['response']['count'];
       } else {
         throw Exception('오늘의 답변 수 조회 실패: ${response.statusCode}');
       }
@@ -531,9 +537,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Mockoon 응답 구조에 맞게 수정
-        final responseData = data['response'] ?? data;
-        return responseData['count'] ?? 0;
+        return data['response']['count'];
       } else {
         throw Exception('전체 답변 수 조회 실패: ${response.statusCode}');
       }
