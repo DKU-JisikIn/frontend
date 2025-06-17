@@ -511,25 +511,15 @@ class _ChatScreenState extends State<ChatScreen> {
                   final suggestedCategory = metadata['suggestedCategory'] as String? ?? '기타';
                   
                   try {
-                    // Question 객체 생성
-                    final questionToCreate = Question(
-                      id: '', // 서버에서 생성됨
-                      title: suggestedTitle,
-                      content: suggestedContent,
-                      category: suggestedCategory,
-                      userId: '', // 서버에서 토큰으로 식별
-                      userName: '', // 서버에서 토큰으로 식별
-                      createdAt: DateTime.now(), // 서버에서 설정됨
-                      answerCount: 0,
-                      isAnswered: false,
-                    );
-
                     // 인증된 사용자로 질문 생성 (토큰 전달)
                     final authService = AuthService();
                     final accessToken = authService.accessToken;
                     
-                    final question = await _apiService.createQuestion(
-                      questionToCreate,
+                    // 채팅에서 질문 생성 (전용 API 사용)
+                    final question = await _apiService.createQuestionFromChat(
+                      suggestedTitle,
+                      suggestedContent,
+                      suggestedCategory,
                       token: accessToken,
                     );
 

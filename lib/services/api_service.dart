@@ -356,14 +356,20 @@ class ApiService {
             for (var answer in responseData['response']['answers']) {
               messages.add(ChatMessage.assistant(
                 answer['answer'] ?? '응답을 받지 못했습니다.',
-                metadata: responseData,
+                metadata: {
+                  'actions': responseData['actions'],
+                  'relatedQuestions': responseData['relatedQuestions'],
+                },
               ));
             }
           } else if (responseData['response']['answer'] != null) {
             // 단일 답변이 있는 경우
             messages.add(ChatMessage.assistant(
               responseData['response']['answer'],
-              metadata: responseData,
+              metadata: {
+                'actions': responseData['actions'],
+                'relatedQuestions': responseData['relatedQuestions'],
+              },
             ));
           }
         }
