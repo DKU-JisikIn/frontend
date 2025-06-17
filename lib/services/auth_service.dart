@@ -95,14 +95,14 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final responseData = data['response'];
         
-        if (responseData != null) {
+        // 실제 서버는 response 래핑 없이 직접 반환
+        if (data['token'] != null && data['user'] != null) {
           _isLoggedIn = true;
-          _accessToken = responseData['token']['accessToken'];
-          _refreshToken = responseData['token']['refreshToken'];
+          _accessToken = data['token']['accessToken'];
+          _refreshToken = data['token']['refreshToken'];
           
-          final userData = responseData['user'];
+          final userData = data['user'];
           _currentUserId = userData['id'].toString();
           _currentUserEmail = userData['email'];
           _currentUserNickname = userData['nickname'];
@@ -117,10 +117,7 @@ class AuthService {
           return {
             'success': true,
             'message': '로그인 성공',
-            'token': {
-              'accessToken': _accessToken,
-              'refreshToken': _refreshToken,
-            },
+            'token': data['token'],
             'user': userData,
           };
         }
