@@ -55,7 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
         
         if (result['success']) {
           // 로그인 성공: 홈화면으로 이동
-          Navigator.pop(context); // 로그인 화면 닫기
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/',
+            (route) => false, // 모든 이전 화면 제거
+          );
           _showSnackBar('로그인되었습니다.');
         } else {
           // 로그인 실패: iOS 스타일 알림창 표시
@@ -388,7 +392,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (mounted) {
                       setState(() => _isLoading = false);
                       if (result['success']) {
-                        Navigator.pushReplacementNamed(context, '/home');
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/',
+                          (route) => false, // 모든 이전 화면 제거
+                        );
                       } else {
                         _showErrorDialog(result['message']);
                       }

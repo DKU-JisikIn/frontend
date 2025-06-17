@@ -5,8 +5,8 @@ import '../models/answer.dart';
 import '../models/chat_message.dart';
 
 class ApiService {
-  // Mockoon 로컬 서버 URL (기본 포트 3001)
-  static const String baseUrl = 'http://localhost:3001/api';
+  // 테스트 서버 URL (포트 8001)
+  static const String baseUrl = 'http://localhost:8001';
   
   // HTTP 헤더 설정
   Map<String, String> get headers => {
@@ -654,7 +654,7 @@ class ApiService {
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         final data = json.decode(response.body);
         return data['response'];
       } else {

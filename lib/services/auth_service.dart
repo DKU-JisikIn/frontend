@@ -12,7 +12,7 @@ class AuthService {
   final ApiService _apiService = ApiService();
 
   // Base URL (API 서비스와 동일)
-  static const String baseUrl = 'http://localhost:3001/api';
+  static const String baseUrl = 'http://localhost:8001';
 
   // 현재 로그인 상태
   bool _isLoggedIn = false;
@@ -56,6 +56,9 @@ class AuthService {
     'Accept': 'application/json',
     if (_accessToken != null) 'Authorization': 'Bearer $_accessToken',
   };
+
+  // 이메일 인증 요청 ID 저장
+  int? _verificationRequestId;
 
   // 로그인
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -177,6 +180,7 @@ class AuthService {
   Future<Map<String, dynamic>> sendVerificationCode(String email) async {
     try {
       final response = await _apiService.sendVerificationCode(email);
+      _verificationRequestId = response['requestId'];  // requestId 저장
       return {
         'success': true,
         'message': '인증번호가 발송되었습니다.',
@@ -196,8 +200,14 @@ class AuthService {
   // 이메일 인증
   Future<Map<String, dynamic>> verifyEmail(String email, String code) async {
     try {
-      // requestId는 임시로 1을 사용 (실제로는 sendVerificationCode에서 받은 값 사용)
-      final response = await _apiService.verifyEmail(1, email, code);
+      if (_verificationRequestId == null) {
+        return {
+          'success': false,
+          'message': '먼저 인증번호를 요청해주세요.',
+        };
+      }
+      
+      final response = await _apiService.verifyEmail(_verificationRequestId!, email, code);
       return {
         'success': true,
         'message': '이메일 인증이 완료되었습니다.',

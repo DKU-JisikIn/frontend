@@ -40,7 +40,10 @@ class _MyAppState extends State<MyApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const HomeScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomeScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

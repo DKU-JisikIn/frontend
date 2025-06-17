@@ -171,14 +171,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _handleRelatedQuestionsTap(List<Map<String, dynamic>> relatedQuestions) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RelatedQuestionsScreen(
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RelatedQuestionsScreen(
           relatedQuestions: relatedQuestions,
+          ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildMessageWidget(ChatMessage message, int index) {
