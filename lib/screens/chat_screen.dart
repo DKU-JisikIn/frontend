@@ -6,6 +6,8 @@ import '../services/api_service.dart';
 import '../widgets/chat_input.dart';
 import 'related_questions_screen.dart';
 import 'new_question_screen.dart';
+import '../services/auth_service.dart';
+import '../models/question.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? initialQuery;
@@ -509,11 +511,26 @@ class _ChatScreenState extends State<ChatScreen> {
                   final suggestedCategory = metadata['suggestedCategory'] as String? ?? '기타';
                   
                   try {
-                    // 자동으로 질문 생성
-                    final question = await _apiService.createQuestionFromChat(
-                      suggestedTitle,
-                      suggestedContent,
-                      suggestedCategory,
+                    // Question 객체 생성
+                    final questionToCreate = Question(
+                      id: '', // 서버에서 생성됨
+                      title: suggestedTitle,
+                      content: suggestedContent,
+                      category: suggestedCategory,
+                      userId: '', // 서버에서 토큰으로 식별
+                      userName: '', // 서버에서 토큰으로 식별
+                      createdAt: DateTime.now(), // 서버에서 설정됨
+                      answerCount: 0,
+                      isAnswered: false,
+                    );
+
+                    // 인증된 사용자로 질문 생성 (토큰 전달)
+                    final authService = AuthService();
+                    final accessToken = authService.accessToken;
+                    
+                    final question = await _apiService.createQuestion(
+                      questionToCreate,
+                      token: accessToken,
                     );
 
                     // 성공 메시지 추가
@@ -532,7 +549,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     // 오류 메시지 추가
                     setState(() {
                       _messages.add(ChatMessage.assistant(
-                        '연결 필요',
+                        '질문 작성 중 오류가 발생했습니다: ${e.toString()}',
                         metadata: {'type': 'error'},
                       ));
                     });
