@@ -12,7 +12,7 @@ class AuthService {
   final ApiService _apiService = ApiService();
 
   // Base URL (API 서비스와 동일)
-  static const String baseUrl = 'http://localhost:8001';
+  static const String baseUrl = 'https://taba-backend2.purpleforest-e1d94921.koreacentral.azurecontainerapps.io';
 
   // 현재 로그인 상태
   bool _isLoggedIn = false;

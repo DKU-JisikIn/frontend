@@ -55,8 +55,12 @@ class _ChatScreenState extends State<ChatScreen> {
     await _scrollToBottomSmooth();
 
     try {
+      // 인증 토큰 가져오기
+      final authService = AuthService();
+      final accessToken = authService.accessToken;
+      
       // API 서비스로 메시지 처리 (AI 답변만)
-      final aiMessages = await _apiService.processChatMessage(text.trim());
+      final aiMessages = await _apiService.processChatMessage(text.trim(), token: accessToken);
       
       setState(() {
         _messages.addAll(aiMessages); // addAll 사용
@@ -138,8 +142,12 @@ class _ChatScreenState extends State<ChatScreen> {
         userMessage = '질문을 작성해주세요'; // 기본값
       }
 
-      // AI 질문 작성 도우미 API 호출
-      final composedQuestion = await _apiService.composeQuestion(userMessage);
+      // 간단한 질문 생성 (API 호출 없이)
+      final suggestedTitle = userMessage.length > 20 
+          ? '${userMessage.substring(0, 17)}...' 
+          : userMessage;
+      final suggestedContent = '다음과 관련하여 문의드립니다: $userMessage';
+      final suggestedCategory = _apiService.detectCategory(userMessage);
 
       // 질문 미리보기를 채팅 메시지로 표시
       setState(() {
@@ -147,9 +155,9 @@ class _ChatScreenState extends State<ChatScreen> {
           '다음과 같이 질문을 작성할까요?',
           metadata: {
             'type': 'question_preview',
-            'suggestedTitle': composedQuestion['title'] ?? '',
-            'suggestedContent': composedQuestion['content'] ?? '',
-            'suggestedCategory': composedQuestion['category'] ?? '기타',
+            'suggestedTitle': suggestedTitle,
+            'suggestedContent': suggestedContent,
+            'suggestedCategory': suggestedCategory,
           },
         ));
       });

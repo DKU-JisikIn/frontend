@@ -5,8 +5,8 @@ import '../models/answer.dart';
 import '../models/chat_message.dart';
 
 class ApiService {
-  // 테스트 서버 URL (포트 8001)
-  static const String baseUrl = 'http://localhost:8001';
+  // Azure Container Apps 백엔드 서버 URL
+  static const String baseUrl = 'https://taba-backend2.purpleforest-e1d94921.koreacentral.azurecontainerapps.io';
   
   // HTTP 헤더 설정
   Map<String, String> get headers => {
@@ -326,7 +326,7 @@ class ApiService {
   }
 
   // 채팅 메시지 처리
-  Future<List<ChatMessage>> processChatMessage(String message) async {
+  Future<List<ChatMessage>> processChatMessage(String message, {String? token}) async {
     try {
       if (message.trim().isEmpty) {
         return [
@@ -339,7 +339,7 @@ class ApiService {
 
       final response = await http.post(
         Uri.parse('$baseUrl/chat/process'),
-        headers: headers,
+        headers: getAuthHeaders(token: token), // 인증 토큰 포함
         body: json.encode({
           'message': message,
         }),
@@ -347,31 +347,20 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final responseData = data['response'];
+        
+        // 실제 서버는 ChatResponse 객체를 직접 반환
+        // data = { "answer": "...", "references": [...], "actions": {...} }
+        
         final List<ChatMessage> messages = [];
-
-        if (responseData['response'] != null) {
-          if (responseData['response']['answers'] != null) {
-            // 여러 답변이 있는 경우
-            for (var answer in responseData['response']['answers']) {
-              messages.add(ChatMessage.assistant(
-                answer['answer'] ?? '응답을 받지 못했습니다.',
-                metadata: {
-                  'actions': responseData['actions'],
-                  'relatedQuestions': responseData['relatedQuestions'],
-                },
-              ));
-            }
-          } else if (responseData['response']['answer'] != null) {
-            // 단일 답변이 있는 경우
-            messages.add(ChatMessage.assistant(
-              responseData['response']['answer'],
-              metadata: {
-                'actions': responseData['actions'],
-                'relatedQuestions': responseData['relatedQuestions'],
-              },
-            ));
-          }
+        
+        if (data['answer'] != null) {
+          messages.add(ChatMessage.assistant(
+            data['answer'],
+            metadata: {
+              'actions': data['actions'],
+              'relatedQuestions': data['references'] ?? data['relatedQuestions'],
+            },
+          ));
         }
 
         if (messages.isEmpty) {
@@ -612,7 +601,8 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['response'];
+        // 실제 서버는 response 래핑 없이 직접 반환
+        return data;
       } else {
         throw Exception('인증 코드 전송 실패: ${response.statusCode}');
       }
@@ -637,7 +627,8 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['response'];
+        // 실제 서버는 response 래핑 없이 직접 반환
+        return data;
       } else {
         throw Exception('이메일 인증 실패: ${response.statusCode}');
       }
@@ -662,7 +653,8 @@ class ApiService {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['response'];
+        // 실제 서버는 response 래핑 없이 직접 반환
+        return data;
       } else {
         throw Exception('회원가입 실패: ${response.statusCode}');
       }
