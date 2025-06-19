@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../models/top_answerer.dart';
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});

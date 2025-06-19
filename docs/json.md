@@ -158,7 +158,7 @@ No json body - just the Bearer header w/ access token.
 ```
 ```json
 {
-  "route": "/questions/:id", 
+  "route": "/questions/:id",
   "method": "GET",
   "status": 200,
   "response": {
@@ -453,10 +453,10 @@ No json body - just the Bearer header w/ access token.
 ```json
 {
   "route": "/chat/process",
-  "method": "POST",
+  "method": "POST", 
   "status": 200,
-  "response": {
-    "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
+    "response": {
+      "answer": "죄송합니다. 해당 질문에 대한 정확한 정보를 찾지 못했습니다. 질문을 등록하시면 다른 학생들이나 관리자가 답변해드릴 수 있습니다.",
     "relatedQuestions": [],
     "actions": {
       "canCreateQuestion": true,
@@ -469,11 +469,11 @@ No json body - just the Bearer header w/ access token.
 **시나리오 3: 일반적인 인사 또는 모호한 질문**
 ```json
 {
-  "route": "/chat/process",
+  "route": "/chat/process", 
   "method": "POST",
   "status": 200,
-  "response": {
-    "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
+    "response": {
+      "answer": "안녕하세요! 단국대학교 학생 질문 도우미입니다. 학사, 장학금, 교내프로그램, 취업 등 다양한 주제에 대해 질문해주세요.",
     "relatedQuestions": [
       {
         "id": 10,
@@ -528,8 +528,8 @@ No json body - just the Bearer header w/ access token.
     "method": "PATCH",
     "status": 200,
     "response": {
-      "department": "",
-      "isVerified": true
+    "department": "",
+    "isVerified": true
     }
 }
 ```
@@ -546,6 +546,6 @@ No json body - just the Bearer header w/ access token.
     "response": {
       "id": 1,
       "email": ""
-    }
+}
 }
 ```

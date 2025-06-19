@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/theme_service.dart';
 import '../models/question.dart';
+import '../models/top_answerer.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/home/banner_widgets.dart';
 import '../widgets/home/stats_widgets.dart';

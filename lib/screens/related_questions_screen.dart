@@ -89,38 +89,36 @@ class RelatedQuestionsScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: Text(
-                              question['title'] ?? '',
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6B6B),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              'VOC',
                               style: TextStyle(
-                                color: AppTheme.primaryTextColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          if (isVOC)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'VOC',
-                                style: TextStyle(
-                                  color: AppTheme.primaryColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+                          const Spacer(),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      
+                      Text(
+                        question['title'] ?? '',
+                        style: TextStyle(
+                          color: AppTheme.primaryTextColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       const SizedBox(height: 8),
+                      
                       Text(
                         question['content'] ?? '',
                         style: TextStyle(
@@ -132,6 +130,7 @@ class RelatedQuestionsScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 12),
+                      
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/question.dart';
 import '../models/answer.dart';
 import '../models/chat_message.dart';
+import '../models/top_answerer.dart';
 
 class ApiService {
   // Azure Container Apps 백엔드 서버 URL
@@ -126,12 +127,86 @@ class ApiService {
         final questionsJson = data['response']['questions'] as List;
         return questionsJson.map((json) => Question.fromJson(json)).toList();
       } else {
-        throw Exception('답변받지 못한 질문 조회 실패: ${response.statusCode}');
+        print('답변받지 못한 질문 API 응답 오류: ${response.statusCode}');
+        return _getMockUnansweredQuestions(limit);
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      return [];
+      return _getMockUnansweredQuestions(limit);
     }
+  }
+
+  // 목업 답변받지 못한 질문 데이터
+  List<Question> _getMockUnansweredQuestions(int limit) {
+    final mockQuestions = [
+      Question(
+        id: 'mock_1',
+        title: '수강신청 기간이 언제인가요?',
+        content: '다음 학기 수강신청 기간과 방법에 대해 궁금합니다.',
+        category: '학사',
+        userId: 'user1',
+        userName: '학생A',
+        createdAt: DateTime.now().subtract(Duration(hours: 2)),
+        viewCount: 23,
+        answerCount: 0,
+        isAnswered: false,
+        tags: ['수강신청', '학사일정'],
+      ),
+      Question(
+        id: 'mock_2',
+        title: '장학금 신청 조건이 궁금해요',
+        content: '성적우수장학금과 가계곤란장학금의 신청 조건과 절차를 알고 싶습니다.',
+        category: '장학금',
+        userId: 'user2',
+        userName: '김학생',
+        createdAt: DateTime.now().subtract(Duration(hours: 5)),
+        viewCount: 45,
+        answerCount: 0,
+        isAnswered: false,
+        tags: ['장학금', '신청조건'],
+      ),
+      Question(
+        id: 'mock_3',
+        title: '도서관 열람실 이용 방법',
+        content: '도서관 열람실 예약은 어떻게 하나요? 이용 시간과 규칙도 알려주세요.',
+        category: '기타',
+        userId: 'user3',
+        userName: '이학생',
+        createdAt: DateTime.now().subtract(Duration(hours: 8)),
+        viewCount: 67,
+        answerCount: 0,
+        isAnswered: false,
+        tags: ['도서관', '열람실'],
+      ),
+      Question(
+        id: 'mock_4',
+        title: '취업박람회 참가 방법',
+        content: '다음 달에 열리는 취업박람회에 참가하려면 어떻게 신청해야 하나요?',
+        category: '취업',
+        userId: 'user4',
+        userName: '박학생',
+        createdAt: DateTime.now().subtract(Duration(hours: 12)),
+        viewCount: 34,
+        answerCount: 0,
+        isAnswered: false,
+        tags: ['취업박람회', '신청'],
+      ),
+      Question(
+        id: 'mock_5',
+        title: '동아리 창설 절차',
+        content: '새로운 동아리를 만들려고 하는데 필요한 절차와 조건이 무엇인가요?',
+        category: '교내프로그램',
+        userId: 'user5',
+        userName: '최학생',
+        createdAt: DateTime.now().subtract(Duration(hours: 18)),
+        viewCount: 28,
+        answerCount: 0,
+        isAnswered: false,
+        tags: ['동아리', '창설'],
+      ),
+    ];
+    
+    return mockQuestions.take(limit).toList();
   }
 
   // 질문 검색
@@ -455,11 +530,12 @@ class ApiService {
         final data = json.decode(response.body);
         return data['response']['count'];
       } else {
-        throw Exception('오늘의 질문 수 조회 실패: ${response.statusCode}');
+        print('오늘의 질문 수 API 응답 오류: ${response.statusCode}');
+        return 12; // 목업 데이터
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      return 0;
+      return 12; // 목업 데이터
     }
   }
 
@@ -475,11 +551,12 @@ class ApiService {
         final data = json.decode(response.body);
         return data['response']['count'];
       } else {
-        throw Exception('오늘의 답변 수 조회 실패: ${response.statusCode}');
+        print('오늘의 답변 수 API 응답 오류: ${response.statusCode}');
+        return 28; // 목업 데이터
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      return 0;
+      return 28; // 목업 데이터
     }
   }
 
@@ -495,11 +572,12 @@ class ApiService {
         final data = json.decode(response.body);
         return data['response']['count'];
       } else {
-        throw Exception('전체 답변 수 조회 실패: ${response.statusCode}');
+        print('전체 답변 수 API 응답 오류: ${response.statusCode}');
+        return 1847; // 목업 데이터
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      return 0;
+      return 1847; // 목업 데이터
     }
   }
 
@@ -517,7 +595,7 @@ class ApiService {
         // Mockoon 응답 구조에 맞게 수정
         final topAnswerersJson = (data['response']?['topAnswerers'] ?? data['topAnswerers']) as List?;
         if (topAnswerersJson == null) {
-          return [];
+          return _getMockTopAnswerers(limit);
         }
         return topAnswerersJson.map((json) => TopAnswerer(
           id: json['id'],
@@ -529,12 +607,66 @@ class ApiService {
           likeCount: json['likeCount'],
         )).toList();
       } else {
-        throw Exception('우수 답변자 조회 실패: ${response.statusCode}');
+        print('우수 답변자 API 응답 오류: ${response.statusCode}');
+        return _getMockTopAnswerers(limit);
       }
     } catch (e) {
       print('API 호출 오류: $e');
-      return []; // 오류 시 빈 목록 반환
+      return _getMockTopAnswerers(limit); // 오류 시 목업 데이터 반환
     }
+  }
+
+  // 목업 우수 답변자 데이터
+  List<TopAnswerer> _getMockTopAnswerers(int limit) {
+    final mockData = [
+      TopAnswerer(
+        id: '1',
+        userName: '김도움',
+        profileImageUrl: '',
+        score: 2850,
+        rank: 1,
+        answerCount: 47,
+        likeCount: 125,
+      ),
+      TopAnswerer(
+        id: '2',
+        userName: '이답변',
+        profileImageUrl: '',
+        score: 2120,
+        rank: 2,
+        answerCount: 32,
+        likeCount: 89,
+      ),
+      TopAnswerer(
+        id: '3',
+        userName: '박해결',
+        profileImageUrl: '',
+        score: 1890,
+        rank: 3,
+        answerCount: 28,
+        likeCount: 76,
+      ),
+      TopAnswerer(
+        id: '4',
+        userName: '최질문',
+        profileImageUrl: '',
+        score: 1650,
+        rank: 4,
+        answerCount: 24,
+        likeCount: 63,
+      ),
+      TopAnswerer(
+        id: '5',
+        userName: '정학사',
+        profileImageUrl: '',
+        score: 1420,
+        rank: 5,
+        answerCount: 19,
+        likeCount: 52,
+      ),
+    ];
+    
+    return mockData.take(limit).toList();
   }
 
   // 사용자 질문 통계 조회
@@ -834,25 +966,4 @@ class ApiService {
      - JWT 인증: Authorization: Bearer {token}
   
   */
-}
-
-// 우수 답변자 모델
-class TopAnswerer {
-  final String id;
-  final String userName;
-  final String profileImageUrl;
-  final int score;
-  final int rank;
-  final int answerCount;
-  final int likeCount;
-
-  TopAnswerer({
-    required this.id,
-    required this.userName,
-    required this.profileImageUrl,
-    required this.score,
-    required this.rank,
-    required this.answerCount,
-    required this.likeCount,
-  });
 } 

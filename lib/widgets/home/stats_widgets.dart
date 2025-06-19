@@ -4,6 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../models/question.dart';
 import '../../services/api_service.dart';
 import '../../screens/my_questions_screen.dart';
+import '../../models/top_answerer.dart';
 
 class UserStatsWidget extends StatelessWidget {
   final Map<String, dynamic> userQuestionStats;
