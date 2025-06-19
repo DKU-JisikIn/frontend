@@ -519,35 +519,38 @@ class _ChatScreenState extends State<ChatScreen> {
                   final suggestedCategory = metadata['suggestedCategory'] as String? ?? '기타';
                   
                   try {
-                    // 인증된 사용자로 질문 생성 (토큰 전달)
+                    // 실제 서버에 질문 전송
                     final authService = AuthService();
                     final accessToken = authService.accessToken;
                     
-                    // 채팅에서 질문 생성 (전용 API 사용)
+                    // 질문 생성 API 호출
                     final question = await _apiService.createQuestionFromChat(
                       suggestedTitle,
                       suggestedContent,
                       suggestedCategory,
                       token: accessToken,
                     );
-
+                    
                     // 성공 메시지 추가
                     setState(() {
                       _messages.add(ChatMessage.assistant(
-                        '질문이 성공적으로 작성되었습니다! ✅\n\n**제목**: ${question.title}\n**카테고리**: ${question.category}\n\n다른 학생들의 답변을 기다려보세요.',
+                        '질문이 성공적으로 작성되었습니다! ✅\n\n**제목**: ${question.title}\n**카테고리**: ${question.category}\n**ID**: ${question.id}\n\n다른 학생들의 답변을 기다려보세요.',
                         metadata: {
                           'type': 'question_created',
                           'questionId': question.id,
+                          'questionTitle': question.title,
+                          'questionCategory': question.category,
                         },
                       ));
                     });
 
                     await _scrollToBottomSmooth();
                   } catch (e) {
+                    print('질문 생성 오류: $e');
                     // 오류 메시지 추가
                     setState(() {
                       _messages.add(ChatMessage.assistant(
-                        '질문 작성 중 오류가 발생했습니다: ${e.toString()}',
+                        '질문 작성 중 오류가 발생했습니다: ${e.toString()}\n\n다시 시도해주세요.',
                         metadata: {'type': 'error'},
                       ));
                     });

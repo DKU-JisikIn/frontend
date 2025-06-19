@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../models/question.dart';
-import '../widgets/message_bubble.dart';
+import '../models/answer.dart';
 import 'question_detail_screen.dart';
 
 class RelatedQuestionsScreen extends StatelessWidget {
@@ -51,7 +51,7 @@ class RelatedQuestionsScreen extends StatelessWidget {
               ) : null,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -61,22 +61,68 @@ class RelatedQuestionsScreen extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
+                  // 답변 정보 추출
+                  List<Answer> answers = [];
+                  final answerText = question['answer'] ?? question['content'];
+                  
+                  // 질문과 답변이 섞여있는 경우 파싱
+                  if (answerText.contains('답변:') || answerText.contains('Answer:')) {
+                    final parts = answerText.split(RegExp(r'답변[:：]|Answer[:：]'));
+                    if (parts.length > 1) {
+                      final answerContent = parts[1].trim();
+                      if (answerContent.isNotEmpty) {
+                        answers.add(Answer(
+                          id: 'related_answer_$index',
+                          questionId: question['id'].toString(),
+                          content: answerContent,
+                          userId: 'system',
+                          userName: 'AI 어시스턴트',
+                          createdAt: DateTime.now(),
+                          likeCount: 0,
+                          isLiked: false,
+                          isAccepted: true,
+                        ));
+                      }
+                    }
+                  } else if (question['answer'] != null && question['answer'].toString().trim().isNotEmpty) {
+                    // 별도 답변 필드가 있는 경우
+                    answers.add(Answer(
+                      id: 'related_answer_$index',
+                      questionId: question['id'].toString(),
+                      content: question['answer'].toString().trim(),
+                      userId: 'system',
+                      userName: 'AI 어시스턴트',
+                      createdAt: DateTime.now(),
+                      likeCount: 0,
+                      isLiked: false,
+                      isAccepted: true,
+                    ));
+                  }
+
+                  // 질문 내용에서 답변 부분 제거
+                  String questionContent = question['content'] ?? question['title'] ?? '';
+                  if (questionContent.contains('답변:') || questionContent.contains('Answer:')) {
+                    final parts = questionContent.split(RegExp(r'답변[:：]|Answer[:：]'));
+                    questionContent = parts[0].replaceAll('질문:', '').replaceAll('Question:', '').trim();
+                  }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => QuestionDetailScreen(
                         question: Question(
                           id: question['id'].toString(),
-                          title: question['title'],
-                          content: question['content'],
-                          category: '기타',
-                          userId: '',
-                          userName: '',
+                          title: question['title'] ?? questionContent,
+                          content: questionContent,
+                          category: question['category'] ?? '기타',
+                          userId: question['userId'] ?? '',
+                          userName: question['userName'] ?? '익명',
                           createdAt: DateTime.now(),
-                          answerCount: 0,
-                          isAnswered: false,
+                          answerCount: answers.length,
+                          isAnswered: answers.isNotEmpty,
                           isOfficial: false,
                         ),
+                        initialAnswers: answers, // 답변 데이터 전달
                       ),
                     ),
                   );

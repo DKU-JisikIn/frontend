@@ -566,30 +566,47 @@ class ApiService {
   // 채팅에서 질문 생성
   Future<Question> createQuestionFromChat(String title, String content, String category, {String? token}) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/questions/from-chat'),
-        headers: getAuthHeaders(token: token), // 인증 토큰 포함
-        body: json.encode({
-          'title': title,
-          'content': content,
-          'category': category
-        }),
+      // /questions/from-chat 엔드포인트가 405 오류를 반환하므로 일반 질문 생성 API 사용
+      final questionData = Question(
+        id: '', // 서버에서 생성됨
+        title: title.trim(),
+        content: content.trim(),
+        category: category,
+        userId: '', // 서버에서 토큰으로 식별
+        userName: '', // 서버에서 설정
+        createdAt: DateTime.now(),
+        viewCount: 0,
+        answerCount: 0,
+        isAnswered: false,
+        tags: extractKeywords(content),
       );
 
-      if (response.statusCode == 201) {
+      final response = await http.post(
+        Uri.parse('$baseUrl/questions'),
+        headers: getAuthHeaders(token: token),
+        body: json.encode(questionData.toJson()),
+      );
+
+      print('DEBUG: 질문 생성 API 응답 상태: ${response.statusCode}');
+      print('DEBUG: 질문 생성 API 응답 본문: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
         final data = json.decode(response.body);
-        return Question.fromJson(data);
+        // 응답 구조에 따라 적절히 처리
+        final questionJson = data['response'] ?? data;
+        return Question.fromJson(questionJson);
       } else {
-        throw Exception('채팅에서 질문 생성 실패: ${response.statusCode}');
+        print('DEBUG: 질문 생성 실패 - 상태코드: ${response.statusCode}, 응답: ${response.body}');
+        throw Exception('질문 생성 실패: ${response.statusCode}');
       }
     } catch (e) {
-      print('API 호출 오류: $e');
+      print('질문 생성 API 호출 오류: $e');
       rethrow;
     }
   }
 
   // 키워드 추출 (프론트엔드에서 간단히 처리)
-  List<String> _extractKeywords(String text) {
+  List<String> extractKeywords(String text) {
     final keywords = <String>[];
     final words = text.toLowerCase().replaceAll(RegExp(r'[^\w\s가-힣]'), '').split(' ');
     

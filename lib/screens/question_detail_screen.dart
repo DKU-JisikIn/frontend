@@ -11,10 +11,12 @@ import '../widgets/message_bubble.dart';
 
 class QuestionDetailScreen extends StatefulWidget {
   final Question question;
+  final List<Answer>? initialAnswers; // 초기 답변 데이터 (관련 질문에서 온 경우)
 
   const QuestionDetailScreen({
     super.key,
     required this.question,
+    this.initialAnswers,
   });
 
   @override
@@ -37,7 +39,15 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAnswers();
+    if (widget.initialAnswers != null) {
+      // 관련 질문에서 온 경우 초기 답변 사용
+      setState(() {
+        _answers = _sortAnswers(widget.initialAnswers!);
+      });
+    } else {
+      // 일반적인 경우 API에서 답변 로드
+      _loadAnswers();
+    }
   }
 
   Future<void> _loadAnswers() async {
