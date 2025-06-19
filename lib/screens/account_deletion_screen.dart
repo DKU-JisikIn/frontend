@@ -12,10 +12,8 @@ class AccountDeletionScreen extends StatefulWidget {
 
 class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  final FocusNode _userIdFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   
   bool _isLoading = false;
@@ -34,32 +32,13 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
   @override
   void initState() {
     super.initState();
-    // 현재 이메일에서 아이디 부분만 추출
-    final currentEmail = _authService.currentUserEmail ?? '';
-    final userId = currentEmail.split('@')[0];
-    _userIdController.text = userId;
   }
 
   Future<void> _handleAccountDeletion() async {
-    final userId = _userIdController.text.trim();
     final password = _passwordController.text.trim();
-    
-    if (userId.isEmpty) {
-      setState(() => _errorMessage = '아이디를 입력해주세요.');
-      return;
-    }
     
     if (password.isEmpty) {
       setState(() => _errorMessage = '비밀번호를 입력해주세요.');
-      return;
-    }
-
-    // 현재 사용자의 아이디와 비교
-    final currentEmail = _authService.currentUserEmail ?? '';
-    final currentUserId = currentEmail.split('@')[0];
-    
-    if (userId != currentUserId) {
-      setState(() => _errorMessage = '현재 계정의 아이디와 일치하지 않습니다.');
       return;
     }
 
@@ -353,29 +332,25 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
               ),
               const SizedBox(height: 8),
               Container(
-                decoration: AppTheme.inputContainerDecoration,
-                child: TextField(
-                  controller: _userIdController,
-                  focusNode: _userIdFocusNode,
-                  style: AppTheme.bodyStyle,
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                    hintText: '아이디 입력',
-                    hintStyle: AppTheme.hintStyle,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    prefixIcon: Icon(CupertinoIcons.person, color: AppTheme.hintTextColor),
-                    suffixText: '@dankook.ac.kr',
-                    suffixStyle: TextStyle(
-                      color: AppTheme.secondaryTextColor,
-                      fontSize: 16,
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.borderColor),
+                ),
+                child: Row(
+                  children: [
+                    Icon(CupertinoIcons.person, color: AppTheme.hintTextColor),
+                    const SizedBox(width: 12),
+                    Text(
+                      _authService.currentUserEmail ?? '',
+                      style: TextStyle(
+                        color: AppTheme.primaryTextColor,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  onChanged: (_) {
-                    if (_errorMessage != null) {
-                      setState(() => _errorMessage = null);
-                    }
-                  },
+                  ],
                 ),
               ),
               
@@ -570,9 +545,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
 
   @override
   void dispose() {
-    _userIdController.dispose();
     _passwordController.dispose();
-    _userIdFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
   }

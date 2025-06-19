@@ -146,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final suggestedTitle = userMessage.length > 20 
           ? '${userMessage.substring(0, 17)}...' 
           : userMessage;
-      final suggestedContent = '다음과 관련하여 문의드립니다: $userMessage';
+      final suggestedContent = userMessage;
       final suggestedCategory = _apiService.detectCategory(userMessage);
 
       // 질문 미리보기를 채팅 메시지로 표시
@@ -261,7 +261,7 @@ class _ChatScreenState extends State<ChatScreen> {
               Text(
                 message.content,
                 style: TextStyle(
-                  color: AppTheme.primaryTextColor,
+                  color: Colors.black,
                   fontSize: 16,
                   height: 1.5,
                 ),

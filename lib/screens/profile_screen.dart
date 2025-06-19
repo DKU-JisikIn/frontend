@@ -63,10 +63,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(24),
               decoration: AppTheme.welcomeContainerDecoration,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     '${_authService.currentUserName ?? '사용자'}님 환영합니다.',
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -76,6 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _authService.currentUserEmail ?? '',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 14,
@@ -134,16 +136,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 24),
             
             _buildMenuSection('앱 설정', [
-              _buildMenuItem(
-                icon: CupertinoIcons.bell,
-                title: '알림 설정',
-                subtitle: '푸시 알림, 이메일 알림 설정',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('알림 설정 기능은 추후 구현 예정입니다.')),
-                  );
-                },
-              ),
               _buildMenuItem(
                 icon: CupertinoIcons.question_circle,
                 title: '도움말',

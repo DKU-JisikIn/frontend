@@ -63,7 +63,7 @@ class SignupCompleteScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        '가입 완료! 🎉',
+                        '가입 완료!',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
